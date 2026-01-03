@@ -28,12 +28,12 @@ const ITEMS: Item[] = [
     label: "Dashboard",
     Logo: <House size={20} />,
   },
-  {
-    id: "Transactions",
-    href: "/transactions",
-    label: "Transactions",
-    Logo: <Receipt size={20} />,
-  },
+  // {
+  //   id: "Transactions",
+  //   href: "/transactions",
+  //   label: "Transactions",
+  //   Logo: <Receipt size={20} />,
+  // },
   {
     id: "Customers",
     href: "/customers",
