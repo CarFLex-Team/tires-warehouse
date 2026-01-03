@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "@/components/auth/FormInput";
-import CustomButton from "@/components/auth/CustomButton";
+import AuthButton from "@/components/auth/AuthButton";
 import { signinSchema, SigninFormData } from "@/lib/validations/signinSchema";
 
 export default function SignInPage() {
@@ -54,7 +54,7 @@ export default function SignInPage() {
             Forget Password?
           </a>
 
-          <CustomButton
+          <AuthButton
             // type="submit"
             className="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200"
             // disabled={isSubmitting}
@@ -62,7 +62,7 @@ export default function SignInPage() {
             onClick={() => handleSubmit(onSubmit)()}
           >
             {/* {isSubmitting ? "Creating account..." : "Sign up"} */}
-          </CustomButton>
+          </AuthButton>
         </form>
       </div>
     </div>

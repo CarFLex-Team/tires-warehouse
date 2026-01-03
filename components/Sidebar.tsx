@@ -84,7 +84,7 @@ export default function Sidebar({
               open ? "justify-between" : "justify-center"
             }`}
           >
-            {open && <img src="/Logo.png" alt=" Logo" className=" w-16" />}
+            {open && <img src="/Logo.png" alt=" Logo" className=" w-8" />}
             <button
               onClick={() => setOpen(!open)}
               aria-label="Close listings menu"

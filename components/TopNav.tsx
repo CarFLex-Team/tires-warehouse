@@ -2,7 +2,7 @@ import { Menu } from "lucide-react";
 export default function TopNav({ onMenuClick }: { onMenuClick: () => void }) {
   return (
     <nav
-      className="flex justify-between  items-center h-17  px-6 sm:px-9 bg-white  "
+      className="flex justify-between  items-center min-h-17  px-6 sm:px-9 bg-white  "
       aria-label="Listings navigation"
     >
       <button
