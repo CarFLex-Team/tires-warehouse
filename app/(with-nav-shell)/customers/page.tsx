@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 
 export default function customers() {
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+
   const pageSize = 10;
   const [isLoading, setIsLoading] = useState(true);
 
@@ -16,6 +18,7 @@ export default function customers() {
 
     return () => clearTimeout(timer);
   }, []);
+
   type Customer = {
     name: string;
     email: string;
@@ -56,6 +59,15 @@ export default function customers() {
       createdAt: "13 Apr 2022",
     },
   ];
+  const filteredCustomers = customers.filter((customer) => {
+    const value = search.toLowerCase();
+
+    return (
+      customer.name.toLowerCase().includes(value) ||
+      customer.email.toLowerCase().includes(value) ||
+      customer.phone.includes(value)
+    );
+  });
 
   return (
     <div>
@@ -64,7 +76,7 @@ export default function customers() {
         data={
           isLoading
             ? []
-            : customers.slice((page - 1) * pageSize, page * pageSize)
+            : filteredCustomers.slice((page - 1) * pageSize, page * pageSize)
         }
         isLoading={isLoading}
         pagination={{
@@ -78,6 +90,8 @@ export default function customers() {
             <input
               type="text"
               placeholder="Search Customers"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className=" p-2 border-b border-gray-300 focus:outline-none min-w-25"
             />
             <CustomButton onClick={() => {}}>Add Customer</CustomButton>
