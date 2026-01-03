@@ -3,10 +3,12 @@ import CustomButton from "@/components/ui/CustomButton";
 import { DataTable } from "@/components/DataTable/DataTable";
 import { TableColumn } from "@/components/DataTable/Type";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function customers() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const router = useRouter();
 
   const pageSize = 10;
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +22,7 @@ export default function customers() {
   }, []);
 
   type Customer = {
+    id: number;
     name: string;
     email: string;
     phone: string;
@@ -35,24 +38,28 @@ export default function customers() {
   ];
   const customers = [
     {
+      id: 1,
       name: "Mazen Essam",
       email: "mazen.essam@example.com",
       phone: "123-456-7890",
       createdAt: "14 Apr 2022",
     },
     {
+      id: 2,
       name: "John Doe",
       email: "john.doe@example.com",
       phone: "987-654-3210",
       createdAt: "14 Apr 2022",
     },
     {
+      id: 3,
       name: "Sara",
       email: "sara@example.com",
       phone: "123-456-7890",
       createdAt: "14 Apr 2022",
     },
     {
+      id: 4,
       name: "Mohamed",
       email: "mohamed@example.com",
       phone: "123-456-7890",
@@ -78,6 +85,7 @@ export default function customers() {
             ? []
             : filteredCustomers.slice((page - 1) * pageSize, page * pageSize)
         }
+        onRowClick={(customer) => router.push(`/customers/${customer.id}`)}
         isLoading={isLoading}
         pagination={{
           page,

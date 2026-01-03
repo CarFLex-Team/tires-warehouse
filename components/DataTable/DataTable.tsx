@@ -13,6 +13,7 @@ type DataTableProps<T> = {
   action?: React.ReactNode;
   pagination?: Pagination;
   isLoading?: boolean;
+  onRowClick?: (row: T) => void;
 };
 function TableSkeleton({ columns }: { columns: number }) {
   return (
@@ -37,6 +38,7 @@ export function DataTable<T>({
   action,
   pagination,
   isLoading = false,
+  onRowClick,
 }: DataTableProps<T>) {
   const totalPages = pagination
     ? Math.ceil(pagination.total / pagination.pageSize)
@@ -77,7 +79,13 @@ export function DataTable<T>({
               </tr>
             ) : (
               data.map((row, rowIndex) => (
-                <tr key={rowIndex} className="border-b last:border-0">
+                <tr
+                  key={rowIndex}
+                  onClick={() => onRowClick?.(row)}
+                  className={`border-b last:border-0 ${
+                    onRowClick ? "cursor-pointer" : ""
+                  }`}
+                >
                   {columns.map((col, colIndex) => (
                     <td key={colIndex} className="py-3 px-2 text-sm">
                       {typeof col.accessor === "function"
