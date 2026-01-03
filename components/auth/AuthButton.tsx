@@ -1,5 +1,5 @@
 "use client";
-export default function CustomButton({
+export default function AuthButton({
   className,
   title,
   onClick,
