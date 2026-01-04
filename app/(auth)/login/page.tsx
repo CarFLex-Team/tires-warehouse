@@ -38,7 +38,7 @@ export default function SignInPage() {
     <div className="flex min-h-screen items-center justify-center bg-white p-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl border border-gray-200">
         <div className="mb-4 flex justify-center">
-          <img src="/logo.png" alt="Logo" className=" w-25" />
+          <img src="/Logo.png" alt="Logo" className=" w-25" />
         </div>
 
         <h1 className="mb-4 text-center text-2xl font-semibold text-gray-900">
