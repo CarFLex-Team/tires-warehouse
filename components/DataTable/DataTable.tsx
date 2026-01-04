@@ -58,7 +58,7 @@ export function DataTable<T>({
           <thead>
             <tr className="border-b text-left text-sm text-gray-500 ">
               {columns.map((col, i) => (
-                <th key={i} className="p-2 min-w-16">
+                <th key={i} className="p-2 min-w-17">
                   {col.header}
                 </th>
               ))}

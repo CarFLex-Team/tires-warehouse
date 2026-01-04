@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "category": "Tires",
+    "type": "Income",
+    "addedAt": "14 Apr 2022"
+  },
+  {
+    "id": 2,
+    "category": "Tire Repair",
+    "type": "Income",
+    "addedAt": "14 Apr 2022"
+  },
+  {
+    "id": 3,
+    "category": "Battery",
+    "type": "Income",
+    "addedAt": "14 Apr 2022"
+  },
+  {
+    "id": 4,
+    "category": "Battery Fix",
+    "type": "Income",
+    "addedAt": "14 Apr 2022"
+  },
+  {
+    "id": 5,
+    "category": "Oil Change",
+    "type": "Income",
+    "addedAt": "13 Apr 2022"
+  }
+]

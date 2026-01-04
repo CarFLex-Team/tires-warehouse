@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "name": "Mazen Essam",
+    "email": "mazen.essam@example.com",
+    "phone": "123-456-7890",
+    "createdAt": "14 Apr 2022"
+  },
+  {
+    "id": 2,
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "987-654-3210",
+    "createdAt": "14 Apr 2022"
+  },
+  {
+    "id": 3,
+    "name": "Sara",
+    "email": "sara@example.com",
+    "phone": "123-456-7890",
+    "createdAt": "14 Apr 2022"
+  },
+  {
+    "id": 4,
+    "name": "Mohamed",
+    "email": "mohamed@example.com",
+    "phone": "123-456-7890",
+    "createdAt": "13 Apr 2022"
+  }
+]

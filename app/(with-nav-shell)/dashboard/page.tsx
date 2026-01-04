@@ -4,7 +4,7 @@ import { TableColumn } from "@/components/DataTable/Type";
 import { OverviewStats } from "@/components/overview/Overview-stats";
 import CustomButton from "@/components/ui/CustomButton";
 import { useEffect, useState } from "react";
-import { is, tr } from "zod/locales";
+import transactions from "../../../data/transactions.json";
 
 export default function dashboard() {
   const [page, setPage] = useState(1);
@@ -70,78 +70,6 @@ export default function dashboard() {
       ),
     },
     { header: "Created by", accessor: "createdBy" },
-  ];
-  const transactions = [
-    {
-      category: "Tires",
-      description: "Change Tires",
-      type: "Income",
-      amount: "$500",
-      paymentMethod: "Cash",
-      date: "14 Apr 2022",
-      time: "9:00 PM",
-      createdBy: "Ahmed",
-    },
-    {
-      category: "Tire Repair",
-      description: "Repair 1 Tire",
-      type: "Income",
-      amount: "$350",
-      paymentMethod: "Debit",
-      date: "14 Apr 2022",
-      time: "8:45 PM",
-      createdBy: "Ahmed",
-    },
-    {
-      category: "Battery",
-      description: "Change Battery",
-      type: "Income",
-      amount: "$500",
-      paymentMethod: "Debit",
-      date: "14 Apr 2022",
-      time: "8:30 PM",
-      createdBy: "Sara",
-    },
-    {
-      category: "Battery Fix",
-      description: "Fix a Battery",
-      type: "Income",
-      amount: "$400",
-      paymentMethod: "Debit",
-      date: "13 Apr 2022",
-      time: "11:00 AM",
-      createdBy: "Mohamed",
-    },
-    {
-      category: "Oil Change",
-      description: "Full Oil Service",
-      type: "Income",
-      amount: "$250",
-      paymentMethod: "Debit",
-      date: "13 Apr 2022",
-      time: "10:30 AM",
-      createdBy: "Ahmed",
-    },
-    {
-      category: "Oil Change",
-      description: "Full Oil Service",
-      type: "Income",
-      amount: "$250",
-      paymentMethod: "Debit",
-      date: "13 Apr 2022",
-      time: "10:00 AM",
-      createdBy: "Ahmed",
-    },
-    {
-      category: "Oil Change",
-      description: "Full Oil Service",
-      type: "Income",
-      amount: "$250",
-      paymentMethod: "Debit",
-      date: "13 Apr 2022",
-      time: "10:00 AM",
-      createdBy: "Ahmed",
-    },
   ];
 
   return (

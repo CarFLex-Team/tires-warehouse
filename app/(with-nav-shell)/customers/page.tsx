@@ -4,7 +4,7 @@ import { DataTable } from "@/components/DataTable/DataTable";
 import { TableColumn } from "@/components/DataTable/Type";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import customersData from "@/data/customers.json";
 export default function customers() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -36,37 +36,8 @@ export default function customers() {
     { header: "Phone", accessor: "phone" },
     { header: "Created At", accessor: "createdAt" },
   ];
-  const customers = [
-    {
-      id: 1,
-      name: "Mazen Essam",
-      email: "mazen.essam@example.com",
-      phone: "123-456-7890",
-      createdAt: "14 Apr 2022",
-    },
-    {
-      id: 2,
-      name: "John Doe",
-      email: "john.doe@example.com",
-      phone: "987-654-3210",
-      createdAt: "14 Apr 2022",
-    },
-    {
-      id: 3,
-      name: "Sara",
-      email: "sara@example.com",
-      phone: "123-456-7890",
-      createdAt: "14 Apr 2022",
-    },
-    {
-      id: 4,
-      name: "Mohamed",
-      email: "mohamed@example.com",
-      phone: "123-456-7890",
-      createdAt: "13 Apr 2022",
-    },
-  ];
-  const filteredCustomers = customers.filter((customer) => {
+
+  const filteredCustomers = customersData.filter((customer) => {
     const value = search.toLowerCase();
 
     return (
@@ -90,7 +61,7 @@ export default function customers() {
         pagination={{
           page,
           pageSize,
-          total: customers.length,
+          total: filteredCustomers.length,
           onPageChange: setPage,
         }}
         action={
