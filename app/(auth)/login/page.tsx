@@ -5,8 +5,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "@/components/auth/FormInput";
 import AuthButton from "@/components/auth/AuthButton";
 import { signinSchema, SigninFormData } from "@/lib/validations/signinSchema";
+import { signIn } from "next-auth/react";
+import { useState } from "react";
 
 export default function SignInPage() {
+  const [authError, setAuthError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -16,7 +19,19 @@ export default function SignInPage() {
   });
 
   const onSubmit = async (data: SigninFormData) => {
-    console.log("Signup data:", data);
+    setAuthError(null);
+    const result = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+    if (result?.error) {
+      setAuthError("Invalid email or password");
+      return;
+    }
+
+    // success
+    window.location.href = "/dashboard";
   };
 
   return (
@@ -30,7 +45,7 @@ export default function SignInPage() {
           Create an account
         </h1>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+        <form className="space-y-3">
           <FormInput
             label="Email"
             type="email"
@@ -53,15 +68,15 @@ export default function SignInPage() {
           >
             Forget Password?
           </a>
-
+          {/* Auth error */}
+          {authError && <p className="text-sm text-red-500">{authError}</p>}
           <AuthButton
             // type="submit"
             className="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200"
-            // disabled={isSubmitting}
-            title="Sign in"
-            onClick={() => handleSubmit(onSubmit)()}
+            disabled={isSubmitting}
+            onClick={handleSubmit(onSubmit)}
           >
-            {/* {isSubmitting ? "Creating account..." : "Sign up"} */}
+            {isSubmitting ? "Processing..." : "Sign in"}
           </AuthButton>
         </form>
       </div>

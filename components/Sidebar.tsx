@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 type Item = {
   id: string;
@@ -119,7 +120,9 @@ export default function Sidebar({
           </div>
         </div>
         <a
-          href="/login"
+          onClick={() => {
+            signOut({ callbackUrl: "/login" });
+          }}
           className={`flex items-center gap-2 text-red-600 cursor-pointer hover:bg-red-100 decoration-none rounded-lg ${
             open ? " px-3 py-2 " : "p-1  "
           }`}
