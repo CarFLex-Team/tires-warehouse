@@ -2,7 +2,7 @@
   {
     "category": "Tires",
     "description": "Change Tires",
-    "type": "Income",
+    "type": "Sales",
     "amount": "$500",
     "paymentMethod": "Cash",
     "date": "14 Apr 2022",
@@ -12,7 +12,7 @@
   {
     "category": "Tire Repair",
     "description": "Repair 1 Tire",
-    "type": "Income",
+    "type": "Sales",
     "amount": "$350",
     "paymentMethod": "Debit",
     "date": "14 Apr 2022",
@@ -22,7 +22,7 @@
   {
     "category": "Battery",
     "description": "Change Battery",
-    "type": "Income",
+    "type": "Sales",
     "amount": "$500",
     "paymentMethod": "Debit",
     "date": "14 Apr 2022",
@@ -32,7 +32,7 @@
   {
     "category": "Battery Fix",
     "description": "Fix a Battery",
-    "type": "Income",
+    "type": "Sales",
     "amount": "$400",
     "paymentMethod": "Debit",
     "date": "13 Apr 2022",
@@ -42,7 +42,7 @@
   {
     "category": "Oil Change",
     "description": "Full Oil Service",
-    "type": "Income",
+    "type": "Sales",
     "amount": "$250",
     "paymentMethod": "Debit",
     "date": "13 Apr 2022",
@@ -52,7 +52,7 @@
   {
     "category": "Oil Change",
     "description": "Full Oil Service",
-    "type": "Income",
+    "type": "Sales",
     "amount": "$250",
     "paymentMethod": "Debit",
     "date": "13 Apr 2022",
@@ -62,7 +62,7 @@
   {
     "category": "Oil Change",
     "description": "Full Oil Service",
-    "type": "Income",
+    "type": "Sales",
     "amount": "$250",
     "paymentMethod": "Debit",
     "date": "13 Apr 2022",

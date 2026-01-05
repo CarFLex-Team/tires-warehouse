@@ -1,4 +1,4 @@
-import { Home, Users, CreditCard, Settings, BarChart } from "lucide-react";
+import { Home, Users, CreditCard, Settings, Package } from "lucide-react";
 
 export type NavItem = {
   id: string;
@@ -23,38 +23,39 @@ export const navByRole: Record<Role, NavItem[]> = {
       icon: CreditCard,
     },
     {
+      id: "ownerCategory",
+      label: "Category",
+      href: "/owner/category",
+      icon: Package,
+    },
+    {
       id: "ownerCustomers",
       label: "Customers",
       href: "/owner/customers",
       icon: Users,
     },
-    {
-      id: "ownerReports",
-      label: "Reports",
-      href: "/owner/reports",
-      icon: BarChart,
-    },
-    {
-      id: "ownerSettings",
-      label: "Settings",
-      href: "/owner/settings",
-      icon: Settings,
-    },
+
+    // {
+    //   id: "ownerSettings",
+    //   label: "Settings",
+    //   href: "/owner/settings",
+    //   icon: Settings,
+    // },
   ],
 
   TEAM: [
     { id: "teamDashboard", label: "Dashboard", href: "/dashboard", icon: Home },
     {
-      id: "teamTransactions",
-      label: "Transactions",
-      href: "/transactions",
-      icon: CreditCard,
-    },
-    {
       id: "teamCustomers",
       label: "Customers",
       href: "/customers",
       icon: Users,
+    },
+    {
+      id: "teamCategory",
+      label: "Category",
+      href: "/category",
+      icon: Package,
     },
   ],
 };

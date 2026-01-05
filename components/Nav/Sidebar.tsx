@@ -33,7 +33,7 @@ export default function Sidebar({
 
     const current = navItems.find((i) => i.href === pathname);
 
-    setActive(current?.label ?? "Dashboard");
+    setActive(current?.label || null);
   }, [pathname, navItems]);
   if (status === "loading") {
     return null; // or skeleton

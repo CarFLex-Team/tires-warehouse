@@ -4,8 +4,10 @@ import { TableColumn } from "@/components/DataTable/Type";
 import CustomButton from "@/components/ui/CustomButton";
 import { useEffect, useState } from "react";
 import categories from "@/data/categories.json";
+import Modal from "@/components/ui/Modal";
 export default function category() {
   const [page, setPage] = useState(1);
+  const [open, setOpen] = useState(false);
   const pageSize = 10;
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,7 +34,47 @@ export default function category() {
   ];
 
   return (
-    <div className=" ">
+    <>
+      {open && (
+        <Modal
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          title="New Category"
+          buttonText="Add Category"
+        >
+          <div className="flex justify-between items-center gap-4">
+            <label className=" flex-2">Category ID</label>
+            <input
+              type="text"
+              className="p-2 border border-gray-300 rounded-lg flex-5"
+              placeholder="Enter Category ID"
+            />
+          </div>
+          <div className="flex justify-between items-center gap-4">
+            <label className=" flex-2">Category</label>
+            <input
+              type="text"
+              className="p-2 border border-gray-300 rounded-lg flex-5"
+              placeholder="Enter Category Name"
+            />
+          </div>
+          <div className="flex justify-between items-center gap-4">
+            <label className=" flex-2">Type</label>
+            <select
+              name="categoryType"
+              id="categoryType"
+              className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
+              defaultValue=""
+            >
+              <option disabled value="">
+                Category Type
+              </option>
+              <option value="sale">Sales</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+        </Modal>
+      )}
       <DataTable
         title="Category"
         columns={categoryColumns}
@@ -48,8 +90,16 @@ export default function category() {
           total: categories.length,
           onPageChange: setPage,
         }}
-        action={<CustomButton onClick={() => {}}>Add Category</CustomButton>}
+        action={
+          <CustomButton
+            onClick={() => {
+              setOpen(true);
+            }}
+          >
+            Add Category
+          </CustomButton>
+        }
       />
-    </div>
+    </>
   );
 }
