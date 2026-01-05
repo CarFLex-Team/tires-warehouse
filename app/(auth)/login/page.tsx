@@ -2,14 +2,17 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormInput from "@/components/auth/FormInput";
-import AuthButton from "@/components/auth/AuthButton";
+import FormInput from "@/components/Auth/FormInput";
+import AuthButton from "@/components/Auth/AuthButton";
 import { signinSchema, SigninFormData } from "@/lib/validations/signinSchema";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
+  const router = useRouter();
   const [authError, setAuthError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -31,7 +34,11 @@ export default function SignInPage() {
     }
 
     // success
-    window.location.href = "/dashboard";
+    const sessionRes = await fetch("/api/auth/session");
+    const session = await sessionRes.json();
+
+    const role = session?.user?.role;
+    router.push(role === "OWNER" ? "/owner/dashboard" : "/dashboard");
   };
 
   return (

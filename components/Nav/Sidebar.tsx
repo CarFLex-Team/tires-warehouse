@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import NavButton from "./NavButton";
+import { useEffect, useState } from "react";
+import NavButton from "../ui/NavButton";
 import {
   X,
   PanelLeftClose,
@@ -13,41 +13,8 @@ import {
 } from "lucide-react";
 
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
-
-type Item = {
-  id: string;
-  href: string;
-  label: string;
-  Logo: React.ReactNode;
-};
-
-const ITEMS: Item[] = [
-  {
-    id: "dashboard",
-    href: "/dashboard",
-    label: "Dashboard",
-    Logo: <House size={20} />,
-  },
-  // {
-  //   id: "Transactions",
-  //   href: "/transactions",
-  //   label: "Transactions",
-  //   Logo: <Receipt size={20} />,
-  // },
-  {
-    id: "Customers",
-    href: "/customers",
-    label: "Customers",
-    Logo: <CircleUserRound size={20} />,
-  },
-  {
-    id: "Category",
-    href: "/category",
-    label: "Category",
-    Logo: <Package size={20} />,
-  },
-];
+import { signOut, useSession } from "next-auth/react";
+import { navByRole } from "@/nav.config";
 
 export default function Sidebar({
   open,
@@ -56,13 +23,22 @@ export default function Sidebar({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) {
+  const { data: session, status } = useSession();
+  const [active, setActive] = useState<string | null>(null);
   const pathname = usePathname() ?? "/";
-  const activeId = ITEMS.find((i) => pathname === i.href)?.id ?? ITEMS[0].id;
+  const role = session?.user.role as "OWNER" | "TEAM" | undefined;
+  const navItems = role ? navByRole[role] : [];
+  useEffect(() => {
+    if (!navItems.length) return;
 
-  const [active, setActive] = useState(
-    ITEMS.find((i) => i.id === activeId)?.label || "Dashboard"
-  );
+    const current = navItems.find((i) => i.href === pathname);
 
+    setActive(current?.label ?? "Dashboard");
+  }, [pathname, navItems]);
+  if (status === "loading") {
+    return null; // or skeleton
+  }
+  if (!session) return null;
   return (
     <>
       <button
@@ -103,9 +79,9 @@ export default function Sidebar({
             className="flex flex-col gap-2 mt-10"
             aria-label="Mobile listings"
           >
-            {ITEMS.map((item) => (
+            {navItems.map((item) => (
               <NavButton
-                key={item.id}
+                key={item.href}
                 onClick={() => setActive(item.label)}
                 item={item}
                 isActive={active === item.label}
@@ -113,7 +89,7 @@ export default function Sidebar({
                   open ? " px-4 py-3 rounded-lg" : "p-1 mb-2 rounded-md"
                 }
               >
-                {item.Logo}
+                <item.icon size={20} />
                 {open && item.label}
               </NavButton>
             ))}

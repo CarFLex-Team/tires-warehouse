@@ -1,5 +1,10 @@
+"use client";
 import { Menu } from "lucide-react";
+import { useSession } from "next-auth/react";
 export default function TopNav({ onMenuClick }: { onMenuClick: () => void }) {
+  const { data: session } = useSession();
+  if (!session) return null;
+  const name = session.user.name;
   return (
     <nav
       className="flex justify-between  items-center min-h-17  px-6 sm:px-9 bg-white  "
@@ -14,7 +19,7 @@ export default function TopNav({ onMenuClick }: { onMenuClick: () => void }) {
       </button>
 
       <div className="w-fit ">
-        <p className="text-lg font-semibold">Welcome, Mazen</p>
+        <p className="text-lg font-semibold">Welcome, {name?.split(" ")[0]}</p>
       </div>
     </nav>
   );

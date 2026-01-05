@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { JWT } from "next-auth/jwt";
-import type { Session } from "next-auth";
+import type { AuthOptions, Session } from "next-auth";
 import bcrypt from "bcrypt";
 import { db } from "@/lib/db";
 declare module "next-auth" {
@@ -22,7 +22,7 @@ declare module "next-auth/jwt" {
   }
 }
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
   },
@@ -40,7 +40,7 @@ const handler = NextAuth({
 
         const result = await db
           .query(
-            ' SELECT id, email, password, role FROM "User" WHERE email = $1',
+            ' SELECT id,name, email, password, role FROM "User" WHERE email = $1',
             [credentials.email]
           )
           .then((res) => res)
@@ -69,6 +69,7 @@ const handler = NextAuth({
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.name = user.name;
       }
       return token;
     },
@@ -76,6 +77,7 @@ const handler = NextAuth({
       if (session.user) {
         session.user.id = token.id as number;
         session.user.role = token.role;
+        session.user.name = token.name;
       }
       return session;
     },
@@ -83,6 +85,7 @@ const handler = NextAuth({
   pages: {
     signIn: "/login",
   },
-});
+};
 
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
