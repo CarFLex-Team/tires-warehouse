@@ -2,9 +2,12 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormInput from "@/components/Auth/FormInput";
-import AuthButton from "@/components/Auth/AuthButton";
-import { signinSchema, SigninFormData } from "@/lib/validations/signinSchema";
+import FormInput from "../../../components/Auth/FormInput";
+import AuthButton from "../../../components/Auth/AuthButton";
+import {
+  signinSchema,
+  SigninFormData,
+} from "../../../lib/validations/signinSchema";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
