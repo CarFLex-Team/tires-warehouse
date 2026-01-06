@@ -42,7 +42,7 @@ export default function Sidebar({
       />
 
       <aside
-        className={`h-screen flex flex-col justify-between bg-white border-r-2 border-r-gray-100  p-4 z-50  max-md:fixed max-md:inset-0 transform transition-transform duration-300 ease-in-out ${
+        className={`h-screen flex flex-col justify-between bg-white border-r-2 border-r-gray-100  px-4 py-6 max-sm:pb-10 z-50  max-md:fixed max-md:inset-0 transform transition-transform duration-300 ease-in-out ${
           open ? "w-58 max-md:translate-x-0" : "w-16 max-md:-translate-x-full"
         }`}
       >
