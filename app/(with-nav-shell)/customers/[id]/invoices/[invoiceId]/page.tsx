@@ -1,9 +1,7 @@
 "use client";
 import { DataTable } from "@/components/DataTable/DataTable";
 import { TableColumn } from "@/components/DataTable/Type";
-import CustomButton from "@/components/ui/CustomButton";
 import { useEffect, useState } from "react";
-import Modal from "@/components/ui/Modal";
 import customers from "@/data/customers.json";
 import { InfoCard } from "@/components/ui/InfoCard";
 export default function invoice() {

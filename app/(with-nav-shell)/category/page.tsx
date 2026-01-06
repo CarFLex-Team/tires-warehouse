@@ -6,9 +6,12 @@ import { useEffect, useState } from "react";
 import categories from "@/data/categories.json";
 import Modal from "@/components/ui/Modal";
 import { Trash } from "lucide-react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 export default function category() {
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const pageSize = 10;
   const [isLoading, setIsLoading] = useState(true);
 
@@ -103,13 +106,20 @@ export default function category() {
         renderActions={(row) => (
           <button
             onClick={() => {
-              // Handle delete action here
+              setConfirmOpen(true);
             }}
             className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
           >
             <Trash size={16} />
           </button>
         )}
+      />
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={() => {}}
+        description="Do you want to Delete this category?"
+        loading={confirmLoading}
       />
     </>
   );

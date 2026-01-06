@@ -5,6 +5,8 @@ import CustomButton from "@/components/ui/CustomButton";
 import { useEffect, useState } from "react";
 import Modal from "@/components/ui/Modal";
 import customers from "@/data/customers.json";
+import { InvoiceTable } from "@/components/InvoiceTable";
+import CreateTransactions from "@/components/CreateTransactions";
 export default function CreateInvoice() {
   const customer = customers.find((c) => c.id === Number(1));
   const transactions = customer ? customer.invoices[0].transactions : [];
@@ -107,22 +109,7 @@ export default function CreateInvoice() {
         </Modal>
       )}
       <div className=" ">
-        <DataTable
-          title={`Invoice #${customer?.invoices[0].id}`}
-          columns={transactionColumns}
-          data={
-            isLoading
-              ? []
-              : transactions.slice((page - 1) * pageSize, page * pageSize)
-          }
-          isLoading={isLoading}
-          pagination={{
-            page,
-            pageSize,
-            total: transactions.length,
-            onPageChange: setPage,
-          }}
-        />
+        <CreateTransactions />
       </div>
     </>
   );

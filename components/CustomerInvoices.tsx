@@ -6,10 +6,12 @@ import { useState, useEffect } from "react";
 import CustomButton from "./ui/CustomButton";
 import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
+import ConfirmDialog from "./ui/ConfirmDialog";
 export default function CustomerInvoices({ customer }: { customer: any }) {
   const router = useRouter();
   const [page, setPage] = useState(1);
-
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const pageSize = 10;
   const [isLoading, setIsLoading] = useState(true);
 
@@ -73,11 +75,21 @@ export default function CustomerInvoices({ customer }: { customer: any }) {
         renderActions={(row) => (
           <button
             className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              setConfirmOpen(true);
+            }}
           >
             <Trash size={16} />
           </button>
         )}
+      />
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={() => {}}
+        description="Do you want to Delete this invoice?"
+        loading={confirmLoading}
       />
     </>
   );
