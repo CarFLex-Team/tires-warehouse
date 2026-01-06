@@ -2,9 +2,9 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormInput from "@/components/Auth/FormInput";
-import AuthButton from "@/components/Auth/AuthButton";
-// import { signinSchema, SigninFormData } from "@/lib/validations/signinSchema";
+import FormInput from "@/components/FormInput";
+import AuthButton from "@/components/AuthButton";
+import { signinSchema, SigninFormData } from "@/lib/validations/signinSchema";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -17,11 +17,11 @@ export default function SignInPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<any>({
-    // resolver: zodResolver(signinSchema),
+  } = useForm<SigninFormData>({
+    resolver: zodResolver(signinSchema),
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: SigninFormData) => {
     setAuthError(null);
     const result = await signIn("credentials", {
       email: data.email,
@@ -58,7 +58,7 @@ export default function SignInPage() {
             type="email"
             placeholder="Enter your email"
             register={register("email")}
-            // error={errors.email}
+            error={errors.email}
           />
 
           <FormInput
@@ -66,7 +66,7 @@ export default function SignInPage() {
             type="password"
             placeholder="Enter your password"
             register={register("password")}
-            // error={errors.password}
+            error={errors.password}
           />
 
           <a
