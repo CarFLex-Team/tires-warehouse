@@ -18,7 +18,6 @@ export default function FormInput({
   register,
   error,
 }: FormInputProps) {
-  const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
 
   return (
@@ -27,7 +26,7 @@ export default function FormInput({
 
       <div className="">
         <input
-          type={isPassword && showPassword ? "text" : type}
+          type={type}
           placeholder={placeholder}
           {...register}
           className={`h-11 w-full rounded-lg border px-3  text-sm outline-none transition
