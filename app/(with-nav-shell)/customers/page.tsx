@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import customersData from "@/data/customers.json";
 import Modal from "@/components/ui/Modal";
+import { Trash } from "lucide-react";
 export default function customers() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -92,7 +93,9 @@ export default function customers() {
               ? []
               : filteredCustomers.slice((page - 1) * pageSize, page * pageSize)
           }
-          onRowClick={(customer) => router.push(`/customers/${customer.id}`)}
+          onRowClick={(customer) =>
+            router.push(`/customers/${customer.id}/invoices`)
+          }
           isLoading={isLoading}
           pagination={{
             page,
@@ -114,6 +117,16 @@ export default function customers() {
               </CustomButton>
             </>
           }
+          renderActions={(row) => (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+            >
+              <Trash size={16} />
+            </button>
+          )}
         />
       </div>
     </>

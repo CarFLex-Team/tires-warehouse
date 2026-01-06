@@ -1,14 +1,13 @@
 "use client";
 import { DataTable } from "@/components/DataTable/DataTable";
 import { TableColumn } from "@/components/DataTable/Type";
-import { OverviewStats } from "@/components/overview/Overview-stats";
 import CustomButton from "@/components/ui/CustomButton";
 import { useEffect, useState } from "react";
-import transactions from "../../../data/transactions.json";
 import Modal from "@/components/ui/Modal";
-import { Trash } from "lucide-react";
-
-export default function dashboard() {
+import customers from "@/data/customers.json";
+export default function CreateInvoice() {
+  const customer = customers.find((c) => c.id === Number(1));
+  const transactions = customer ? customer.invoices[0].transactions : [];
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
   const pageSize = 6;
@@ -21,58 +20,17 @@ export default function dashboard() {
 
     return () => clearTimeout(timer);
   }, []);
-  const dailyTransactionStats = [
-    {
-      label: "Total Transactions",
-      value: 7,
-      color: "text-primary-500",
-    },
-    {
-      label: "Total Sales",
-      value: 6,
-      subValue: "$2500",
-      color: "text-orange-400",
-    },
-    {
-      label: "Cash Sales",
-      value: 1,
-      subValue: "$500",
-      color: "text-red-400",
-    },
-    {
-      label: "Debit Sales",
-      value: 5,
-      subValue: "$2000",
-      color: "text-purple-400",
-    },
-  ];
+
   type Transaction = {
     category: string;
     description: string;
-    type: string;
-    amount: string;
-    paymentMethod: string;
-    date: string;
-    time: string;
-    createdBy: string;
+    amount: number;
   };
 
   const transactionColumns: TableColumn<Transaction>[] = [
     { header: "Category", accessor: "category" },
     { header: "Description", accessor: "description" },
-    { header: "Type", accessor: "type" },
     { header: "Amount", accessor: "amount" },
-    { header: "Payment Method", accessor: "paymentMethod" },
-    {
-      header: "Date",
-      accessor: (row) => (
-        <div>
-          <div>{row.date}</div>
-          <div className="text-xs text-gray-400">at {row.time}</div>
-        </div>
-      ),
-    },
-    { header: "Created by", accessor: "createdBy" },
   ];
 
   return (
@@ -149,9 +107,8 @@ export default function dashboard() {
         </Modal>
       )}
       <div className=" ">
-        <OverviewStats title="Daily Overview" stats={dailyTransactionStats} />
         <DataTable
-          title="Transactions"
+          title={`Invoice #${customer?.invoices[0].id}`}
           columns={transactionColumns}
           data={
             isLoading
@@ -165,25 +122,6 @@ export default function dashboard() {
             total: transactions.length,
             onPageChange: setPage,
           }}
-          action={
-            <CustomButton
-              onClick={() => {
-                setOpen(true);
-              }}
-            >
-              Add Transaction
-            </CustomButton>
-          }
-          renderActions={(row) => (
-            <button
-              onClick={() => {
-                // Handle delete action here
-              }}
-              className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
-            >
-              <Trash size={16} />
-            </button>
-          )}
         />
       </div>
     </>

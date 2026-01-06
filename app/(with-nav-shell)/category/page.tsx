@@ -5,6 +5,7 @@ import CustomButton from "@/components/ui/CustomButton";
 import { useEffect, useState } from "react";
 import categories from "@/data/categories.json";
 import Modal from "@/components/ui/Modal";
+import { Trash } from "lucide-react";
 export default function category() {
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
@@ -99,6 +100,16 @@ export default function category() {
             Add Category
           </CustomButton>
         }
+        renderActions={(row) => (
+          <button
+            onClick={() => {
+              // Handle delete action here
+            }}
+            className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+          >
+            <Trash size={16} />
+          </button>
+        )}
       />
     </>
   );

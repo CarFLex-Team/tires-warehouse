@@ -1,16 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import NavButton from "../ui/NavButton";
-import {
-  X,
-  PanelLeftClose,
-  LogOut,
-  House,
-  CircleUserRound,
-  Package,
-  Receipt,
-  PanelLeftOpen,
-} from "lucide-react";
+import { PanelLeftClose, LogOut, PanelLeftOpen } from "lucide-react";
 
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
