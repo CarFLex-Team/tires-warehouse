@@ -90,8 +90,8 @@ export default function dashboard() {
           <div className="flex justify-between items-center gap-4">
             <label className=" flex-2">Category</label>
             <select
-              name="transactionType"
-              id="transactionType"
+              name="category"
+              id="category"
               className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
               defaultValue=""
             >
@@ -137,8 +137,8 @@ export default function dashboard() {
           <div className="flex justify-between items-center gap-4">
             <label className=" flex-2">Method</label>
             <select
-              name="transactionType"
-              id="transactionType"
+              name="paymentMethod"
+              id="paymentMethod"
               className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
               defaultValue=""
             >
