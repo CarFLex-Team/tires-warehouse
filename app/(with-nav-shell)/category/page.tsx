@@ -1,6 +1,6 @@
 "use client";
-import { DataTable } from "@/components/DataTable/DataTable";
-import { TableColumn } from "@/components/DataTable/Type";
+import { DataTable } from "@/components/Tables/DataTable";
+import { TableColumn } from "@/components/Tables/Type";
 import CustomButton from "@/components/ui/CustomButton";
 import { useEffect, useState } from "react";
 import categories from "@/data/categories.json";

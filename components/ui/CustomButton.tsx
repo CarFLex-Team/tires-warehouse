@@ -9,7 +9,7 @@ export default function CustomButton({
 }) {
   return (
     <button
-      className="rounded bg-primary-600 px-3 py-2 text-sm text-white cursor-pointer"
+      className={`rounded bg-primary-600 px-3 py-2 text-sm text-white cursor-pointer ${className}`}
       onClick={onClick}
     >
       {children}

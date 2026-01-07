@@ -1,7 +1,7 @@
 "use client";
 import CustomButton from "@/components/ui/CustomButton";
-import { DataTable } from "@/components/DataTable/DataTable";
-import { TableColumn } from "@/components/DataTable/Type";
+import { DataTable } from "@/components/Tables/DataTable";
+import { TableColumn } from "@/components/Tables/Type";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import customersData from "@/data/customers.json";

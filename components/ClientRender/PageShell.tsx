@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import Sidebar from "./Nav/Sidebar";
-import TopNav from "./Nav/TopNav";
+import Sidebar from "../Nav/Sidebar";
+import TopNav from "../Nav/TopNav";
 import { usePathname } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
 export default function PageShell({ children }: { children: React.ReactNode }) {

@@ -1,12 +1,12 @@
 "use client";
-import { DataTable } from "@/components/DataTable/DataTable";
-import { TableColumn } from "@/components/DataTable/Type";
+import { DataTable } from "@/components/Tables/DataTable";
+import { TableColumn } from "@/components/Tables/Type";
 import { InfoCard } from "@/components/ui/InfoCard";
 import { useState, useEffect } from "react";
-import CustomButton from "./ui/CustomButton";
+import CustomButton from "../ui/CustomButton";
 import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
-import ConfirmDialog from "./ui/ConfirmDialog";
+import ConfirmDialog from "../ui/ConfirmDialog";
 export default function CustomerInvoices({ customer }: { customer: any }) {
   const router = useRouter();
   const [page, setPage] = useState(1);
@@ -66,7 +66,7 @@ export default function CustomerInvoices({ customer }: { customer: any }) {
         action={
           <CustomButton
             onClick={() => {
-              router.push(`/customers/${customer.id}/create-invoice`);
+              router.push(`/customers/${customer.id}/invoices/new`);
             }}
           >
             Add Invoice

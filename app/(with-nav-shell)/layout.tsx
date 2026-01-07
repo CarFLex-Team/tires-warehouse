@@ -1,4 +1,4 @@
-import PageShell from "@/components/PageShell";
+import PageShell from "@/components/ClientRender/PageShell";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 export default async function Layout({

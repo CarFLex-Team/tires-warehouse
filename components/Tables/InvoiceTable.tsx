@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
-import { ComboBox } from "./ui/ComboBox";
+import { ComboBox } from "../ui/ComboBox";
+import CustomButton from "../ui/CustomButton";
 
 type Row = {
   id: string;
@@ -92,6 +93,10 @@ export function InvoiceTable({ rows, onAdd, onUpdate, onRemove }: Props) {
           </tbody>
         </table>
       </div>
+      <CustomButton onClick={onAdd} className="flex items-center gap-1 mt-4">
+        <Plus size={16} />
+        Add Item
+      </CustomButton>
     </div>
   );
 }
