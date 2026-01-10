@@ -49,7 +49,7 @@ export default function SignInPage() {
         </div>
 
         <h1 className="mb-4 text-center text-2xl font-semibold text-gray-900">
-          Create an account
+          Sign in to your account
         </h1>
 
         <form className="space-y-3">
