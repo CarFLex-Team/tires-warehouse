@@ -20,5 +20,5 @@ export const useInvoiceDraft = create<InvoiceDraftState>((set) => ({
   items: [],
   setCustomer: (id) => set({ customerId: id }),
   setItems: (items) => set({ items }),
-  clear: () => set({ customerId: null, items: [] }),
+  clear: () => set({ items: [] }),
 }));

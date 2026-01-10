@@ -93,6 +93,8 @@ export function DataTable<T>({
                     <td key={colIndex} className="py-3 px-2 text-sm">
                       {typeof col.accessor === "function"
                         ? col.accessor(row)
+                        : col.header === "Amount"
+                        ? "$" + (row[col.accessor] as React.ReactNode)
                         : (row[col.accessor] as React.ReactNode)}
                     </td>
                   ))}

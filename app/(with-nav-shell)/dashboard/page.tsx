@@ -53,7 +53,7 @@ export default function dashboard() {
     category: string;
     description: string;
     type: string;
-    amount: string;
+    amount: number;
     paymentMethod: string;
     date: string;
     time: string;
