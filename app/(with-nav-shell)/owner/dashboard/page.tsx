@@ -6,10 +6,14 @@ import CustomButton from "@/components/ui/CustomButton";
 import { useEffect, useState } from "react";
 import transactions from "../../../../data/transactions.json";
 import Modal from "@/components/ui/Modal";
+import { Trash } from "lucide-react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 export default function dashboard() {
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const pageSize = 6;
   const [isLoading, setIsLoading] = useState(true);
 
@@ -20,28 +24,42 @@ export default function dashboard() {
 
     return () => clearTimeout(timer);
   }, []);
-  const dailyTransactionStats = [
+  const mostSellingItems = [
+    {
+      category: "Tires",
+      turnOver: 15000,
+    },
+    { category: "Batteries", turnOver: 10000 },
+  ];
+  const mostSpendingCustomers = [
+    {
+      Name: "Mazen Essam",
+      turnOver: 15000,
+    },
+    { Name: "Jane Smith", turnOver: 10000 },
+  ];
+  const monthlyTransactionStats = [
     {
       label: "Total Transactions",
-      value: 7,
+      value: 30,
       color: "text-primary-500",
     },
     {
       label: "Total Sales",
-      value: 6,
-      subValue: "$2500",
+      value: 25,
+      subValue: "$25000",
       color: "text-orange-400",
     },
     {
       label: "Cash Sales",
-      value: 1,
-      subValue: "$500",
+      value: 10,
+      subValue: "$5000",
       color: "text-red-400",
     },
     {
       label: "Debit Sales",
-      value: 5,
-      subValue: "$2000",
+      value: 15,
+      subValue: "$20000",
       color: "text-purple-400",
     },
   ];
@@ -49,11 +67,21 @@ export default function dashboard() {
     category: string;
     description: string;
     type: string;
-    amount: string;
+    amount: number;
     paymentMethod: string;
     date: string;
     time: string;
     createdBy: string;
+  };
+  type Category = {
+    category: string;
+
+    turnOver: number;
+  };
+  type Customer = {
+    Name: string;
+
+    turnOver: number;
   };
 
   const transactionColumns: TableColumn<Transaction>[] = [
@@ -73,10 +101,18 @@ export default function dashboard() {
     },
     { header: "Created by", accessor: "createdBy" },
   ];
+  const CategoryColumn: TableColumn<Category>[] = [
+    { header: "Category", accessor: "category" },
+    { header: "Turn Over", accessor: "turnOver" },
+  ];
+  const CustomerColumn: TableColumn<Customer>[] = [
+    { header: "Name", accessor: "Name" },
+    { header: "Turn Over", accessor: "turnOver" },
+  ];
 
   return (
     <>
-      {open && (
+      {/* {open && (
         <Modal
           isOpen={open}
           onClose={() => setOpen(false)}
@@ -86,8 +122,8 @@ export default function dashboard() {
           <div className="flex justify-between items-center gap-4">
             <label className=" flex-2">Category</label>
             <select
-              name="transactionType"
-              id="transactionType"
+              name="category"
+              id="category"
               className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
               defaultValue=""
             >
@@ -133,8 +169,8 @@ export default function dashboard() {
           <div className="flex justify-between items-center gap-4">
             <label className=" flex-2">Method</label>
             <select
-              name="transactionType"
-              id="transactionType"
+              name="paymentMethod"
+              id="paymentMethod"
               className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
               defaultValue=""
             >
@@ -146,9 +182,26 @@ export default function dashboard() {
             </select>
           </div>
         </Modal>
-      )}
+      )} */}
       <div className=" ">
-        <OverviewStats title="Daily Overview" stats={dailyTransactionStats} />
+        <OverviewStats
+          title="Monthly Overview"
+          stats={monthlyTransactionStats}
+        />
+        <div className=" grid grid-cols-1 md:grid-cols-2 ">
+          <DataTable
+            title="Most Selling Categories"
+            columns={CategoryColumn}
+            data={isLoading ? [] : mostSellingItems}
+            isLoading={isLoading}
+          />
+          <DataTable
+            title="Most Spending Customers"
+            columns={CustomerColumn}
+            data={isLoading ? [] : mostSpendingCustomers}
+            isLoading={isLoading}
+          />
+        </div>
         <DataTable
           title="Transactions"
           columns={transactionColumns}
@@ -164,17 +217,35 @@ export default function dashboard() {
             total: transactions.length,
             onPageChange: setPage,
           }}
-          action={
-            <CustomButton
-              onClick={() => {
-                setOpen(true);
-              }}
-            >
-              Add Transaction
-            </CustomButton>
-          }
+          // action={
+          //   <CustomButton
+          //     onClick={() => {
+          //       setOpen(true);
+          //     }}
+          //   >
+          //     Add Transaction
+          //   </CustomButton>
+          // }
+          // renderActions={(row) => (
+          //   <button
+          //     onClick={() => {
+          //       setConfirmOpen(true);
+          //     }}
+          //     className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+          //   >
+          //     <Trash size={16} />
+          //   </button>
+          // )}
         />
       </div>
+
+      {/* <ConfirmDialog
+        isOpen={confirmOpen}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={() => {}}
+        description="Do you want to Delete this transaction?"
+        loading={confirmLoading}
+      /> */}
     </>
   );
 }

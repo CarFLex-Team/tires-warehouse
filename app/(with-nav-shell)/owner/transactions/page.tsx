@@ -4,11 +4,17 @@ import { TableColumn } from "@/components/Tables/Type";
 import { OverviewStats } from "@/components/overview/Overview-stats";
 import CustomButton from "@/components/ui/CustomButton";
 import { useEffect, useState } from "react";
-import { is, tr } from "zod/locales";
+import transactions from "../../../../data/transactions.json";
+import Modal from "@/components/ui/Modal";
+import { Trash } from "lucide-react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
-export default function transactions() {
+export default function dashboard() {
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const pageSize = 6;
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -47,7 +53,7 @@ export default function transactions() {
     category: string;
     description: string;
     type: string;
-    amount: string;
+    amount: number;
     paymentMethod: string;
     date: string;
     time: string;
@@ -71,139 +77,125 @@ export default function transactions() {
     },
     { header: "Created by", accessor: "createdBy" },
   ];
-  const transactions = [
-    {
-      category: "Tires",
-      description: "Change Tires",
-      type: "Income",
-      amount: "$500",
-      paymentMethod: "Cash",
-      date: "14 Apr 2022",
-      time: "9:00 PM",
-      createdBy: "Ahmed",
-    },
-    {
-      category: "Tire Repair",
-      description: "Repair 1 Tire",
-      type: "Income",
-      amount: "$300",
-      paymentMethod: "Debit",
-      date: "14 Apr 2022",
-      time: "8:45 PM",
-      createdBy: "Ahmed",
-    },
-    {
-      category: "Battery",
-      description: "Change Battery",
-      type: "Income",
-      amount: "$450",
-      paymentMethod: "Debit",
-      date: "14 Apr 2022",
-      time: "8:30 PM",
-      createdBy: "Sara",
-    },
-    {
-      category: "Battery Fix",
-      description: "Fix a Battery",
-      type: "Income",
-      amount: "$200",
-      paymentMethod: "Debit",
-      date: "13 Apr 2022",
-      time: "11:00 AM",
-      createdBy: "Mohamed",
-    },
-    {
-      category: "Oil Change",
-      description: "Full Oil Service",
-      type: "Income",
-      amount: "$150",
-      paymentMethod: "Debit",
-      date: "13 Apr 2022",
-      time: "10:30 AM",
-      createdBy: "Ahmed",
-    },
-    {
-      category: "Oil Change",
-      description: "Full Oil Service",
-      type: "Income",
-      amount: "$150",
-      paymentMethod: "Debit",
-      date: "13 Apr 2022",
-      time: "10:00 AM",
-      createdBy: "Ahmed",
-    },
-    {
-      category: "Oil Change",
-      description: "Full Oil Service",
-      type: "Income",
-      amount: "$150",
-      paymentMethod: "Debit",
-      date: "13 Apr 2022",
-      time: "10:00 AM",
-      createdBy: "Ahmed",
-    },
-    {
-      category: "Oil Change",
-      description: "Full Oil Service",
-      type: "Income",
-      amount: "$150",
-      paymentMethod: "Debit",
-      date: "13 Apr 2022",
-      time: "10:00 AM",
-      createdBy: "Ahmed",
-    },
-    {
-      category: "Oil Change",
-      description: "Full Oil Service",
-      type: "Income",
-      amount: "$150",
-      paymentMethod: "Debit",
-      date: "13 Apr 2022",
-      time: "10:00 AM",
-      createdBy: "Ahmed",
-    },
-    {
-      category: "Oil Change",
-      description: "Full Oil Service",
-      type: "Income",
-      amount: "$150",
-      paymentMethod: "Debit",
-      date: "13 Apr 2022",
-      time: "10:00 AM",
-      createdBy: "Ahmed",
-    },
-    {
-      category: "Oil Change",
-      description: "Full Oil Service",
-      type: "Income",
-      amount: "$150",
-      paymentMethod: "Debit",
-      date: "13 Apr 2022",
-      time: "10:00 AM",
-      createdBy: "Ahmed",
-    },
-  ];
 
   return (
-    <div className=" ">
-      <OverviewStats title="Daily Overview" stats={dailyTransactionStats} />
-      <DataTable
-        title="Transactions"
-        columns={transactionColumns}
-        data={
-          isLoading
-            ? []
-            : transactions.slice((page - 1) * pageSize, page * pageSize)
-        }
-        isLoading={isLoading}
-        pagination={{
-          page,
-          pageSize,
-          total: transactions.length,
-          onPageChange: setPage,
-        }}
-        action={<CustomButton onClick={() => {}}>Add Transaction</CustomButton>}
+    <>
+      {open && (
+        <Modal
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          title="New Transaction"
+          buttonText="Add Transaction"
+        >
+          <div className="flex justify-between items-center gap-4">
+            <label className=" flex-2">Category</label>
+            <select
+              name="category"
+              id="category"
+              className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
+              defaultValue=""
+            >
+              <option disabled value="">
+                Category
+              </option>
+              <option value="tires">Tires</option>
+              <option value="batteryFix">Battery Fix</option>
+            </select>
+          </div>
+          <div className="flex justify-between items-center gap-4">
+            <label className="flex-2">Description</label>
+            <textarea
+              rows={2}
+              className="p-2 border border-gray-300 rounded-lg flex-5"
+              placeholder="Enter Transaction Description"
+            />
+          </div>
+          <div className="flex justify-between items-center gap-4">
+            <label className=" flex-2">Type</label>
+            <select
+              name="transactionType"
+              id="transactionType"
+              className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
+              defaultValue=""
+            >
+              <option disabled value="">
+                Transaction Type
+              </option>
+              <option value="sale">Sales</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+
+          <div className="flex justify-between items-center gap-4">
+            <label className=" flex-2">Amount</label>
+            <input
+              type="number"
+              className="p-2 border border-gray-300 rounded-lg flex-5"
+              placeholder="Enter Price Amount"
+            />
+          </div>
+          <div className="flex justify-between items-center gap-4">
+            <label className=" flex-2">Method</label>
+            <select
+              name="paymentMethod"
+              id="paymentMethod"
+              className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
+              defaultValue=""
+            >
+              <option disabled value="">
+                Payment Method
+              </option>
+              <option value="cash">Cash</option>
+              <option value="debit">Debit</option>
+            </select>
+          </div>
+        </Modal>
+      )}
+      <div className=" ">
+        <OverviewStats title="Daily Overview" stats={dailyTransactionStats} />
+        <DataTable
+          title="Transactions"
+          columns={transactionColumns}
+          data={
+            isLoading
+              ? []
+              : transactions.slice((page - 1) * pageSize, page * pageSize)
+          }
+          isLoading={isLoading}
+          pagination={{
+            page,
+            pageSize,
+            total: transactions.length,
+            onPageChange: setPage,
+          }}
+          // action={
+          //   <CustomButton
+          //     onClick={() => {
+          //       setOpen(true);
+          //     }}
+          //   >
+          //     Add Transaction
+          //   </CustomButton>
+          // }
+          // renderActions={(row) => (
+          //   <button
+          //     onClick={() => {
+          //       setConfirmOpen(true);
+          //     }}
+          //     className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+          //   >
+          //     <Trash size={16} />
+          //   </button>
+          // )}
+        />
+      </div>
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={() => {}}
+        description="Do you want to Delete this transaction?"
+        loading={confirmLoading}
       />
-    </div>
+    </>
   );
 }

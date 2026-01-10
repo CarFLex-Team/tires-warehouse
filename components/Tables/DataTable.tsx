@@ -16,10 +16,16 @@ type DataTableProps<T> = {
   onRowClick?: (row: T) => void;
   renderActions?: (row: T) => React.ReactNode;
 };
-function TableSkeleton({ columns }: { columns: number }) {
+function TableSkeleton({
+  columns,
+  length,
+}: {
+  columns: number;
+  length: number;
+}) {
   return (
     <>
-      {Array.from({ length: 5 }).map((_, rowIndex) => (
+      {Array.from({ length: length }).map((_, rowIndex) => (
         <tr key={rowIndex} className="border-b">
           {Array.from({ length: columns }).map((_, colIndex) => (
             <td key={colIndex} className="py-3">
@@ -70,7 +76,10 @@ export function DataTable<T>({
 
           <tbody>
             {isLoading ? (
-              <TableSkeleton columns={columns.length} />
+              <TableSkeleton
+                columns={columns.length}
+                length={pagination ? pagination.pageSize : 3}
+              />
             ) : data.length === 0 ? (
               <tr>
                 <td

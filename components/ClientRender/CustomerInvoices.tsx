@@ -7,7 +7,13 @@ import CustomButton from "../ui/CustomButton";
 import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
 import ConfirmDialog from "../ui/ConfirmDialog";
-export default function CustomerInvoices({ customer }: { customer: any }) {
+export default function CustomerInvoices({
+  customer,
+  isOwner,
+}: {
+  customer: any;
+  isOwner?: boolean;
+}) {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -37,7 +43,19 @@ export default function CustomerInvoices({ customer }: { customer: any }) {
     { header: "Payment Method", accessor: "paymentMethod" },
     { header: "Created By", accessor: "createdBy" },
   ];
-
+  const actionColumn = !isOwner
+    ? (invoice: Invoice) => (
+        <button
+          className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+          onClick={(e) => {
+            e.stopPropagation();
+            setConfirmOpen(true);
+          }}
+        >
+          <Trash size={16} />
+        </button>
+      )
+    : undefined;
   return (
     <>
       <InfoCard
@@ -54,9 +72,7 @@ export default function CustomerInvoices({ customer }: { customer: any }) {
             : customer.invoices.slice((page - 1) * pageSize, page * pageSize)
         }
         isLoading={isLoading}
-        onRowClick={(invoice) =>
-          router.push(`/customers/${customer.id}/invoices/${invoice.id}`)
-        }
+        onRowClick={(invoice) => router.push(`invoices/${invoice.id}`)}
         pagination={{
           page,
           pageSize,
@@ -64,25 +80,17 @@ export default function CustomerInvoices({ customer }: { customer: any }) {
           onPageChange: setPage,
         }}
         action={
-          <CustomButton
-            onClick={() => {
-              router.push(`/customers/${customer.id}/invoices/new`);
-            }}
-          >
-            Add Invoice
-          </CustomButton>
+          !isOwner && (
+            <CustomButton
+              onClick={() => {
+                router.push(`/customers/${customer.id}/invoices/new`);
+              }}
+            >
+              Add Invoice
+            </CustomButton>
+          )
         }
-        renderActions={(row) => (
-          <button
-            className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
-            onClick={(e) => {
-              e.stopPropagation();
-              setConfirmOpen(true);
-            }}
-          >
-            <Trash size={16} />
-          </button>
-        )}
+        renderActions={actionColumn}
       />
       <ConfirmDialog
         isOpen={confirmOpen}
