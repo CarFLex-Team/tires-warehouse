@@ -7,14 +7,14 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-
+    console.log("Deleting category with id:", id);
     await db.query(
       `
       UPDATE "Category"
       SET deleted_at = NOW(), updated_at = NOW()
       WHERE id = $1
       `,
-      [id]
+      [Number(id)]
     );
 
     return NextResponse.json(
