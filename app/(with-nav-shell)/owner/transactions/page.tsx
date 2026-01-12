@@ -93,7 +93,7 @@ export default function dashboard() {
               name="category"
               id="category"
               className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
-              defaultValue=""
+              value=""
             >
               <option disabled value="">
                 Category
@@ -116,7 +116,7 @@ export default function dashboard() {
               name="transactionType"
               id="transactionType"
               className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
-              defaultValue=""
+              value=""
             >
               <option disabled value="">
                 Transaction Type
@@ -140,7 +140,7 @@ export default function dashboard() {
               name="paymentMethod"
               id="paymentMethod"
               className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
-              defaultValue=""
+              value=""
             >
               <option disabled value="">
                 Payment Method

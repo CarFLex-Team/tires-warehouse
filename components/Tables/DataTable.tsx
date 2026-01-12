@@ -83,7 +83,7 @@ export function DataTable<T>({
             ) : data.length === 0 ? (
               <tr>
                 <td
-                  colSpan={columns.length}
+                  colSpan={renderActions ? columns.length + 1 : columns.length}
                   className="py-6 text-center text-sm text-gray-500"
                 >
                   No data available

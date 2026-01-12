@@ -3,38 +3,53 @@ import { DataTable } from "@/components/Tables/DataTable";
 import { TableColumn } from "@/components/Tables/Type";
 import CustomButton from "@/components/ui/CustomButton";
 import { useEffect, useState } from "react";
-import categories from "@/data/categories.json";
+
 import Modal from "@/components/ui/Modal";
 import { Trash } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  getCategories,
+  deleteCategory,
+  Category,
+  CategoryType,
+  createCategory,
+} from "@/lib/api/categories";
+import { AddCategoryForm } from "@/components/Forms/addCategoryForm";
+import formatDate from "@/lib/formatDate";
+
 export default function category() {
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const pageSize = 10;
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500); // 1.5 seconds
+  const queryClient = useQueryClient();
+  const { data, isLoading, error } = useQuery<Category[]>({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+    select: (categories) =>
+      categories.map((category) => ({
+        ...category,
+        created_at: formatDate(category.created_at),
+      })),
+  });
+  const deleteMutation = useMutation({
+    mutationFn: deleteCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      setSelectedId(null);
+      setConfirmOpen(false);
+    },
+  });
 
-    return () => clearTimeout(timer);
-  }, []);
-
-  type Category = {
-    id: number;
-    category: string;
-    type: string;
-    addedAt: string;
-  };
-
+  if (error) return <p>Error {error.message}</p>;
   const categoryColumns: TableColumn<Category>[] = [
     { header: "ID", accessor: "id" },
-    { header: "Category", accessor: "category" },
+    { header: "Category", accessor: "name" },
     { header: "Type", accessor: "type" },
-    { header: "Added At", accessor: "addedAt" },
+    { header: "Added At", accessor: "created_at" },
   ];
 
   return (
@@ -44,39 +59,8 @@ export default function category() {
           isOpen={open}
           onClose={() => setOpen(false)}
           title="New Category"
-          buttonText="Add Category"
         >
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Category ID</label>
-            <input
-              type="text"
-              className="p-2 border border-gray-300 rounded-lg flex-5"
-              placeholder="Enter Category ID"
-            />
-          </div>
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Category</label>
-            <input
-              type="text"
-              className="p-2 border border-gray-300 rounded-lg flex-5"
-              placeholder="Enter Category Name"
-            />
-          </div>
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Type</label>
-            <select
-              name="categoryType"
-              id="categoryType"
-              className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
-              defaultValue=""
-            >
-              <option disabled value="">
-                Category Type
-              </option>
-              <option value="sale">Sales</option>
-              <option value="expense">Expense</option>
-            </select>
-          </div>
+          <AddCategoryForm onSuccess={() => setOpen(false)} />
         </Modal>
       )}
       <DataTable
@@ -85,13 +69,13 @@ export default function category() {
         data={
           isLoading
             ? []
-            : categories.slice((page - 1) * pageSize, page * pageSize)
+            : data?.slice((page - 1) * pageSize, page * pageSize) || []
         }
         isLoading={isLoading}
         pagination={{
           page,
           pageSize,
-          total: categories.length,
+          total: data?.length || 1,
           onPageChange: setPage,
         }}
         action={
@@ -106,6 +90,7 @@ export default function category() {
         renderActions={(row) => (
           <button
             onClick={() => {
+              setSelectedId(row.id);
               setConfirmOpen(true);
             }}
             className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -117,9 +102,13 @@ export default function category() {
       <ConfirmDialog
         isOpen={confirmOpen}
         onCancel={() => setConfirmOpen(false)}
-        onConfirm={() => {}}
+        onConfirm={() => {
+          if (selectedId) {
+            deleteMutation.mutate(selectedId);
+          }
+        }}
         description="Do you want to Delete this category?"
-        loading={confirmLoading}
+        loading={deleteMutation.isPending}
       />
     </>
   );
