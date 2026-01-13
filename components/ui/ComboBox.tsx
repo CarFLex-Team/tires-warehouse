@@ -12,6 +12,8 @@ type ComboBoxProps = {
   options: Option[];
   placeholder?: string;
   onChange: (value: string) => void;
+  required?: boolean;
+  className?: string;
 };
 
 export function ComboBox({
@@ -19,6 +21,8 @@ export function ComboBox({
   options,
   placeholder,
   onChange,
+  required,
+  className,
 }: ComboBoxProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -40,7 +44,7 @@ export function ComboBox({
   }, []);
 
   return (
-    <div ref={ref} className="">
+    <div ref={ref} className={`${className ? className : ""}`}>
       <input
         value={query}
         onChange={(e) => {
@@ -49,11 +53,14 @@ export function ComboBox({
         }}
         onFocus={() => setOpen(true)}
         placeholder={placeholder}
-        className="w-full rounded border px-2 py-1"
+        className={`${
+          className ? "w-full outline-none" : "w-full rounded border px-2 py-1"
+        }`}
+        required={required}
       />
 
       {open && (
-        <div className="absolute z-50 mt-1 max-h-48 min-w-1/4  rounded border bg-white shadow">
+        <div className="absolute z-50 mt-1 max-h-48 min-w-1/4 overflow-auto rounded border bg-white shadow">
           {filtered.length === 0 && (
             <div className="px-3 py-2 text-sm text-gray-400">No results</div>
           )}

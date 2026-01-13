@@ -44,13 +44,13 @@ export default function category() {
     },
   });
 
-  if (error) return <p>Error {error.message}</p>;
   const categoryColumns: TableColumn<Category>[] = [
     { header: "ID", accessor: "id" },
     { header: "Category", accessor: "name" },
     { header: "Type", accessor: "type" },
     { header: "Added At", accessor: "created_at" },
   ];
+  if (error) return <p>Error {error.message}</p>;
 
   return (
     <>
