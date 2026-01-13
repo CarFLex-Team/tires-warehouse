@@ -1,4 +1,3 @@
-import { is } from "zod/locales";
 import LoadingSkeleton from "../ui/LoadingSkeleton";
 
 import { OverviewStat } from "./types";
@@ -7,12 +6,21 @@ type OverviewStatsProps = {
   title: string;
   stats: OverviewStat[];
   isLoading?: boolean;
+  action?: React.ReactNode;
 };
 
-export function OverviewStats({ title, stats, isLoading }: OverviewStatsProps) {
+export function OverviewStats({
+  title,
+  stats,
+  isLoading,
+  action,
+}: OverviewStatsProps) {
   return (
     <div className="rounded-xl bg-white p-5 m-4 shadow-sm">
-      <h2 className="mb-3 text-lg font-semibold text-gray-800">{title}</h2>
+      <div className="flex justify-between">
+        <h2 className="mb-3 text-lg font-semibold text-gray-800">{title}</h2>
+        {action}
+      </div>
 
       <div className="grid grid-cols-1 divide-y md:grid-cols-4 md:divide-x divide-gray-200 md:divide-y-0">
         {stats.map((stat, index) => (

@@ -2,9 +2,41 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const date = searchParams.get("date");
+  const month = searchParams.get("month");
+
+  // const targetDate = date ?? new Date().toISOString().slice(0, 10);
+  let whereClause = ``;
+  const params: any[] = [];
+
+  if (date) {
+    params.push(date);
+    whereClause += `
+      AND t.created_at >= $${params.length}::date
+      AND t.created_at < $${params.length}::date + INTERVAL '1 day'
+    `;
+  }
+
+  if (month) {
+    params.push(`${month}-01`);
+    whereClause += `
+      AND t.created_at >= date_trunc('month', $${params.length}::date)
+      AND t.created_at < date_trunc('month', $${params.length}::date) + INTERVAL '1 month'
+    `;
+  }
+  if (!date && !month) {
+    const today = new Date().toISOString().slice(0, 10);
+    params.push(today);
+    whereClause += `
+      AND t.created_at >= $${params.length}::date
+      AND t.created_at < $${params.length}::date + INTERVAL '1 day'
+    `;
+  }
   try {
-    const { rows } = await db.query(`
+    const { rows } = await db.query(
+      `
       SELECT
         t.*,
         c.name AS category_name,
@@ -13,8 +45,11 @@ export async function GET() {
         JOIN "Category" c ON c.id = t.category_id
         JOIN "User" u ON u.id = t.created_by
         WHERE t.deleted_at IS NULL
+        ${whereClause}
         ORDER BY t.created_at DESC;
-    `);
+    `,
+      params
+    );
 
     return NextResponse.json(rows);
   } catch {

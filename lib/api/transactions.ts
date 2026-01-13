@@ -21,19 +21,40 @@ export interface TransactionSummary {
   debit_sales_amount: number;
 }
 
-export async function getTransactions(): Promise<Transaction[]> {
-  const res = await fetch("/api/transactions");
+export async function getTransactions({
+  date,
+  month,
+}: {
+  date?: string;
+  month?: string;
+}): Promise<Transaction[]> {
+  const url = date
+    ? `/api/transactions?date=${date}`
+    : month
+    ? `/api/transactions?month=${month}`
+    : "/api/transactions";
+  const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch transactions");
   return res.json();
 }
-export async function getTransactionsSummary(
+export async function getTransactionsDailySummary(
   date?: string
 ): Promise<TransactionSummary> {
   const url = date
     ? `/api/transactions/summary?date=${date}`
     : "/api/transactions/summary";
   const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to fetch transactions summary");
+  if (!res.ok) throw new Error("Failed to fetch transactions daily summary");
+  return res.json();
+}
+export async function getTransactionsMonthlySummary(
+  month?: string
+): Promise<TransactionSummary> {
+  const url = month
+    ? `/api/transactions/summary/monthly?month=${month}`
+    : "/api/transactions/summary";
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to fetch transactions monthly summary");
   return res.json();
 }
 export async function createTransaction(data: {

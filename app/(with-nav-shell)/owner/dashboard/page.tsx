@@ -2,28 +2,34 @@
 import { DataTable } from "@/components/Tables/DataTable";
 import { TableColumn } from "@/components/Tables/Type";
 import { OverviewStats } from "@/components/overview/Overview-stats";
-import CustomButton from "@/components/ui/CustomButton";
-import { useEffect, useState } from "react";
-import transactions from "../../../../data/transactions.json";
-import Modal from "@/components/ui/Modal";
-import { Trash } from "lucide-react";
-import ConfirmDialog from "@/components/ui/ConfirmDialog";
-
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  getTransactions,
+  getTransactionsMonthlySummary,
+  Transaction,
+  TransactionSummary,
+} from "@/lib/api/transactions";
+import { formatTime } from "@/lib/formatTime";
+import formatDate from "@/lib/formatDate";
 export default function dashboard() {
   const [page, setPage] = useState(1);
-  const [open, setOpen] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const [month, setMonth] = useState(currentMonth);
   const pageSize = 6;
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500); // 1.5 seconds
-
-    return () => clearTimeout(timer);
-  }, []);
+  const { data, isLoading, error } = useQuery<Transaction[]>({
+    queryKey: ["transactions", month],
+    queryFn: () => getTransactions({ month: month }),
+  });
+  const {
+    data: summaryData,
+    isLoading: summaryLoading,
+    error: summaryError,
+  } = useQuery<TransactionSummary>({
+    queryKey: ["transactionsSummary", month],
+    queryFn: () => getTransactionsMonthlySummary(month),
+  });
   const mostSellingItems = [
     {
       category: "Tires",
@@ -41,38 +47,29 @@ export default function dashboard() {
   const monthlyTransactionStats = [
     {
       label: "Total Transactions",
-      value: 30,
+      value: summaryData ? summaryData.total_transactions : 0,
       color: "text-primary-500",
     },
     {
       label: "Total Sales",
-      value: 25,
-      subValue: "$25000",
+      value: summaryData ? summaryData.total_sales_count : 0,
+      subValue: `$${summaryData ? summaryData.total_sales_amount : 0}`,
       color: "text-orange-400",
     },
     {
       label: "Cash Sales",
-      value: 10,
-      subValue: "$5000",
+      value: summaryData ? summaryData.cash_sales_count : 0,
+      subValue: `$${summaryData ? summaryData.cash_sales_amount : 0}`,
       color: "text-red-400",
     },
     {
       label: "Debit Sales",
-      value: 15,
-      subValue: "$20000",
+      value: summaryData ? summaryData.debit_sales_count : 0,
+      subValue: `$${summaryData ? summaryData.debit_sales_amount : 0}`,
       color: "text-purple-400",
     },
   ];
-  type Transaction = {
-    category: string;
-    description: string;
-    type: string;
-    amount: number;
-    paymentMethod: string;
-    date: string;
-    time: string;
-    createdBy: string;
-  };
+
   type Category = {
     category: string;
 
@@ -85,21 +82,23 @@ export default function dashboard() {
   };
 
   const transactionColumns: TableColumn<Transaction>[] = [
-    { header: "Category", accessor: "category" },
+    { header: "Category", accessor: "category_name" },
     { header: "Description", accessor: "description" },
     { header: "Type", accessor: "type" },
     { header: "Amount", accessor: "amount" },
-    { header: "Payment Method", accessor: "paymentMethod" },
+    { header: "Payment Method", accessor: "payment_method" },
     {
-      header: "Date",
+      header: "Created At",
       accessor: (row) => (
         <div>
-          <div>{row.date}</div>
-          <div className="text-xs text-gray-400">at {row.time}</div>
+          <div>{formatDate(row.created_at)}</div>
+          <div className="text-xs text-gray-400">
+            at {formatTime(row.created_at)}
+          </div>
         </div>
       ),
     },
-    { header: "Created by", accessor: "createdBy" },
+    { header: "Created by", accessor: "created_by_name" },
   ];
   const CategoryColumn: TableColumn<Category>[] = [
     { header: "Category", accessor: "category" },
@@ -109,84 +108,24 @@ export default function dashboard() {
     { header: "Name", accessor: "Name" },
     { header: "Turn Over", accessor: "turnOver" },
   ];
-
+  if (error) return <p>Error {error.message}</p>;
+  if (summaryError) return <p>Error {summaryError.message}</p>;
   return (
     <>
-      {/* {open && (
-        <Modal
-          isOpen={open}
-          onClose={() => setOpen(false)}
-          title="New Transaction"
-          buttonText="Add Transaction"
-        >
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Category</label>
-            <select
-              name="category"
-              id="category"
-              className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
-              defaultValue=""
-            >
-              <option disabled value="">
-                Category
-              </option>
-              <option value="tires">Tires</option>
-              <option value="batteryFix">Battery Fix</option>
-            </select>
-          </div>
-          <div className="flex justify-between items-center gap-4">
-            <label className="flex-2">Description</label>
-            <textarea
-              rows={2}
-              className="p-2 border border-gray-300 rounded-lg flex-5"
-              placeholder="Enter Transaction Description"
-            />
-          </div>
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Type</label>
-            <select
-              name="transactionType"
-              id="transactionType"
-              className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
-              defaultValue=""
-            >
-              <option disabled value="">
-                Transaction Type
-              </option>
-              <option value="sale">Sales</option>
-              <option value="expense">Expense</option>
-            </select>
-          </div>
-
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Amount</label>
-            <input
-              type="number"
-              className="p-2 border border-gray-300 rounded-lg flex-5"
-              placeholder="Enter Price Amount"
-            />
-          </div>
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Method</label>
-            <select
-              name="paymentMethod"
-              id="paymentMethod"
-              className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
-              defaultValue=""
-            >
-              <option disabled value="">
-                Payment Method
-              </option>
-              <option value="cash">Cash</option>
-              <option value="debit">Debit</option>
-            </select>
-          </div>
-        </Modal>
-      )} */}
       <div className=" ">
         <OverviewStats
           title="Monthly Overview"
           stats={monthlyTransactionStats}
+          isLoading={summaryLoading}
+          action={
+            <input
+              type="month"
+              max={currentMonth}
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              className="rounded border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+            />
+          }
         />
         <div className=" grid grid-cols-1 md:grid-cols-2 ">
           <DataTable
@@ -208,13 +147,15 @@ export default function dashboard() {
           data={
             isLoading
               ? []
-              : transactions.slice((page - 1) * pageSize, page * pageSize)
+              : data
+              ? data.slice((page - 1) * pageSize, page * pageSize)
+              : []
           }
           isLoading={isLoading}
           pagination={{
             page,
             pageSize,
-            total: transactions.length,
+            total: data ? data.length : 1,
             onPageChange: setPage,
           }}
           // action={

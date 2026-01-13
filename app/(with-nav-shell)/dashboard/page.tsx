@@ -3,7 +3,7 @@ import { DataTable } from "@/components/Tables/DataTable";
 import { TableColumn } from "@/components/Tables/Type";
 import { OverviewStats } from "@/components/overview/Overview-stats";
 import CustomButton from "@/components/ui/CustomButton";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import Modal from "@/components/ui/Modal";
 import { Trash } from "lucide-react";
@@ -14,7 +14,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteTransaction,
   getTransactions,
-  getTransactionsSummary,
+  getTransactionsDailySummary,
   Transaction,
   TransactionSummary,
 } from "@/lib/api/transactions";
@@ -26,25 +26,27 @@ export default function dashboard() {
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const today = new Date().toISOString().slice(0, 10);
+  const [date, setDate] = useState(today);
   const pageSize = 6;
 
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery<Transaction[]>({
-    queryKey: ["transactions"],
-    queryFn: getTransactions,
+    queryKey: ["transactions", date],
+    queryFn: () => getTransactions({ date: date }),
   });
   const {
     data: summaryData,
     isLoading: summaryLoading,
     error: summaryError,
   } = useQuery<TransactionSummary>({
-    queryKey: ["transactionsSummary"],
-    queryFn: () => getTransactionsSummary(),
+    queryKey: ["transactionsSummary", date],
+    queryFn: () => getTransactionsDailySummary(date),
   });
   const deleteMutation = useMutation({
     mutationFn: deleteTransaction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions", date] });
       setSelectedId(null);
       setConfirmOpen(false);
     },
@@ -96,6 +98,7 @@ export default function dashboard() {
     { header: "Created by", accessor: "created_by_name" },
   ];
   if (error) return <p>Error {error.message}</p>;
+  if (summaryError) return <p>Error {summaryError.message}</p>;
   return (
     <>
       {open && (
@@ -112,6 +115,15 @@ export default function dashboard() {
           title="Daily Overview"
           stats={dailyTransactionStats}
           isLoading={summaryLoading}
+          action={
+            <input
+              type="date"
+              value={date}
+              max={today}
+              onChange={(e) => setDate(e.target.value)}
+              className="rounded border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+            />
+          }
         />
         <DataTable
           title="Transactions"
@@ -127,7 +139,7 @@ export default function dashboard() {
           pagination={{
             page,
             pageSize,
-            total: data ? data.length : 0,
+            total: data ? data.length : 1,
             onPageChange: setPage,
           }}
           action={
