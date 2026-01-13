@@ -10,20 +10,20 @@ export async function DELETE(
 
     await db.query(
       `
-      UPDATE "Category"
-      SET deleted_at = NOW(), updated_at = NOW()
+      UPDATE "Transaction"
+      SET deleted_at = NOW()
       WHERE id = $1
       `,
-      [Number(id)]
+      [id]
     );
 
     return NextResponse.json(
-      { message: "Category deleted (soft)" },
+      { message: "Transaction deleted (soft)" },
       { status: 200 }
     );
   } catch {
     return NextResponse.json(
-      { error: "Failed to delete category" },
+      { error: "Failed to delete transaction" },
       { status: 500 }
     );
   }

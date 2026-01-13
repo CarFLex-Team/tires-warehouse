@@ -1,11 +1,15 @@
+import { is } from "zod/locales";
+import LoadingSkeleton from "../ui/LoadingSkeleton";
+
 import { OverviewStat } from "./types";
 
 type OverviewStatsProps = {
   title: string;
   stats: OverviewStat[];
+  isLoading?: boolean;
 };
 
-export function OverviewStats({ title, stats }: OverviewStatsProps) {
+export function OverviewStats({ title, stats, isLoading }: OverviewStatsProps) {
   return (
     <div className="rounded-xl bg-white p-5 m-4 shadow-sm">
       <h2 className="mb-3 text-lg font-semibold text-gray-800">{title}</h2>
@@ -18,18 +22,21 @@ export function OverviewStats({ title, stats }: OverviewStatsProps) {
             >
               {stat.label}
             </p>
-
-            <div className="mt-1 px-1 flex items-center justify-between ">
-              <span className="text-xl font-semibold text-gray-900">
-                {stat.value}
-              </span>
-
-              {stat.subValue && (
-                <span className="text-sm font-medium text-gray-600">
-                  {stat.subValue}
+            {isLoading ? (
+              <LoadingSkeleton />
+            ) : (
+              <div className="mt-1 px-1 flex items-center justify-between ">
+                <span className="text-xl font-semibold text-gray-900">
+                  {stat.value}
                 </span>
-              )}
-            </div>
+
+                {stat.subValue && (
+                  <span className="text-sm font-medium text-gray-600">
+                    {stat.subValue}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         ))}
       </div>

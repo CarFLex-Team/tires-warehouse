@@ -3,7 +3,7 @@ export function formatTime(dateString: string) {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
-    timeZone: "Etc/GMT-4", // UTC+4
+    timeZone: "Etc/GMT-2", // UTC+2
   }).format(new Date(dateString));
 }
 export default formatTime;

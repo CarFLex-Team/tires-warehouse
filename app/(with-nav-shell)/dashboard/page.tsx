@@ -9,9 +9,15 @@ import Modal from "@/components/ui/Modal";
 import { Trash } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { AddTransactionForm } from "@/components/Forms/addTransactionForm";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { getTransactions, Transaction } from "@/lib/api/transactions";
+import {
+  deleteTransaction,
+  getTransactions,
+  getTransactionsSummary,
+  Transaction,
+  TransactionSummary,
+} from "@/lib/api/transactions";
 import formatDate from "@/lib/formatDate";
 import { formatTime } from "@/lib/formatTime";
 
@@ -19,7 +25,7 @@ export default function dashboard() {
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const pageSize = 6;
 
   const queryClient = useQueryClient();
@@ -27,29 +33,45 @@ export default function dashboard() {
     queryKey: ["transactions"],
     queryFn: getTransactions,
   });
+  const {
+    data: summaryData,
+    isLoading: summaryLoading,
+    error: summaryError,
+  } = useQuery<TransactionSummary>({
+    queryKey: ["transactionsSummary"],
+    queryFn: () => getTransactionsSummary(),
+  });
+  const deleteMutation = useMutation({
+    mutationFn: deleteTransaction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      setSelectedId(null);
+      setConfirmOpen(false);
+    },
+  });
 
   const dailyTransactionStats = [
     {
       label: "Total Transactions",
-      value: data ? data.length : 0,
+      value: summaryData ? summaryData.total_transactions : 0,
       color: "text-primary-500",
     },
     {
       label: "Total Sales",
-      value: 6,
-      subValue: "$2500",
+      value: summaryData ? summaryData.total_sales_count : 0,
+      subValue: `$${summaryData ? summaryData.total_sales_amount : 0}`,
       color: "text-orange-400",
     },
     {
       label: "Cash Sales",
-      value: 1,
-      subValue: "$500",
+      value: summaryData ? summaryData.cash_sales_count : 0,
+      subValue: `$${summaryData ? summaryData.cash_sales_amount : 0}`,
       color: "text-red-400",
     },
     {
       label: "Debit Sales",
-      value: 5,
-      subValue: "$2000",
+      value: summaryData ? summaryData.debit_sales_count : 0,
+      subValue: `$${summaryData ? summaryData.debit_sales_amount : 0}`,
       color: "text-purple-400",
     },
   ];
@@ -86,7 +108,11 @@ export default function dashboard() {
         </Modal>
       )}
       <div className=" ">
-        <OverviewStats title="Daily Overview" stats={dailyTransactionStats} />
+        <OverviewStats
+          title="Daily Overview"
+          stats={dailyTransactionStats}
+          isLoading={summaryLoading}
+        />
         <DataTable
           title="Transactions"
           columns={transactionColumns}
@@ -116,6 +142,7 @@ export default function dashboard() {
           renderActions={(row) => (
             <button
               onClick={() => {
+                setSelectedId(row.id);
                 setConfirmOpen(true);
               }}
               className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -128,9 +155,13 @@ export default function dashboard() {
       <ConfirmDialog
         isOpen={confirmOpen}
         onCancel={() => setConfirmOpen(false)}
-        onConfirm={() => {}}
+        onConfirm={() => {
+          if (selectedId) {
+            deleteMutation.mutate(selectedId);
+          }
+        }}
         description="Do you want to Delete this transaction?"
-        loading={confirmLoading}
+        loading={deleteMutation.isPending}
       />
     </>
   );
