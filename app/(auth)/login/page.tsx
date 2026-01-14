@@ -52,34 +52,36 @@ export default function SignInPage() {
           Sign in to your account
         </h1>
 
-        <form className="space-y-3">
-          <FormInput
-            label="Email"
-            type="email"
-            placeholder="Enter your email"
-            register={register("email")}
-            error={errors.email}
-          />
+        <form className="">
+          <div className=" space-y-3">
+            <FormInput
+              label="Email"
+              type="email"
+              placeholder="Enter your email"
+              register={register("email")}
+              error={errors.email}
+            />
 
-          <FormInput
-            label="Password"
-            type="password"
-            placeholder="Enter your password"
-            register={register("password")}
-            error={errors.password}
-          />
-
+            <FormInput
+              label="Password"
+              type="password"
+              placeholder="Enter your password"
+              register={register("password")}
+              error={errors.password}
+            />
+          </div>
           <a
-            href="/login"
-            className="font-medium text-primary hover:underline text-center text-sm text-gray-600"
+            href="/forgot-password"
+            className="font-medium text-primary hover:underline text-sm text-gray-600 mb-4 block mt-2"
           >
             Forget Password?
           </a>
+
           {/* Auth error */}
           {authError && <p className="text-sm text-red-500">{authError}</p>}
           <AuthButton
             // type="submit"
-            className="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200"
+            className="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isSubmitting}
             onClick={handleSubmit(onSubmit)}
           >
