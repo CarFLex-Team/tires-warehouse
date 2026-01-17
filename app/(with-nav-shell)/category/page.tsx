@@ -8,13 +8,7 @@ import Modal from "@/components/ui/Modal";
 import { Trash } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  getCategories,
-  deleteCategory,
-  Category,
-  CategoryType,
-  createCategory,
-} from "@/lib/api/categories";
+import { getCategories, deleteCategory, Category } from "@/lib/api/categories";
 import { AddCategoryForm } from "@/components/Forms/addCategoryForm";
 import formatDate from "@/lib/formatDate";
 

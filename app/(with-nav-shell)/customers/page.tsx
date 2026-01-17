@@ -2,48 +2,51 @@
 import CustomButton from "@/components/ui/CustomButton";
 import { DataTable } from "@/components/Tables/DataTable";
 import { TableColumn } from "@/components/Tables/Type";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import customersData from "@/data/customers.json";
 import Modal from "@/components/ui/Modal";
 import { Trash } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Customer, deleteCustomer, getCustomers } from "@/lib/api/customers";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { AddCustomerForm } from "@/components/Forms/addCustomerForm";
+import formatDate from "@/lib/formatDate";
 export default function customers() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const router = useRouter();
 
   const pageSize = 10;
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500); // 1.5 seconds
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  type Customer = {
-    id: number;
-    name: string;
-    email: string;
-    phone: string;
-
-    createdAt: string;
-  };
-
+  const queryClient = useQueryClient();
+  const { data, isLoading, error } = useQuery<Customer[]>({
+    queryKey: ["customers"],
+    queryFn: getCustomers,
+    select: (customers) =>
+      customers.map((customer) => ({
+        ...customer,
+        created_at: formatDate(customer.created_at),
+      })),
+  });
+  const deleteMutation = useMutation({
+    mutationFn: deleteCustomer,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      setSelectedId(null);
+      setConfirmOpen(false);
+    },
+  });
   const customerColumns: TableColumn<Customer>[] = [
     { header: "Name", accessor: "name" },
     { header: "Email", accessor: "email" },
     { header: "Phone", accessor: "phone" },
-    { header: "Created At", accessor: "createdAt" },
+    { header: "Added At", accessor: "created_at" },
   ];
 
-  const filteredCustomers = customersData.filter((customer) => {
+  const filteredCustomers = data?.filter((customer) => {
     const value = search.toLowerCase();
 
     return (
@@ -52,7 +55,7 @@ export default function customers() {
       customer.phone.includes(value)
     );
   });
-
+  if (error) return <p>Error {error.message}</p>;
   return (
     <>
       {open && (
@@ -60,32 +63,8 @@ export default function customers() {
           isOpen={open}
           onClose={() => setOpen(false)}
           title="New Customer"
-          buttonText="Add Customer"
         >
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Name</label>
-            <input
-              type="text"
-              className="p-2 border border-gray-300 rounded-lg flex-5"
-              placeholder="Enter Customer Name"
-            />
-          </div>
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Email</label>
-            <input
-              type="text"
-              className="p-2 border border-gray-300 rounded-lg flex-5"
-              placeholder="Enter Customer Email"
-            />
-          </div>
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Phone</label>
-            <input
-              type="text"
-              className="p-2 border border-gray-300 rounded-lg flex-5"
-              placeholder="Enter Customer Phone"
-            />
-          </div>
+          <AddCustomerForm onSuccess={() => setOpen(false)} />
         </Modal>
       )}
       <div>
@@ -94,7 +73,10 @@ export default function customers() {
           data={
             isLoading
               ? []
-              : filteredCustomers.slice((page - 1) * pageSize, page * pageSize)
+              : filteredCustomers?.slice(
+                  (page - 1) * pageSize,
+                  page * pageSize,
+                ) || []
           }
           onRowClick={(customer) =>
             router.push(`/customers/${customer.id}/invoices`)
@@ -103,7 +85,7 @@ export default function customers() {
           pagination={{
             page,
             pageSize,
-            total: filteredCustomers.length,
+            total: filteredCustomers?.length || 1,
             onPageChange: setPage,
           }}
           action={
@@ -124,6 +106,7 @@ export default function customers() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
+                setSelectedId(row.id);
                 setConfirmOpen(true);
               }}
               className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -136,9 +119,13 @@ export default function customers() {
       <ConfirmDialog
         isOpen={confirmOpen}
         onCancel={() => setConfirmOpen(false)}
-        onConfirm={() => {}}
-        description="Do you want to Delete this customer?"
-        loading={confirmLoading}
+        onConfirm={() => {
+          if (selectedId) {
+            deleteMutation.mutate(selectedId);
+          }
+        }}
+        description="Do you want to Delete this Customer?"
+        loading={deleteMutation.isPending}
       />
     </>
   );

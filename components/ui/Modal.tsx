@@ -18,10 +18,6 @@ export default function ConfirmDialog({
   title,
   onClose,
   children,
-  buttonText,
-  onConfirm,
-  isPending,
-  isError,
 }: ConfirmDialogProps) {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

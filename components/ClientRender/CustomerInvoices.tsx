@@ -2,46 +2,45 @@
 import { DataTable } from "@/components/Tables/DataTable";
 import { TableColumn } from "@/components/Tables/Type";
 import { InfoCard } from "@/components/ui/InfoCard";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import CustomButton from "../ui/CustomButton";
 import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
 import ConfirmDialog from "../ui/ConfirmDialog";
+import { Customer, getCustomerById, Invoice } from "@/lib/api/customers";
+import { useQuery } from "@tanstack/react-query";
+import formatDate from "@/lib/formatDate";
 export default function CustomerInvoices({
-  customer,
+  customer2,
   isOwner,
+  customerId,
 }: {
-  customer: any;
+  customer2?: any;
   isOwner?: boolean;
+  customerId?: string;
 }) {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const pageSize = 10;
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500); // 1.5 seconds
-
-    return () => clearTimeout(timer);
-  }, []);
-  type Invoice = {
-    id: number;
-    createdAt: string;
-    amount: string;
-    createdBy: string;
-    paymentMethod: string;
-  };
-
+  const { data, isLoading, error } = useQuery<Customer>({
+    queryKey: ["customers", customerId],
+    queryFn: () => getCustomerById(customerId || ""),
+    select: (customer) => ({
+      ...customer,
+      created_at: formatDate(customer.created_at),
+    }),
+  });
+  const customer = data;
+  if (error) return <p>Error {error.message}</p>;
   const InvoiceColumns: TableColumn<Invoice>[] = [
     { header: "Invoice ID", accessor: "id" },
-    { header: "Date", accessor: "createdAt" },
-    { header: "Amount", accessor: "amount" },
-    { header: "Payment Method", accessor: "paymentMethod" },
-    { header: "Created By", accessor: "createdBy" },
+    { header: "Date", accessor: "created_at" },
+    { header: "Amount", accessor: "total_amount" },
+    { header: "Payment Method", accessor: "payment_method" },
+    { header: "Created By", accessor: "created_by" },
   ];
   const actionColumn = !isOwner
     ? (invoice: Invoice) => (
@@ -61,7 +60,7 @@ export default function CustomerInvoices({
       <InfoCard
         title={customer?.name || "Name not available"}
         subtitle={customer?.email || "Email not available"}
-        meta={`Created at ${customer?.createdAt || "Date not available"}`}
+        meta={`Created at ${customer?.created_at || "Date not available"}`}
       />
       <DataTable
         title="Invoices"
@@ -69,21 +68,24 @@ export default function CustomerInvoices({
         data={
           isLoading
             ? []
-            : customer.invoices.slice((page - 1) * pageSize, page * pageSize)
+            : customer?.invoices.slice(
+                (page - 1) * pageSize,
+                page * pageSize,
+              ) || []
         }
         isLoading={isLoading}
         onRowClick={(invoice) => router.push(`invoices/${invoice.id}`)}
         pagination={{
           page,
           pageSize,
-          total: customer.invoices.length,
+          total: customer?.invoices.length || 1,
           onPageChange: setPage,
         }}
         action={
           !isOwner && (
             <CustomButton
               onClick={() => {
-                router.push(`/customers/${customer.id}/invoices/new`);
+                router.push(`/customers/${customer?.id}/invoices/new`);
               }}
             >
               Add Invoice
