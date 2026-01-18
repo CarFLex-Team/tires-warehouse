@@ -49,7 +49,6 @@ export default function CreateNewInvoice({
   function removeRow(id: string) {
     setRows((prev) => prev.filter((row) => row.id !== id));
   }
-
   function submit() {
     if (rows.length === 0) {
       setShowAlert("Please add at least one transaction.");
