@@ -11,5 +11,5 @@ export default async function invoice({
     ? customer.invoices.find((inv) => inv.id === Number(invoiceId))
     : null;
 
-  return <InvoiceTransactions invoice={invoice} customer={customer} />;
+  return <InvoiceTransactions invoice_id={invoiceId} />;
 }

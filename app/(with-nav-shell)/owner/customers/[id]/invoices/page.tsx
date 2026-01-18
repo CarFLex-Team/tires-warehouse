@@ -9,7 +9,7 @@ export default async function customer({ params }: { params: { id: string } }) {
 
   return (
     <>
-      <CustomerInvoices customer={customer} isOwner={true} />
+      <CustomerInvoices customerId={id} isOwner={true} />
     </>
   );
 }
