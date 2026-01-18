@@ -17,7 +17,6 @@ export default function customers() {
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [confirmLoading, setConfirmLoading] = useState(false);
   const router = useRouter();
 
   const pageSize = 10;

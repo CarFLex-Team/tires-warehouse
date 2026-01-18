@@ -1,10 +1,12 @@
+import { CategoryType } from "@/lib/api/categories";
 import { create } from "zustand";
 
 export type InvoiceItem = {
   id: string;
-  category: string;
+  category_id: string;
   description: string;
   amount: string;
+  type: CategoryType;
 };
 
 type InvoiceDraftState = {
@@ -20,5 +22,5 @@ export const useInvoiceDraft = create<InvoiceDraftState>((set) => ({
   items: [],
   setCustomer: (id) => set({ customerId: id }),
   setItems: (items) => set({ items }),
-  clear: () => set({ items: [] }),
+  clear: () => set({ items: [], customerId: null }),
 }));

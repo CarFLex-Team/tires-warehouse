@@ -55,39 +55,6 @@ export default function customers() {
 
   return (
     <>
-      {/* {open && (
-        <Modal
-          isOpen={open}
-          onClose={() => setOpen(false)}
-          title="New Customer"
-          buttonText="Add Customer"
-        >
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Name</label>
-            <input
-              type="text"
-              className="p-2 border border-gray-300 rounded-lg flex-5"
-              placeholder="Enter Customer Name"
-            />
-          </div>
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Email</label>
-            <input
-              type="text"
-              className="p-2 border border-gray-300 rounded-lg flex-5"
-              placeholder="Enter Customer Email"
-            />
-          </div>
-          <div className="flex justify-between items-center gap-4">
-            <label className=" flex-2">Phone</label>
-            <input
-              type="text"
-              className="p-2 border border-gray-300 rounded-lg flex-5"
-              placeholder="Enter Customer Phone"
-            />
-          </div>
-        </Modal>
-      )} */}
       <div>
         <DataTable
           columns={customerColumns}

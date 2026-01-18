@@ -29,7 +29,7 @@ export function ComboBox({
   const ref = useRef<HTMLDivElement>(null);
 
   const filtered = options.filter((o) =>
-    o.label.toLowerCase().includes(query.toLowerCase())
+    o.label.toLowerCase().includes(query.toLowerCase()),
   );
 
   // Close on outside click

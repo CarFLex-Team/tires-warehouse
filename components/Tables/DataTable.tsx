@@ -53,7 +53,6 @@ export function DataTable<T>({
               {renderActions && <th className="text-center">Actions</th>}
             </tr>
           </thead>
-
           <tbody>
             {isLoading ? (
               <TableSkeleton
@@ -83,8 +82,8 @@ export function DataTable<T>({
                       {typeof col.accessor === "function"
                         ? col.accessor(row)
                         : col.header === "Amount"
-                        ? "$" + (row[col.accessor] as React.ReactNode)
-                        : (row[col.accessor] as React.ReactNode)}
+                          ? "$" + (row[col.accessor] as React.ReactNode)
+                          : (row[col.accessor] as React.ReactNode)}
                     </td>
                   ))}
                   {renderActions && (

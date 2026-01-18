@@ -1,33 +1,25 @@
 "use client";
 import { DataTable } from "@/components/Tables/DataTable";
 import { TableColumn } from "@/components/Tables/Type";
-import { useEffect, useState } from "react";
 import { InfoCard } from "@/components/ui/InfoCard";
-type Transaction = {
-  category: string;
-  description: string;
-  amount: number;
-};
+import { getInvoiceById } from "@/lib/api/invoices";
+import { useQuery } from "@tanstack/react-query";
+import { Invoice } from "@/lib/api/customers";
+import { Transaction } from "@/lib/api/transactions";
+import formatDate from "@/lib/formatDate";
 
 export default function invoiceTransactions({
-  invoice,
-  customer,
+  invoice_id,
 }: {
-  invoice: any;
-  customer: any;
+  invoice_id: string;
 }) {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500); // 1.5 seconds
-
-    return () => clearTimeout(timer);
-  }, []);
-  const transactions = invoice ? invoice.transactions : [];
+  const { data, isLoading, error } = useQuery<Invoice>({
+    queryKey: ["invoices", invoice_id],
+    queryFn: () => getInvoiceById(invoice_id),
+  });
+  const transactions = data ? data?.transactions : [];
   const transactionColumns: TableColumn<Transaction>[] = [
-    { header: "Category", accessor: "category" },
+    { header: "Category", accessor: "category_name" },
     { header: "Description", accessor: "description" },
     { header: "Amount", accessor: "amount" },
   ];
@@ -36,11 +28,12 @@ export default function invoiceTransactions({
     <>
       <InfoCard
         title={"Invoice Total"}
-        subtitle={`$${invoice?.amount || "Amount not available"}`}
-        meta={`Created at ${invoice?.createdAt || "Date not available"}`}
+        subtitle={`$${data?.total_amount || "Amount not available"}`}
+        meta={`Created at ${data ? formatDate(data.created_at) : "Date not available"}`}
+        isLoading={isLoading}
       />
       <DataTable
-        title={`Invoice #${invoice?.id}`}
+        title={`Invoice #${data?.invoice_no || ""}`}
         columns={transactionColumns}
         data={isLoading ? [] : transactions}
         isLoading={isLoading}

@@ -3,43 +3,45 @@ import { useEffect, useState } from "react";
 import { InvoiceTable } from "../Tables/InvoiceTable";
 import CustomButton from "../ui/CustomButton";
 import { useRouter } from "next/navigation";
-import { useInvoiceDraft } from "@/stores/useInvoiceDraft";
+import { InvoiceItem, useInvoiceDraft } from "@/stores/useInvoiceDraft";
 
-type Row = {
-  id: string;
-  category: string;
-  description: string;
-  amount: string;
-};
-
-export default function CreateNewInvoice({ customer }: { customer: any }) {
-  const [rows, setRows] = useState<Row[]>([]);
+export default function CreateNewInvoice({
+  customer_Id,
+}: {
+  customer_Id: string;
+}) {
+  const [rows, setRows] = useState<InvoiceItem[]>([]);
   const [showAlert, setShowAlert] = useState<string>("");
   const setItems = useInvoiceDraft((s) => s.setItems);
   const setCustomer = useInvoiceDraft((s) => s.setCustomer);
   const router = useRouter();
-  const items = useInvoiceDraft((s) => s.items);
+  const { items, customerId } = useInvoiceDraft((s) => s);
   useEffect(() => {
-    if (items.length) {
+    if (items.length && customerId === customer_Id) {
       setRows(items);
     }
-  }, []);
+  }, [items, customerId, customer_Id]);
   function addRow() {
     setRows((prev) => [
       ...prev,
       {
         id: crypto.randomUUID(),
-        category: "",
+        category_id: "",
         description: "",
         amount: "",
+        type: "Sales",
       },
     ]);
     setShowAlert("");
   }
 
-  function updateRow(id: string, field: keyof Row, value: string) {
+  function updateRow(
+    id: string,
+    field: keyof InvoiceItem,
+    value: string | number,
+  ) {
     setRows((prev) =>
-      prev.map((row) => (row.id === id ? { ...row, [field]: value } : row))
+      prev.map((row) => (row.id === id ? { ...row, [field]: value } : row)),
     );
     setShowAlert("");
   }
@@ -53,15 +55,17 @@ export default function CreateNewInvoice({ customer }: { customer: any }) {
       setShowAlert("Please add at least one transaction.");
       return;
     }
-    if (rows.some((row) => !row.category || !row.description || !row.amount)) {
+    if (
+      rows.some((row) => !row.category_id || !row.description || !row.amount)
+    ) {
       setShowAlert("Please fill in all fields for each transaction.");
       return;
     }
     setShowAlert("");
     console.log("Create payload:", rows);
-    setCustomer(customer.id);
+    setCustomer(customer_Id);
     setItems(rows);
-    router.push(`/customers/${customer.id}/invoices/new/review`);
+    router.push(`/customers/${customer_Id}/invoices/new/review`);
   }
 
   return (

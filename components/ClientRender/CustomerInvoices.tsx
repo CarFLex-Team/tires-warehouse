@@ -8,14 +8,14 @@ import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import { Customer, getCustomerById, Invoice } from "@/lib/api/customers";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import formatDate from "@/lib/formatDate";
+import { formatTime } from "@/lib/formatTime";
+import { deleteInvoice } from "@/lib/api/invoices";
 export default function CustomerInvoices({
-  customer2,
   isOwner,
   customerId,
 }: {
-  customer2?: any;
   isOwner?: boolean;
   customerId?: string;
 }) {
@@ -23,21 +23,37 @@ export default function CustomerInvoices({
   const [page, setPage] = useState(1);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const pageSize = 10;
-
+  const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery<Customer>({
     queryKey: ["customers", customerId],
     queryFn: () => getCustomerById(customerId || ""),
-    select: (customer) => ({
-      ...customer,
-      created_at: formatDate(customer.created_at),
-    }),
   });
   const customer = data;
+  const deleteMutation = useMutation({
+    mutationFn: deleteInvoice,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers", customerId] });
+      setSelectedId(null);
+      setConfirmOpen(false);
+    },
+  });
+
   if (error) return <p>Error {error.message}</p>;
   const InvoiceColumns: TableColumn<Invoice>[] = [
-    { header: "Invoice ID", accessor: "id" },
-    { header: "Date", accessor: "created_at" },
+    { header: "Invoice ID", accessor: "invoice_no" },
+    {
+      header: "Created At",
+      accessor: (row) => (
+        <div>
+          <div>{formatDate(row.created_at)}</div>
+          <div className="text-xs text-gray-400">
+            at {formatTime(row.created_at)}
+          </div>
+        </div>
+      ),
+    },
     { header: "Amount", accessor: "total_amount" },
     { header: "Payment Method", accessor: "payment_method" },
     { header: "Created By", accessor: "created_by" },
@@ -48,6 +64,7 @@ export default function CustomerInvoices({
           className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
           onClick={(e) => {
             e.stopPropagation();
+            setSelectedId(invoice.id);
             setConfirmOpen(true);
           }}
         >
@@ -60,7 +77,8 @@ export default function CustomerInvoices({
       <InfoCard
         title={customer?.name || "Name not available"}
         subtitle={customer?.email || "Email not available"}
-        meta={`Created at ${customer?.created_at || "Date not available"}`}
+        meta={`Created at ${customer ? formatDate(customer?.created_at) : "Date not available"}`}
+        isLoading={isLoading}
       />
       <DataTable
         title="Invoices"
@@ -97,9 +115,13 @@ export default function CustomerInvoices({
       <ConfirmDialog
         isOpen={confirmOpen}
         onCancel={() => setConfirmOpen(false)}
-        onConfirm={() => {}}
+        onConfirm={() => {
+          if (selectedId) {
+            deleteMutation.mutate(selectedId);
+          }
+        }}
         description="Do you want to Delete this invoice?"
-        loading={confirmLoading}
+        loading={deleteMutation.isPending}
       />
     </>
   );

@@ -1,3 +1,5 @@
+import { Transaction } from "./transactions";
+
 export interface Customer {
   id: string;
   name: string;
@@ -8,12 +10,14 @@ export interface Customer {
 }
 
 export interface Invoice {
-  id: number;
+  id: string;
+  invoice_no: number;
   created_at: string;
   total_amount: string;
   created_by: string;
   invoice_status: string;
   payment_method: string;
+  transactions: Transaction[];
 }
 // export interface TransactionSummary {
 //   total_transactions: number;
