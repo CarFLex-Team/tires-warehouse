@@ -41,7 +41,7 @@ export const authOptions: AuthOptions = {
         const result = await db
           .query(
             ' SELECT id,name, email, password, role FROM "User" WHERE email = $1',
-            [credentials.email]
+            [credentials.email],
           )
           .then((res) => res)
           .catch((err) => {

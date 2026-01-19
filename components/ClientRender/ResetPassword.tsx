@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 export default function ResetPasswordPage() {
   const token = useSearchParams().get("token");
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const {
     register,
@@ -47,13 +48,23 @@ export default function ResetPasswordPage() {
         </h1>
 
         <form className="space-y-3">
-          <FormInput
-            label="New Password"
-            type="password"
-            placeholder="Enter your new password"
-            register={register("password")}
-            error={errors.password}
-          />
+          <div className=" relative">
+            <FormInput
+              label="New Password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your new password"
+              register={register("password")}
+              error={errors.password}
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-sm text-primary hover:underline absolute right-3 top-9"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
           {error && <div className="text-red-500 text-sm">{error}</div>}
           <AuthButton
             className="w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"

@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 export default function SignInPage() {
   const router = useRouter();
   const [authError, setAuthError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -61,14 +62,22 @@ export default function SignInPage() {
               register={register("email")}
               error={errors.email}
             />
-
-            <FormInput
-              label="Password"
-              type="password"
-              placeholder="Enter your password"
-              register={register("password")}
-              error={errors.password}
-            />
+            <div className=" relative">
+              <FormInput
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                register={register("password")}
+                error={errors.password}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-sm text-primary hover:underline absolute right-3 top-9"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
           <a
             href="/forgot-password"
