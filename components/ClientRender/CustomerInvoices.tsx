@@ -12,17 +12,22 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import formatDate from "@/lib/formatDate";
 import { formatTime } from "@/lib/formatTime";
 import { deleteInvoice } from "@/lib/api/invoices";
+
 export default function CustomerInvoices({
-  isOwner,
+  isOwner = false,
   customerId,
 }: {
   isOwner?: boolean;
   customerId?: string;
 }) {
+  console.log(
+    "CustomerInvoices rendered with customerId:",
+    isOwner,
+    customerId,
+  );
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const pageSize = 10;
   const queryClient = useQueryClient();

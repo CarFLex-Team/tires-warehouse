@@ -12,6 +12,15 @@ import {
 } from "@/lib/api/transactions";
 import { formatTime } from "@/lib/formatTime";
 import formatDate from "@/lib/formatDate";
+import {
+  CustomerMonthlySummary,
+  getCustomerMonthlySummary,
+} from "@/lib/api/customers";
+import {
+  CategoryMonthlySummary,
+  getCategoriesMonthlySummary,
+} from "@/lib/api/categories";
+import category from "../category/page";
 export default function dashboard() {
   const [page, setPage] = useState(1);
 
@@ -21,6 +30,7 @@ export default function dashboard() {
   const { data, isLoading, error } = useQuery<Transaction[]>({
     queryKey: ["transactions", month],
     queryFn: () => getTransactions({ month: month }),
+    enabled: !!month,
   });
   const {
     data: summaryData,
@@ -29,21 +39,27 @@ export default function dashboard() {
   } = useQuery<TransactionSummary>({
     queryKey: ["transactionsSummary", month],
     queryFn: () => getTransactionsMonthlySummary(month),
+    enabled: !!month,
   });
-  const mostSellingItems = [
-    {
-      category: "Tires",
-      turnOver: 15000,
-    },
-    { category: "Batteries", turnOver: 10000 },
-  ];
-  const mostSpendingCustomers = [
-    {
-      Name: "Mazen Essam",
-      turnOver: 15000,
-    },
-    { Name: "Jane Smith", turnOver: 10000 },
-  ];
+  const {
+    data: summaryCustomerData,
+    isLoading: summaryCustomerLoading,
+    error: summaryCustomerError,
+  } = useQuery<CustomerMonthlySummary[]>({
+    queryKey: ["customersSummary", month],
+    queryFn: () => getCustomerMonthlySummary(month),
+    enabled: !!month,
+  });
+  const {
+    data: summaryCategoryData,
+    isLoading: summaryCategoryLoading,
+    error: summaryCategoryError,
+  } = useQuery<CategoryMonthlySummary[]>({
+    queryKey: ["categoriesSummary", month],
+    queryFn: () => getCategoriesMonthlySummary(month),
+    enabled: !!month,
+  });
+
   const monthlyTransactionStats = [
     {
       label: "Total Transactions",
@@ -70,17 +86,6 @@ export default function dashboard() {
     },
   ];
 
-  type Category = {
-    category: string;
-
-    turnOver: number;
-  };
-  type Customer = {
-    Name: string;
-
-    turnOver: number;
-  };
-
   const transactionColumns: TableColumn<Transaction>[] = [
     { header: "Category", accessor: "category_name" },
     { header: "Description", accessor: "description" },
@@ -100,16 +105,17 @@ export default function dashboard() {
     },
     { header: "Created by", accessor: "created_by_name" },
   ];
-  const CategoryColumn: TableColumn<Category>[] = [
+  const CategoryColumn: TableColumn<CategoryMonthlySummary>[] = [
     { header: "Category", accessor: "category" },
-    { header: "Turn Over", accessor: "turnOver" },
+    { header: "Turn Over", accessor: "turn_over" },
   ];
-  const CustomerColumn: TableColumn<Customer>[] = [
-    { header: "Name", accessor: "Name" },
-    { header: "Turn Over", accessor: "turnOver" },
+  const CustomerColumn: TableColumn<CustomerMonthlySummary>[] = [
+    { header: "Name", accessor: "customer" },
+    { header: "Turn Over", accessor: "turn_over" },
   ];
   if (error) return <p>Error {error.message}</p>;
-  if (summaryError) return <p>Error {summaryError.message}</p>;
+  if (summaryError || summaryCategoryError || summaryCustomerError)
+    return <p>Error</p>;
   return (
     <>
       <div className=" ">
@@ -131,14 +137,26 @@ export default function dashboard() {
           <DataTable
             title="Most Selling Categories"
             columns={CategoryColumn}
-            data={isLoading ? [] : mostSellingItems}
-            isLoading={isLoading}
+            data={
+              summaryCategoryLoading
+                ? []
+                : summaryCategoryData
+                  ? summaryCategoryData
+                  : []
+            }
+            isLoading={summaryCategoryLoading}
           />
           <DataTable
             title="Most Spending Customers"
             columns={CustomerColumn}
-            data={isLoading ? [] : mostSpendingCustomers}
-            isLoading={isLoading}
+            data={
+              summaryCustomerLoading
+                ? []
+                : summaryCustomerData
+                  ? summaryCustomerData
+                  : []
+            }
+            isLoading={summaryCustomerLoading}
           />
         </div>
         <DataTable
@@ -148,8 +166,8 @@ export default function dashboard() {
             isLoading
               ? []
               : data
-              ? data.slice((page - 1) * pageSize, page * pageSize)
-              : []
+                ? data.slice((page - 1) * pageSize, page * pageSize)
+                : []
           }
           isLoading={isLoading}
           pagination={{

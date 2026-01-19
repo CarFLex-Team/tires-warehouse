@@ -19,15 +19,10 @@ export interface Invoice {
   payment_method: string;
   transactions: Transaction[];
 }
-// export interface TransactionSummary {
-//   total_transactions: number;
-//   total_sales_count: number;
-//   total_sales_amount: number;
-//   cash_sales_count: number;
-//   cash_sales_amount: number;
-//   debit_sales_count: number;
-//   debit_sales_amount: number;
-// }
+export interface CustomerMonthlySummary {
+  customer: string;
+  turn_over: string;
+}
 
 export async function getCustomers(): Promise<Customer[]> {
   const res = await fetch("/api/customers");
@@ -37,6 +32,17 @@ export async function getCustomers(): Promise<Customer[]> {
 export async function getCustomerById(id: string): Promise<Customer> {
   const res = await fetch(`/api/customers/${id}`);
   if (!res.ok) throw new Error("Failed to fetch customer");
+  return res.json();
+}
+export async function getCustomerMonthlySummary(
+  month?: string,
+): Promise<CustomerMonthlySummary[]> {
+  const url = month
+    ? `/api/customers/summary/monthly?month=${month}`
+    : `/api/customers/summary`;
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to fetch customers monthly summary");
   return res.json();
 }
 export async function createCustomer(data: {

@@ -5,11 +5,7 @@ export default async function invoice({
 }: {
   params: { id: string; invoiceId: string };
 }) {
-  const { id, invoiceId } = await params;
-  const customer = customers.find((c) => c.id === Number(id));
-  const invoice = customer
-    ? customer.invoices.find((inv) => inv.id === Number(invoiceId))
-    : null;
+  const { invoiceId } = await params;
 
   return <InvoiceTransactions invoice_id={invoiceId} />;
 }

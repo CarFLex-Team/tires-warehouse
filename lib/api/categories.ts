@@ -7,12 +7,25 @@ export interface Category {
   created_at: string;
 }
 
+export interface CategoryMonthlySummary {
+  category: string;
+  turn_over: string;
+}
+
 export async function getCategories(): Promise<Category[]> {
   const res = await fetch("/api/categories");
   if (!res.ok) throw new Error("Failed to fetch categories");
   return res.json();
 }
+export async function getCategoriesMonthlySummary(
+  month?: string,
+): Promise<CategoryMonthlySummary[]> {
+  const url = `/api/categories/summary/monthly?month=${month}`;
 
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to fetch categories monthly summary");
+  return res.json();
+}
 export async function createCategory(data: {
   name: string;
   type: CategoryType;

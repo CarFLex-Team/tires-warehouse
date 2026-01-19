@@ -20,6 +20,10 @@ import {
 } from "@/lib/api/transactions";
 import formatDate from "@/lib/formatDate";
 import { formatTime } from "@/lib/formatTime";
+import {
+  CustomerMonthlySummary,
+  getCustomerMonthlySummary,
+} from "@/lib/api/customers";
 
 export default function dashboard() {
   const [page, setPage] = useState(1);
@@ -51,7 +55,14 @@ export default function dashboard() {
       setConfirmOpen(false);
     },
   });
-
+  const {
+    data: summaryCustomerData,
+    isLoading: summaryCustomerLoading,
+    error: summaryCustomerError,
+  } = useQuery<CustomerMonthlySummary[]>({
+    queryKey: ["customersSummary"],
+    queryFn: () => getCustomerMonthlySummary(),
+  });
   const dailyTransactionStats = [
     {
       label: "Total Transactions",
@@ -97,6 +108,10 @@ export default function dashboard() {
     },
     { header: "Created by", accessor: "created_by_name" },
   ];
+  const CustomerColumn: TableColumn<CustomerMonthlySummary>[] = [
+    { header: "Name", accessor: "customer" },
+    { header: "Turn Over", accessor: "turn_over" },
+  ];
   if (error) return <p>Error {error.message}</p>;
   if (summaryError) return <p>Error {summaryError.message}</p>;
   return (
@@ -125,6 +140,18 @@ export default function dashboard() {
             />
           }
         />
+        {/* <DataTable
+          title="Most Spending Customers"
+          columns={CustomerColumn}
+          data={
+            summaryCustomerLoading
+              ? []
+              : summaryCustomerData
+                ? summaryCustomerData
+                : []
+          }
+          isLoading={summaryCustomerLoading}
+        /> */}
         <DataTable
           title="Transactions"
           columns={transactionColumns}

@@ -1,8 +1,15 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient() {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY is missing");
+  }
+
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function sendResetPasswordEmail(to: string, resetLink: string) {
+  const resend = getResendClient();
   await resend.emails.send({
     from: "Tire Warehouse <onboarding@resend.dev>", // or
     to,
