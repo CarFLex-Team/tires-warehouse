@@ -46,7 +46,7 @@ export function ComboBox({
   return (
     <div ref={ref} className={`${className ? className : ""}`}>
       <input
-        value={query}
+        value={query || options.find((o) => o.value === value)?.label || ""}
         onChange={(e) => {
           setQuery(e.target.value);
           setOpen(true);

@@ -4,6 +4,7 @@ import { create } from "zustand";
 export type InvoiceItem = {
   id: string;
   category_id: string;
+  category_name?: string;
   description: string;
   amount: string;
   type: CategoryType;

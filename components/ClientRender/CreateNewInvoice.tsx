@@ -27,6 +27,7 @@ export default function CreateNewInvoice({
       {
         id: crypto.randomUUID(),
         category_id: "",
+        category_name: "",
         description: "",
         amount: "",
         type: "Sales",
@@ -34,7 +35,6 @@ export default function CreateNewInvoice({
     ]);
     setShowAlert("");
   }
-
   function updateRow(
     id: string,
     field: keyof InvoiceItem,

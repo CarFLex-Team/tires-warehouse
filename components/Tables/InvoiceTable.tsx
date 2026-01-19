@@ -21,7 +21,7 @@ export function InvoiceTable({ rows, onAdd, onUpdate, onRemove }: Props) {
     queryKey: ["categories"],
     queryFn: getCategories,
   });
-
+  console.log("Rendering InvoiceTable with rows:", rows);
   return (
     <div className="rounded-xl bg-white p-5 m-4 shadow-sm">
       {/* Header */}
@@ -71,7 +71,14 @@ export function InvoiceTable({ rows, onAdd, onUpdate, onRemove }: Props) {
                         })) || []
                     }
                     placeholder="Category"
-                    onChange={(value) => onUpdate(row.id, "category_id", value)}
+                    onChange={(value) => {
+                      onUpdate(row.id, "category_id", value);
+                      onUpdate(
+                        row.id,
+                        "category_name",
+                        categories?.find((cat) => cat.id === value)?.name || "",
+                      );
+                    }}
                   />
                 </td>
 

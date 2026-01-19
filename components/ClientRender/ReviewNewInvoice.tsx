@@ -40,7 +40,7 @@ export default function ReviewNewInvoice({
 
   const invoiceItemColumns: TableColumn<InvoiceItem>[] = [
     { header: "Type", accessor: "type" },
-    { header: "Category", accessor: "category_id" },
+    { header: "Category", accessor: "category_name" },
     { header: "Description", accessor: "description" },
     { header: "Amount", accessor: "amount" },
   ];
@@ -48,7 +48,7 @@ export default function ReviewNewInvoice({
     (total, item) => total + Number(item.amount),
     0,
   );
-  const tax = Math.floor(subTotal * 0.1);
+  const tax = paymentMethod === "Debit" ? Math.floor(subTotal * 0.1) : 0;
   const totalAmount = subTotal + tax;
 
   function saveInvoice() {
@@ -108,14 +108,22 @@ export default function ReviewNewInvoice({
         <div className="my-6 border-t" />
         <div className="space-y-1">
           <p className="font-semibold text-gray-800">Amount Breakdown</p>
-          <p className="text-sm text-gray-500">
-            SubTotal: ${subTotal.toFixed(2)}
-          </p>
-          <p className="text-sm text-gray-500">Tax(10%): ${tax.toFixed(2)}</p>
+          {paymentMethod === "Debit" && (
+            <p className="text-sm text-gray-500">
+              SubTotal: ${subTotal.toFixed(2)}
+            </p>
+          )}
+          {paymentMethod === "Debit" && (
+            <p className="text-sm text-gray-500">Tax(10%): ${tax.toFixed(2)}</p>
+          )}
           <p className="text-sm text-gray-500">
             Total: ${totalAmount.toFixed(2)}
           </p>
-          <CustomButton className="mt-4 w-full" onClick={saveInvoice}>
+          <CustomButton
+            className="mt-4 w-full"
+            onClick={saveInvoice}
+            isLoading={mutation.isPending}
+          >
             Save Invoice
           </CustomButton>
         </div>
