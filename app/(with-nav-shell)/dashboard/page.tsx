@@ -178,17 +178,17 @@ export default function dashboard() {
               Add Transaction
             </CustomButton>
           }
-          // renderActions={(row) => (
-          //   <button
-          //     onClick={() => {
-          //       setSelectedId(row.id);
-          //       setConfirmOpen(true);
-          //     }}
-          //     className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
-          //   >
-          //     <Trash size={16} />
-          //   </button>
-          // )}
+          renderActions={(row) => (
+            <button
+              onClick={() => {
+                setSelectedId(row.id);
+                setConfirmOpen(true);
+              }}
+              className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+            >
+              <Trash size={16} />
+            </button>
+          )}
         />
       </div>
       <ConfirmDialog

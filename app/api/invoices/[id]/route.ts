@@ -59,15 +59,29 @@ export async function DELETE(
   try {
     const { id } = await context.params;
 
+    await db.query("BEGIN");
+
     await db.query(
       `
-      UPDATE "Invoice"
-      SET deleted_at = NOW()
-      WHERE id = $1
-      `,
+  UPDATE "Invoice"
+  SET deleted_at = NOW()
+  WHERE id = $1
+    AND deleted_at IS NULL
+  `,
       [id],
     );
 
+    await db.query(
+      `
+  UPDATE "Transaction"
+  SET deleted_at = NOW()
+  WHERE invoice_id = $1
+    AND deleted_at IS NULL
+  `,
+      [id],
+    );
+
+    await db.query("COMMIT");
     return NextResponse.json(
       { message: "Invoice deleted (soft)" },
       { status: 200 },
