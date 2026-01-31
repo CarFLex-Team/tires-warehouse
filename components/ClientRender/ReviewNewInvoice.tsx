@@ -48,7 +48,7 @@ export default function ReviewNewInvoice({
     (total, item) => total + Number(item.amount),
     0,
   );
-  const tax = paymentMethod === "Debit" ? Math.floor(subTotal * 0.1) : 0;
+  const tax = paymentMethod === "Debit" ? Math.floor(subTotal * 0.07) : 0;
   const totalAmount = subTotal + tax;
 
   function saveInvoice() {
