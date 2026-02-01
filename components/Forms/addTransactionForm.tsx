@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCategories } from "@/lib/api/categories";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ComboBox } from "../ui/ComboBox";
 import { createTransaction } from "@/lib/api/transactions";
 
@@ -16,12 +16,15 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
   const [categoryId, setCategoryId] = useState("");
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
+  const [errorMessage, setErrorMessage] = useState("");
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategories,
   });
   const filteredCategories = categories?.filter((c) => c.type === type);
-
+  useEffect(() => {
+    setCategoryId("");
+  }, [type]);
   const mutation = useMutation({
     mutationFn: createTransaction,
     onSuccess: () => {
@@ -38,6 +41,7 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!description || !type || !categoryId || !amount || !paymentMethod) {
+      setErrorMessage("Please fill in all fields.");
       return;
     }
 
@@ -51,38 +55,59 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+    <form onSubmit={handleSubmit} className="mt-6 space-y-8 ">
       <div className="flex justify-between items-center gap-4">
         <label className="flex-2">Type</label>
-        <select
-          className="p-2 border border-gray-300 rounded-lg flex-5"
-          value={type}
-          onChange={(e) => setType(e.target.value as CategoryType)}
-          required
-        >
-          <option value="" disabled>
-            Transaction Type
-          </option>
-          <option value="Sales">Sales</option>
-          <option value="Expense">Expense</option>
-        </select>
+        <div className="flex gap-2 flex-5">
+          <button
+            type="button"
+            className={`flex items-center gap-1.5 rounded border border-primary-600 p-2  text-sm cursor-pointer  ${
+              type === "Sales"
+                ? "bg-primary-600 text-white"
+                : "bg-white text-primary-600 hover:bg-gray-100"
+            }`}
+            onClick={() => setType("Sales" as CategoryType)}
+          >
+            Sales
+          </button>
+
+          <button
+            className={`flex items-center gap-1.5 rounded border border-primary-600 p-2  text-sm cursor-pointer  ${
+              type === "Expense"
+                ? "bg-primary-600 text-white"
+                : "bg-white text-primary-600 hover:bg-gray-100"
+            }`}
+            onClick={() => setType("Expense" as CategoryType)}
+            type="button"
+          >
+            Expense
+          </button>
+        </div>
       </div>
       <div className="flex justify-between items-center gap-4">
         <label className="flex-2">Category</label>
-
-        <ComboBox
-          value={categoryId}
-          options={
-            filteredCategories?.map((cat: any) => ({
-              label: cat.name,
-              value: cat.id,
-            })) || []
-          }
-          className="p-2 border border-gray-300 rounded-lg flex-5"
-          placeholder="Category"
-          onChange={(value) => setCategoryId(value)}
-          required
-        />
+        {filteredCategories?.length !== 0 ? (
+          <div className="flex gap-1 flex-5 flex-wrap">
+            {filteredCategories?.map((cat: any) => (
+              <button
+                key={cat.id}
+                className={`flex items-center gap-1.5 rounded border border-primary-600 p-1 text-sm cursor-pointer m-0.5 ${
+                  categoryId === String(cat.id)
+                    ? "bg-primary-600 text-white"
+                    : "bg-white text-primary-600 hover:bg-gray-100"
+                }`}
+                onClick={() => setCategoryId(String(cat.id))}
+                type="button"
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="flex-5 text-gray-400">
+            Type has no categories available
+          </p>
+        )}
       </div>
       <div className="flex justify-between items-center gap-4">
         <label className="flex-2">Description</label>
@@ -137,6 +162,7 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
       {mutation.isError && (
         <p className="text-sm text-red-500">{mutation.error.message}</p>
       )}
+      {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
     </form>
   );
 }

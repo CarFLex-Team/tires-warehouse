@@ -39,7 +39,7 @@ export default function ConfirmDialog({
       <div onClick={onClose} className="absolute inset-0 bg-black/40" />
 
       {/* Modal */}
-      <div className="relative z-10 w-full max-w-sm rounded-lg bg-white p-6 shadow-lg max-h-[90vh] overflow-auto">
+      <div className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-lg max-h-[90vh] overflow-auto">
         <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
 
         {children}
