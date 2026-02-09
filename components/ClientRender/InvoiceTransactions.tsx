@@ -9,12 +9,15 @@ import { Transaction } from "@/lib/api/transactions";
 import formatDate from "@/lib/formatDate";
 import CustomButton from "../ui/CustomButton";
 import { downloadPdf } from "@/lib/api/donwloadPdf";
+import { useState } from "react";
+import { set } from "zod";
 
 export default function invoiceTransactions({
   invoice_id,
 }: {
   invoice_id: string;
 }) {
+  const [isdownloading, setIsDownloading] = useState(false);
   const { data, isLoading, error } = useQuery<Invoice>({
     queryKey: ["invoices", invoice_id],
     queryFn: () => getInvoiceById(invoice_id),
@@ -42,10 +45,10 @@ export default function invoiceTransactions({
         action={
           <CustomButton
             onClick={() => {
-              downloadPdf(data!);
+              downloadPdf(data!, setIsDownloading);
             }}
           >
-            Download PDF
+            {isdownloading ? "Downloading..." : "Download PDF"}
           </CustomButton>
         }
       />

@@ -17,8 +17,11 @@ import { Invoice } from "./customers";
 //   ],
 //   total_amount: 799.98,
 // };
-export function downloadPdf(invoice: Invoice) {
-  console.log("Downloading PDF for invoice:", invoice);
+export function downloadPdf(
+  invoice: Invoice,
+  setIsDownloading: (downloading: boolean) => void,
+) {
+  setIsDownloading(true);
   fetch("https://pdf-service-production-92e8.up.railway.app/invoice", {
     method: "POST",
     headers: {
@@ -33,8 +36,10 @@ export function downloadPdf(invoice: Invoice) {
       link.href = URL.createObjectURL(blob);
       link.download = `invoice-${invoice.id}.pdf`;
       link.click();
+      setIsDownloading(false);
     })
     .catch((error) => {
       console.error("Error:", error);
+      setIsDownloading(false);
     });
 }
