@@ -7,6 +7,8 @@ export async function getInvoiceById(id: string): Promise<Invoice> {
 }
 export async function createInvoice(data: {
   total: number;
+  subtotal: number;
+  tax: number;
   customer_id: string;
   payment_method: string;
   transactions: any[];

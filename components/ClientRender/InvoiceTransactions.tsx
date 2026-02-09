@@ -7,6 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Invoice } from "@/lib/api/customers";
 import { Transaction } from "@/lib/api/transactions";
 import formatDate from "@/lib/formatDate";
+import CustomButton from "../ui/CustomButton";
+import { downloadPdf } from "@/lib/api/donwloadPdf";
 
 export default function invoiceTransactions({
   invoice_id,
@@ -37,6 +39,15 @@ export default function invoiceTransactions({
         columns={transactionColumns}
         data={isLoading ? [] : transactions}
         isLoading={isLoading}
+        action={
+          <CustomButton
+            onClick={() => {
+              downloadPdf(data!);
+            }}
+          >
+            Download PDF
+          </CustomButton>
+        }
       />
     </>
   );

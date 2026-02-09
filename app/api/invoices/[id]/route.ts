@@ -15,6 +15,9 @@ SELECT
   i.customer_id,
   i.total_amount,
   i.created_at,
+  i.subtotal,
+  i.tax,
+  i.payment_method,
   COALESCE(
     json_agg(
       jsonb_build_object(

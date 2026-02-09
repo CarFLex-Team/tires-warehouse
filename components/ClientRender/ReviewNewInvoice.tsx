@@ -61,6 +61,8 @@ export default function ReviewNewInvoice({
     }
     mutation.mutate({
       total: totalAmount,
+      subtotal: subTotal,
+      tax,
       customer_id: customerId,
       payment_method: paymentMethod,
       transactions: items,

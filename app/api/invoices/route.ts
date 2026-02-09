@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   const client = await db.connect();
 
   try {
-    const { total, customer_id, payment_method, transactions } =
+    const { total, subtotal, tax, customer_id, payment_method, transactions } =
       await req.json();
     const session = await getServerSession(authOptions);
 
@@ -28,11 +28,11 @@ export async function POST(req: Request) {
     // 1️⃣ Create invoice
     const invoiceRes = await client.query(
       `
-      INSERT INTO "Invoice" (customer_id, created_by, total_amount, created_at,payment_method)
-      VALUES ($1, $2, $3, NOW(), $4)
+      INSERT INTO "Invoice" (customer_id, created_by, total_amount, subtotal, tax, created_at, payment_method)
+      VALUES ($1, $2, $3, $4, $5, NOW(), $6)
       RETURNING id
       `,
-      [customer_id, created_by, total, payment_method],
+      [customer_id, created_by, total, subtotal, tax, payment_method],
     );
 
     const invoiceId = invoiceRes.rows[0].id;

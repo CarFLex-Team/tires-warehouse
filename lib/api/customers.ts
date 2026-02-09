@@ -14,6 +14,8 @@ export interface Invoice {
   invoice_no: number;
   created_at: string;
   total_amount: string;
+  subtotal: string;
+  tax: string;
   created_by: string;
   invoice_status: string;
   payment_method: string;
