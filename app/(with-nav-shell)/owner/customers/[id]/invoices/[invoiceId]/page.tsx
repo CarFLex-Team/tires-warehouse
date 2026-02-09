@@ -1,4 +1,3 @@
-import customers from "@/data/customers.json";
 import InvoiceTransactions from "@/components/ClientRender/InvoiceTransactions";
 export default async function invoice({
   params,
