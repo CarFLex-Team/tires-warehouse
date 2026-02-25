@@ -8,11 +8,11 @@ import Modal from "@/components/ui/Modal";
 import { Trash } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getCategories, deleteCategory, Category } from "@/lib/api/categories";
-import { AddCategoryForm } from "@/components/Forms/addCategoryForm";
+import { getServices, deleteService, Service } from "@/lib/api/services";
+import { AddServiceForm } from "@/components/Forms/addServiceForm";
 import formatDate from "@/lib/formatDate";
 
-export default function category() {
+export default function ServicePage() {
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -20,28 +20,28 @@ export default function category() {
   const pageSize = 10;
 
   const queryClient = useQueryClient();
-  const { data, isLoading, error } = useQuery<Category[]>({
-    queryKey: ["categories"],
-    queryFn: getCategories,
-    select: (categories) =>
-      categories.map((category) => ({
-        ...category,
-        created_at: formatDate(category.created_at),
+  const { data, isLoading, error } = useQuery<Service[]>({
+    queryKey: ["services"],
+    queryFn: getServices,
+    select: (services) =>
+      services.map((service) => ({
+        ...service,
+        created_at: formatDate(service.created_at),
       })),
   });
   const deleteMutation = useMutation({
-    mutationFn: deleteCategory,
+    mutationFn: deleteService,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
       setSelectedId(null);
       setConfirmOpen(false);
     },
   });
 
-  const categoryColumns: TableColumn<Category>[] = [
+  const serviceColumns: TableColumn<Service>[] = [
     { header: "ID", accessor: "id" },
-    { header: "Category", accessor: "name" },
-    { header: "Type", accessor: "type" },
+    { header: "Service", accessor: "name" },
+    { header: "Price", accessor: "price" },
     { header: "Added At", accessor: "created_at" },
   ];
   if (error) return <p>Error {error.message}</p>;
@@ -49,17 +49,13 @@ export default function category() {
   return (
     <>
       {open && (
-        <Modal
-          isOpen={open}
-          onClose={() => setOpen(false)}
-          title="New Category"
-        >
-          <AddCategoryForm onSuccess={() => setOpen(false)} />
+        <Modal isOpen={open} onClose={() => setOpen(false)} title="New Service">
+          <AddServiceForm onSuccess={() => setOpen(false)} />
         </Modal>
       )}
       <DataTable
-        title="Category"
-        columns={categoryColumns}
+        title="Services"
+        columns={serviceColumns}
         data={
           isLoading
             ? []
@@ -78,7 +74,7 @@ export default function category() {
               setOpen(true);
             }}
           >
-            Add Category
+            Add Service
           </CustomButton>
         }
         renderActions={(row) => (
@@ -101,7 +97,7 @@ export default function category() {
             deleteMutation.mutate(selectedId);
           }
         }}
-        description="Do you want to Delete this category?"
+        description="Do you want to Delete this service?"
         loading={deleteMutation.isPending}
       />
     </>

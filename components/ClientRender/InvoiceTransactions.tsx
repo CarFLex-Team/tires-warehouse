@@ -10,7 +10,6 @@ import formatDate from "@/lib/formatDate";
 import CustomButton from "../ui/CustomButton";
 import { downloadPdf } from "@/lib/api/donwloadPdf";
 import { useState } from "react";
-import { set } from "zod";
 
 export default function invoiceTransactions({
   invoice_id,
@@ -24,8 +23,14 @@ export default function invoiceTransactions({
   });
   const transactions = data ? data?.transactions : [];
   const transactionColumns: TableColumn<Transaction>[] = [
-    { header: "Category", accessor: "category_name" },
-    { header: "Description", accessor: "description" },
+    // { header: "Description", accessor: "description" },
+    {
+      header: "Product/Service",
+      accessor: (tx) => tx.product_name || tx.service_name,
+    },
+    { header: "Type", accessor: "type" },
+    { header: "Category", accessor: "category" },
+
     { header: "Amount", accessor: "amount" },
   ];
 
@@ -47,6 +52,7 @@ export default function invoiceTransactions({
             onClick={() => {
               downloadPdf(data!, setIsDownloading);
             }}
+            isLoading={isdownloading}
           >
             {isdownloading ? "Downloading..." : "Download PDF"}
           </CustomButton>

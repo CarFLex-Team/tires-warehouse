@@ -20,11 +20,6 @@ export default function CustomerInvoices({
   isOwner?: boolean;
   customerId?: string;
 }) {
-  console.log(
-    "CustomerInvoices rendered with customerId:",
-    isOwner,
-    customerId,
-  );
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -59,23 +54,41 @@ export default function CustomerInvoices({
         </div>
       ),
     },
-    { header: "Amount", accessor: "total_amount" },
+    {
+      header: "Amount",
+      accessor: (row) => `$${row.total_amount ?? row.subtotal}`,
+    },
+    {
+      header: "Status",
+      accessor: (row) => <p className="capitalize">{row.status}</p>,
+    },
     { header: "Payment Method", accessor: "payment_method" },
     { header: "Created By", accessor: "created_by" },
   ];
   const actionColumn = !isOwner
-    ? (invoice: Invoice) => (
-        <button
-          className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
-          onClick={(e) => {
-            e.stopPropagation();
-            setSelectedId(invoice.id);
-            setConfirmOpen(true);
-          }}
-        >
-          <Trash size={16} />
-        </button>
-      )
+    ? (invoice: Invoice) =>
+        invoice.status === "finished" ? (
+          <button
+            className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedId(invoice.id);
+              setConfirmOpen(true);
+            }}
+          >
+            <Trash size={16} />
+          </button>
+        ) : (
+          <CustomButton
+            onClick={() =>
+              router.push(
+                `/customers/${customerId}/invoices/${invoice.id}/edit`,
+              )
+            }
+          >
+            Finish Invoice
+          </CustomButton>
+        )
     : undefined;
   return (
     <>
@@ -97,7 +110,9 @@ export default function CustomerInvoices({
               ) || []
         }
         isLoading={isLoading}
-        onRowClick={(invoice) => router.push(`invoices/${invoice.id}`)}
+        onRowClick={(invoice) =>
+          invoice.status === "finished" && router.push(`invoices/${invoice.id}`)
+        }
         pagination={{
           page,
           pageSize,

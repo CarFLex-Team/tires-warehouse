@@ -20,12 +20,12 @@ import {
 } from "@/lib/api/transactions";
 import formatDate from "@/lib/formatDate";
 import { formatTime } from "@/lib/formatTime";
-import {
-  CustomerMonthlySummary,
-  getCustomerMonthlySummary,
-} from "@/lib/api/customers";
-
+import { Invoice } from "@/lib/api/customers";
+import { getInventorySummary, InventorySummary } from "@/lib/api/inventory";
+import { getInvoices } from "@/lib/api/invoices";
+import { useRouter } from "next/navigation";
 export default function dashboard() {
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -56,12 +56,20 @@ export default function dashboard() {
     },
   });
   const {
-    data: summaryCustomerData,
-    isLoading: summaryCustomerLoading,
-    error: summaryCustomerError,
-  } = useQuery<CustomerMonthlySummary[]>({
-    queryKey: ["customersSummary"],
-    queryFn: () => getCustomerMonthlySummary(),
+    data: summaryInventoryData,
+    isLoading: summaryInventoryLoading,
+    error: summaryInventoryError,
+  } = useQuery<InventorySummary[]>({
+    queryKey: ["inventorySummary"],
+    queryFn: () => getInventorySummary(),
+  });
+  const {
+    data: invoiceData,
+    isLoading: invoiceLoading,
+    error: invoiceError,
+  } = useQuery<Invoice[]>({
+    queryKey: ["invoices"],
+    queryFn: () => getInvoices(),
   });
   const dailyTransactionStats = [
     {
@@ -88,13 +96,37 @@ export default function dashboard() {
       color: "text-purple-400",
     },
   ];
-
+  const InventoryColumn: TableColumn<InventorySummary>[] = [
+    { header: "Product", accessor: "name" },
+    { header: "Quantity", accessor: "quantity" },
+    {
+      header: "Status",
+      accessor: (row) =>
+        row.quantity <= 0 ? (
+          <p className="bg-red-300 text-center px-2 py-1 rounded">
+            Out of Stock
+          </p>
+        ) : row.quantity <= 10 ? (
+          <p className="bg-yellow-300 text-center px-2 py-1 rounded">
+            Low Stock
+          </p>
+        ) : (
+          <p className="bg-green-300 text-center px-2 py-1 rounded">In Stock</p>
+        ),
+    },
+  ];
   const transactionColumns: TableColumn<Transaction>[] = [
-    { header: "Category", accessor: "category_name" },
-    { header: "Description", accessor: "description" },
     { header: "Type", accessor: "type" },
+    { header: "Category", accessor: "category" },
+    {
+      header: "Product/Service",
+      accessor: (row) =>
+        row.category === "Tire" ? row.product_name : row.service_name,
+    },
+    // { header: "Description", accessor: "description" },
     { header: "Amount", accessor: "amount" },
     { header: "Payment Method", accessor: "payment_method" },
+
     {
       header: "Created At",
       accessor: (row) => (
@@ -108,9 +140,26 @@ export default function dashboard() {
     },
     { header: "Created by", accessor: "created_by_name" },
   ];
-  const CustomerColumn: TableColumn<CustomerMonthlySummary>[] = [
-    { header: "Name", accessor: "customer" },
-    { header: "Turn Over", accessor: "turn_over" },
+  const invoiceColumns: TableColumn<Invoice>[] = [
+    { header: "Invoice ID", accessor: "invoice_no" },
+    { header: "Customer", accessor: "customer_name" },
+    { header: "SubTotal", accessor: (row) => `$${row.subtotal}` },
+    {
+      header: "Status",
+      accessor: (row) => <p className="capitalize">{row.status}</p>,
+    },
+
+    {
+      header: "Created At",
+      accessor: (row) => (
+        <div>
+          <div>{formatDate(row.created_at)}</div>
+          <div className="text-xs text-gray-400">
+            at {formatTime(row.created_at)}
+          </div>
+        </div>
+      ),
+    },
   ];
   if (error) return <p>Error {error.message}</p>;
   if (summaryError) return <p>Error {summaryError.message}</p>;
@@ -126,6 +175,35 @@ export default function dashboard() {
         </Modal>
       )}
       <div className=" ">
+        <DataTable
+          title="Pending Invoices "
+          columns={invoiceColumns}
+          data={invoiceLoading ? [] : invoiceData ? invoiceData : []}
+          isLoading={invoiceLoading}
+          renderActions={(row) => (
+            <CustomButton
+              onClick={() => {
+                router.push(
+                  `/customers/${row.customer_id}/invoices/${row.id}/edit`,
+                );
+              }}
+            >
+              Finish Invoice
+            </CustomButton>
+          )}
+        />
+        <DataTable
+          title="Stock Alert"
+          columns={InventoryColumn}
+          data={
+            summaryInventoryLoading
+              ? []
+              : summaryInventoryData
+                ? summaryInventoryData
+                : []
+          }
+          isLoading={summaryInventoryLoading}
+        />
         <OverviewStats
           title="Daily Overview"
           stats={dailyTransactionStats}
@@ -152,6 +230,7 @@ export default function dashboard() {
           }
           isLoading={summaryCustomerLoading}
         /> */}
+
         <DataTable
           title="Transactions"
           columns={transactionColumns}
@@ -169,26 +248,26 @@ export default function dashboard() {
             total: data?.length || 1,
             onPageChange: setPage,
           }}
-          action={
-            <CustomButton
-              onClick={() => {
-                setOpen(true);
-              }}
-            >
-              Add Transaction
-            </CustomButton>
-          }
-          renderActions={(row) => (
-            <button
-              onClick={() => {
-                setSelectedId(row.id);
-                setConfirmOpen(true);
-              }}
-              className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
-            >
-              <Trash size={16} />
-            </button>
-          )}
+          // action={
+          //   <CustomButton
+          //     onClick={() => {
+          //       setOpen(true);
+          //     }}
+          //   >
+          //     Add Transaction
+          //   </CustomButton>
+          // }
+          // renderActions={(row) => (
+          //   <button
+          //     onClick={() => {
+          //       setSelectedId(row.id);
+          //       setConfirmOpen(true);
+          //     }}
+          //     className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+          //   >
+          //     <Trash size={16} />
+          //   </button>
+          // )}
         />
       </div>
       <ConfirmDialog

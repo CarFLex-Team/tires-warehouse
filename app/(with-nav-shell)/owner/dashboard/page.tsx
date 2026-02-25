@@ -13,14 +13,15 @@ import {
 import { formatTime } from "@/lib/formatTime";
 import formatDate from "@/lib/formatDate";
 import {
-  CustomerMonthlySummary,
-  getCustomerMonthlySummary,
-} from "@/lib/api/customers";
+  InventorySummary,
+  ProductMonthlySummary,
+  getInventorySummary,
+  getProductSummary,
+} from "@/lib/api/inventory";
 import {
-  CategoryMonthlySummary,
-  getCategoriesMonthlySummary,
-} from "@/lib/api/categories";
-import category from "../category/page";
+  ServiceMonthlySummary,
+  getServicesMonthlySummary,
+} from "@/lib/api/services";
 export default function dashboard() {
   const [page, setPage] = useState(1);
 
@@ -42,21 +43,39 @@ export default function dashboard() {
     enabled: !!month,
   });
   const {
-    data: summaryCustomerData,
-    isLoading: summaryCustomerLoading,
-    error: summaryCustomerError,
-  } = useQuery<CustomerMonthlySummary[]>({
-    queryKey: ["customersSummary", month],
-    queryFn: () => getCustomerMonthlySummary(month),
+    data: summaryInventoryData,
+    isLoading: summaryInventoryLoading,
+    error: summaryInventoryError,
+  } = useQuery<InventorySummary[]>({
+    queryKey: ["inventorySummary", month],
+    queryFn: () => getInventorySummary(),
+  });
+
+  const {
+    data: summaryProductData,
+    isLoading: summaryProductLoading,
+    error: summaryProductError,
+  } = useQuery<ProductMonthlySummary[]>({
+    queryKey: ["productsSummary", month],
+    queryFn: () => getProductSummary(month),
     enabled: !!month,
   });
+  // const {
+  //   data: summaryCustomerData,
+  //   isLoading: summaryCustomerLoading,
+  //   error: summaryCustomerError,
+  // } = useQuery<CustomerMonthlySummary[]>({
+  //   queryKey: ["customersSummary", month],
+  //   queryFn: () => getCustomerMonthlySummary(month),
+  //   enabled: !!month,
+  // });
   const {
-    data: summaryCategoryData,
-    isLoading: summaryCategoryLoading,
-    error: summaryCategoryError,
-  } = useQuery<CategoryMonthlySummary[]>({
-    queryKey: ["categoriesSummary", month],
-    queryFn: () => getCategoriesMonthlySummary(month),
+    data: summaryServiceData,
+    isLoading: summaryServiceLoading,
+    error: summaryServiceError,
+  } = useQuery<ServiceMonthlySummary[]>({
+    queryKey: ["servicesSummary", month],
+    queryFn: () => getServicesMonthlySummary(month),
     enabled: !!month,
   });
 
@@ -87,11 +106,17 @@ export default function dashboard() {
   ];
 
   const transactionColumns: TableColumn<Transaction>[] = [
-    { header: "Category", accessor: "category_name" },
-    { header: "Description", accessor: "description" },
     { header: "Type", accessor: "type" },
+    { header: "Category", accessor: "category" },
+    {
+      header: "Product/Service",
+      accessor: (row) =>
+        row.category === "Tire" ? row.product_name : row.service_name,
+    },
+    // { header: "Description", accessor: "description" },
     { header: "Amount", accessor: "amount" },
     { header: "Payment Method", accessor: "payment_method" },
+
     {
       header: "Created At",
       accessor: (row) => (
@@ -105,20 +130,56 @@ export default function dashboard() {
     },
     { header: "Created by", accessor: "created_by_name" },
   ];
-  const CategoryColumn: TableColumn<CategoryMonthlySummary>[] = [
-    { header: "Category", accessor: "category" },
+  const ServiceColumn: TableColumn<ServiceMonthlySummary>[] = [
+    { header: "Service", accessor: "service" },
     { header: "Turn Over", accessor: "turn_over" },
   ];
-  const CustomerColumn: TableColumn<CustomerMonthlySummary>[] = [
-    { header: "Name", accessor: "customer" },
+  const InventoryColumn: TableColumn<InventorySummary>[] = [
+    { header: "Product", accessor: "name" },
+    { header: "Quantity", accessor: "quantity" },
+    {
+      header: "Status",
+      accessor: (row) =>
+        row.quantity <= 0 ? (
+          <p className="bg-red-300 text-center px-2 py-1 rounded">
+            Out of Stock
+          </p>
+        ) : row.quantity <= 10 ? (
+          <p className="bg-yellow-300 text-center px-2 py-1 rounded">
+            Low Stock
+          </p>
+        ) : (
+          <p className="bg-green-300 text-center px-2 py-1 rounded">In Stock</p>
+        ),
+    },
+  ];
+  const ProductSummaryColumn: TableColumn<ProductMonthlySummary>[] = [
+    { header: "Product", accessor: "name" },
     { header: "Turn Over", accessor: "turn_over" },
   ];
   if (error) return <p>Error {error.message}</p>;
-  if (summaryError || summaryCategoryError || summaryCustomerError)
+  if (
+    summaryError ||
+    summaryServiceError ||
+    summaryProductError ||
+    summaryInventoryError
+  )
     return <p>Error</p>;
   return (
     <>
       <div className=" ">
+        <DataTable
+          title="Stock Alert"
+          columns={InventoryColumn}
+          data={
+            summaryInventoryLoading
+              ? []
+              : summaryInventoryData
+                ? summaryInventoryData
+                : []
+          }
+          isLoading={summaryInventoryLoading}
+        />
         <OverviewStats
           title="Monthly Overview"
           stats={monthlyTransactionStats}
@@ -135,28 +196,28 @@ export default function dashboard() {
         />
         <div className=" grid grid-cols-1 md:grid-cols-2 ">
           <DataTable
-            title="Most Selling Categories"
-            columns={CategoryColumn}
+            title="Most Selling Services"
+            columns={ServiceColumn}
             data={
-              summaryCategoryLoading
+              summaryServiceLoading
                 ? []
-                : summaryCategoryData
-                  ? summaryCategoryData
+                : summaryServiceData
+                  ? summaryServiceData
                   : []
             }
-            isLoading={summaryCategoryLoading}
+            isLoading={summaryServiceLoading}
           />
           <DataTable
-            title="Most Spending Customers"
-            columns={CustomerColumn}
+            title="Most Selling Products"
+            columns={ProductSummaryColumn}
             data={
-              summaryCustomerLoading
+              summaryProductLoading
                 ? []
-                : summaryCustomerData
-                  ? summaryCustomerData
+                : summaryProductData
+                  ? summaryProductData
                   : []
             }
-            isLoading={summaryCustomerLoading}
+            isLoading={summaryProductLoading}
           />
         </div>
         <DataTable

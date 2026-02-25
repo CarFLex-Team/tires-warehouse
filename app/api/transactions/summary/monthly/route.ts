@@ -46,9 +46,9 @@ export async function GET(req: Request) {
     FROM "Transaction" t
     WHERE
       t.created_at >= date_trunc('month', $1::date)
-      AND t.created_at < date_trunc('month', $1::date) + INTERVAL '1 month'
+      AND t.created_at < date_trunc('month', $1::date) + INTERVAL '1 month' AND t.status = 'finished'
     `,
-    [`${month}-01`]
+    [`${month}-01`],
   );
 
   return Response.json(rows[0]);

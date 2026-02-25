@@ -62,11 +62,29 @@ export default function dashboard() {
   ];
 
   const transactionColumns: TableColumn<Transaction>[] = [
-    { header: "Category", accessor: "category_name" },
-    { header: "Description", accessor: "description" },
     { header: "Type", accessor: "type" },
+    { header: "Category", accessor: "category" },
+    {
+      header: "Product/Service",
+      accessor: (row) =>
+        row.category === "Tire" ? row.product_name : row.service_name,
+    },
+    // { header: "Description", accessor: "description" },
     { header: "Amount", accessor: "amount" },
     { header: "Payment Method", accessor: "payment_method" },
+
+    {
+      header: "Created At",
+      accessor: (row) => (
+        <div>
+          <div>{formatDate(row.created_at)}</div>
+          <div className="text-xs text-gray-400">
+            at {formatTime(row.created_at)}
+          </div>
+        </div>
+      ),
+    },
+    { header: "Created by", accessor: "created_by_name" },
     {
       header: "Created At",
       accessor: (row) => (
@@ -106,8 +124,8 @@ export default function dashboard() {
             isLoading
               ? []
               : data
-              ? data.slice((page - 1) * pageSize, page * pageSize)
-              : []
+                ? data.slice((page - 1) * pageSize, page * pageSize)
+                : []
           }
           isLoading={isLoading}
           pagination={{

@@ -19,7 +19,9 @@ SELECT
         'total_amount', i.total_amount,
         'created_at', i.created_at,
         'payment_method', i.payment_method,
-        'created_by', u.name
+        'created_by', u.name,
+        'status', i.status,
+        'subtotal', i.subtotal
       )
       ORDER BY i.created_at DESC
     )

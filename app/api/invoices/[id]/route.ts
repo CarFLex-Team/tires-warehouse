@@ -24,7 +24,13 @@ SELECT
         'id', t.id,
         'amount', t.amount,
         'description', t.description,
-        'category_name', c.name
+        'type', t.type,
+        'category', t.category,
+        'quantity', t.quantity,
+        'product_name', p.name,
+        'service_name', s.name
+   
+
       )
     )
     FILTER (WHERE t.id IS NOT NULL),
@@ -35,8 +41,10 @@ FROM "Invoice" i
 LEFT JOIN "Transaction" t
   ON t.invoice_id = i.id
   AND t.deleted_at IS NULL
-LEFT JOIN "Category" c
-  ON c.id = t.category_id
+LEFT JOIN "Service" s
+  ON s.id = t.service_id
+LEFT JOIN "Product" p
+  ON p.id = t.product_id
 WHERE i.id = $1
   AND i.deleted_at IS NULL
 GROUP BY i.id;
@@ -54,7 +62,45 @@ GROUP BY i.id;
     );
   }
 }
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> },
+) {
+  const client = await db.connect();
+  try {
+    const { id } = await context.params;
+    const body = await req.json();
+    await client.query("BEGIN");
+    await client.query(
+      `
+   UPDATE "Invoice"
+      SET  total_amount = $2, subtotal = $3, tax = $4, payment_method = $5, updated_at = NOW(),status = 'finished'
+      WHERE id = $1
 
+      `,
+      [id, body.total_amount, body.subtotal, body.tax, body.payment_method],
+    );
+    await client.query(
+      `
+      UPDATE "Transaction"
+      SET payment_method = $1, updated_at = NOW(), status = 'finished'
+      WHERE invoice_id = $2
+      `,
+      [body.payment_method, id],
+    );
+    await client.query("COMMIT");
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("Edit Invoice Payment Method error:", err);
+    return NextResponse.json(
+      { error: "Failed to update invoice payment method" },
+      { status: 500 },
+    );
+  } finally {
+    client.release();
+  }
+}
 export async function DELETE(
   _req: Request,
   context: { params: Promise<{ id: string }> },
@@ -89,7 +135,7 @@ export async function DELETE(
       { message: "Invoice deleted (soft)" },
       { status: 200 },
     );
-  } catch {
+  } catch (err) {
     return NextResponse.json(
       { error: "Failed to delete invoice" },
       { status: 500 },

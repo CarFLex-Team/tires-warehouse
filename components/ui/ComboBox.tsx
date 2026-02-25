@@ -8,7 +8,7 @@ type Option = {
 };
 
 type ComboBoxProps = {
-  value: string;
+  value: string | undefined;
   options: Option[];
   placeholder?: string;
   onChange: (value: string) => void;
@@ -49,6 +49,9 @@ export function ComboBox({
         value={query || options.find((o) => o.value === value)?.label || ""}
         onChange={(e) => {
           setQuery(e.target.value);
+          if (e.target.value === "") {
+            onChange("");
+          }
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}

@@ -4,6 +4,8 @@ import { InvoiceTable } from "../Tables/InvoiceTable";
 import CustomButton from "../ui/CustomButton";
 import { useRouter } from "next/navigation";
 import { InvoiceItem, useInvoiceDraft } from "@/stores/useInvoiceDraft";
+import { getInventory } from "@/lib/api/inventory";
+import { useQuery } from "@tanstack/react-query";
 
 export default function CreateNewInvoice({
   customer_Id,
@@ -16,6 +18,10 @@ export default function CreateNewInvoice({
   const setCustomer = useInvoiceDraft((s) => s.setCustomer);
   const router = useRouter();
   const { items, customerId } = useInvoiceDraft((s) => s);
+  const { data: products } = useQuery({
+    queryKey: ["products"],
+    queryFn: getInventory,
+  });
   useEffect(() => {
     if (items.length && customerId === customer_Id) {
       setRows(items);
@@ -26,10 +32,12 @@ export default function CreateNewInvoice({
       ...prev,
       {
         id: crypto.randomUUID(),
-        category_id: "",
-        category_name: "",
+        category: "",
+        product_name: "",
+        service_name: "",
         description: "",
         amount: "",
+        quantity: 1,
         type: "Sales",
       },
     ]);
@@ -55,10 +63,30 @@ export default function CreateNewInvoice({
       return;
     }
     if (
-      rows.some((row) => !row.category_id || !row.description || !row.amount)
+      rows.some(
+        (row) =>
+          !row.category ||
+          !row.type ||
+          (!row.product_name && row.category === "Tire") ||
+          (!row.service_name && row.category === "Service") ||
+          row.quantity <= 0,
+      )
     ) {
       setShowAlert("Please fill in all fields for each transaction.");
       return;
+    }
+    for (const row of rows) {
+      if (row.category === "Tire") {
+        const product = products?.find(
+          (prod: any) => prod.id === row.product_id,
+        );
+        if (product && row.quantity > product.quantity) {
+          setShowAlert(
+            `Not enough inventory for ${product.name}. Available: ${product.quantity}`,
+          );
+          return;
+        }
+      }
     }
     setShowAlert("");
     console.log("Create payload:", rows);
@@ -74,6 +102,7 @@ export default function CreateNewInvoice({
         onAdd={addRow}
         onUpdate={updateRow}
         onRemove={removeRow}
+        products={products}
       />
       {showAlert && <div className="text-red-500 text-sm">{showAlert}</div>}
       <div className="flex justify-end gap-3">

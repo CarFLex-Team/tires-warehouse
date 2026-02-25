@@ -1,13 +1,16 @@
-import { CategoryType } from "@/lib/api/categories";
 import { create } from "zustand";
-
+export type TransactionType = "Sales" | "Expense";
 export type InvoiceItem = {
   id: string;
-  category_id: string;
-  category_name?: string;
+  category: string;
+  product_name?: string;
+  service_name?: string;
+  product_id?: string;
+  service_id?: string;
+  quantity: number;
   description: string;
   amount: string;
-  type: CategoryType;
+  type: TransactionType;
 };
 
 type InvoiceDraftState = {

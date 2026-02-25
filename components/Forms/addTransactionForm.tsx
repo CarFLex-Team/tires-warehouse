@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCategories } from "@/lib/api/categories";
+import { getServices } from "@/lib/api/services";
 import { useState, useEffect } from "react";
 import { ComboBox } from "../ui/ComboBox";
 import { createTransaction } from "@/lib/api/transactions";
@@ -17,11 +17,12 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
   const [errorMessage, setErrorMessage] = useState("");
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: getCategories,
+  const { data: services } = useQuery({
+    queryKey: ["services"],
+    queryFn: getServices,
   });
-  const filteredCategories = categories?.filter((c) => c.type === type);
+  // const filteredServices = services?.filter((c) => c.type === type);
+  const filteredServices = services;
   useEffect(() => {
     setCategoryId("");
   }, [type]);
@@ -85,10 +86,10 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
       </div>
       <div className="flex justify-between items-center gap-4">
-        <label className="flex-2">Category</label>
-        {filteredCategories?.length !== 0 ? (
+        <label className="flex-2">Service</label>
+        {filteredServices?.length !== 0 ? (
           <div className="flex gap-1 flex-5 flex-wrap">
-            {filteredCategories?.map((cat: any) => (
+            {filteredServices?.map((cat: any) => (
               <button
                 key={cat.id}
                 className={`flex items-center gap-1.5 rounded border border-primary-600 p-1 text-sm cursor-pointer m-0.5 ${

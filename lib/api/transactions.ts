@@ -2,8 +2,12 @@ export type CategoryType = "Sales" | "Expense";
 
 export interface Transaction {
   id: string;
-  category_id: number;
-  category_name?: string;
+  category: string;
+  product_name?: string;
+  service_name?: string;
+  product_id?: string;
+  service_id?: string;
+  quantity: number;
   description: string;
   amount: number;
   type: CategoryType;
@@ -31,14 +35,14 @@ export async function getTransactions({
   const url = date
     ? `/api/transactions?date=${date}`
     : month
-    ? `/api/transactions?month=${month}`
-    : "/api/transactions";
+      ? `/api/transactions?month=${month}`
+      : "/api/transactions";
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch transactions");
   return res.json();
 }
 export async function getTransactionsDailySummary(
-  date?: string
+  date?: string,
 ): Promise<TransactionSummary> {
   const url = date
     ? `/api/transactions/summary?date=${date}`
@@ -48,7 +52,7 @@ export async function getTransactionsDailySummary(
   return res.json();
 }
 export async function getTransactionsMonthlySummary(
-  month?: string
+  month?: string,
 ): Promise<TransactionSummary> {
   const url = month
     ? `/api/transactions/summary/monthly?month=${month}`

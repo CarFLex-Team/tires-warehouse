@@ -37,52 +37,80 @@ export async function GET(req: Request) {
   try {
     const { rows } = await db.query(
       `
-      SELECT
-        t.*,
-        c.name AS category_name,
-        u.name AS created_by_name
-        FROM "Transaction" t
-        JOIN "Category" c ON c.id = t.category_id
-        JOIN "User" u ON u.id = t.created_by
-        WHERE t.deleted_at IS NULL
-        ${whereClause}
-        ORDER BY t.created_at DESC;
+    SELECT
+    t.*,
+    s.name AS service_name,
+    p.name AS product_name,
+    u.name AS created_by_name
+FROM "Transaction" t
+LEFT JOIN "Service" s ON t.service_id = s.id
+LEFT JOIN "Product" p ON t.product_id = p.id
+JOIN "User" u ON t.created_by = u.id
+WHERE t.deleted_at IS NULL AND t.status = 'finished'
+${whereClause}
+ORDER BY t.created_at DESC;
+      
     `,
-      params
+      params,
     );
 
     return NextResponse.json(rows);
-  } catch {
+  } catch (error: any) {
     return NextResponse.json(
-      { error: "Failed to fetch transactions" },
-      { status: 500 }
+      { error: "Failed to fetch transactions", details: error.message },
+      { status: 500 },
     );
   }
 }
 
 export async function POST(req: Request) {
   try {
-    const { amount, type, category_id, description, payment_method } =
-      await req.json();
+    const {
+      amount,
+      type,
+      category,
+      description,
+      payment_method,
+      product_id,
+      service_id,
+      quantity,
+    } = await req.json();
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
       return new Response("Unauthorized", { status: 401 });
     }
-    if (!category_id || !type || !amount || !payment_method || !description) {
+    if (
+      !category ||
+      !type ||
+      !amount ||
+      !payment_method ||
+      !description ||
+      !quantity
+    ) {
       return NextResponse.json(
         { error: "All fields are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const userId = session.user.id;
     const { rows } = await db.query(
       `
-      INSERT INTO "Transaction" ( amount, type, category_id, description, payment_method, created_by)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO "Transaction" ( amount, type, category, description, payment_method, product_id, service_id, quantity, created_by)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
       `,
-      [amount, type, category_id, description, payment_method, userId]
+      [
+        amount,
+        type,
+        category,
+        description,
+        payment_method,
+        product_id,
+        service_id,
+        quantity,
+        userId,
+      ],
     );
 
     return NextResponse.json(rows[0], { status: 201 });

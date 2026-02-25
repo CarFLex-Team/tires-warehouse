@@ -47,9 +47,9 @@ export async function GET(req: Request) {
       FROM "Transaction" t
     WHERE
       t.created_at >= $1::date
-      AND t.created_at < $1::date + INTERVAL '1 day'
+      AND t.created_at < $1::date + INTERVAL '1 day' AND t.status = 'finished'
     `,
-      [targetDate]
+      [targetDate],
     );
 
     return NextResponse.json(rows[0]);
@@ -57,7 +57,7 @@ export async function GET(req: Request) {
     console.error("Daily summary error:", error);
     return NextResponse.json(
       { error: "Failed to fetch daily summary" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

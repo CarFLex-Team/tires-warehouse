@@ -1,4 +1,4 @@
-import { Home, Users, CreditCard, Settings, Package } from "lucide-react";
+import { Home, Users, CreditCard, Hammer, Package } from "lucide-react";
 
 export type NavItem = {
   id: string;
@@ -23,9 +23,9 @@ export const navByRole: Record<Role, NavItem[]> = {
       icon: CreditCard,
     },
     {
-      id: "ownerCategory",
-      label: "Category",
-      href: "/owner/category",
+      id: "ownerInventory",
+      label: "Inventory",
+      href: "/owner/inventory",
       icon: Package,
     },
     {
@@ -33,6 +33,12 @@ export const navByRole: Record<Role, NavItem[]> = {
       label: "Customers",
       href: "/owner/customers",
       icon: Users,
+    },
+    {
+      id: "ownerServices",
+      label: "Services",
+      href: "/owner/services",
+      icon: Hammer,
     },
 
     // {
@@ -52,10 +58,16 @@ export const navByRole: Record<Role, NavItem[]> = {
       icon: Users,
     },
     {
-      id: "teamCategory",
-      label: "Category",
-      href: "/category",
+      id: "teamInventory",
+      label: "Inventory",
+      href: "/inventory",
       icon: Package,
+    },
+    {
+      id: "teamServices",
+      label: "Services",
+      href: "/services",
+      icon: Hammer,
     },
   ],
 };
