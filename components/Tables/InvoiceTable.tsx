@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { ServiceType, getServices } from "@/lib/api/services";
 import { getInventory } from "@/lib/api/inventory";
 import { ca } from "zod/locales";
+import { useState } from "react";
+import { on } from "events";
 
 type Props = {
   rows: InvoiceItem[];
@@ -30,10 +32,15 @@ export function InvoiceTable({
     queryKey: ["services"],
     queryFn: getServices,
   });
+  const [condition, setCondition] = useState("");
   // const { data: products } = useQuery({
   //   queryKey: ["products"],
   //   queryFn: getInventory,
   // });
+  console.log("Products in InvoiceTable:", rows);
+  const filteredProducts = products?.filter((p) =>
+    condition ? p.condition === condition : true,
+  );
   const recalculateAmount = (
     id: string,
     category: string,
@@ -43,7 +50,9 @@ export function InvoiceTable({
   ) => {
     let price = 0;
     if (category === "Tire") {
-      price = products?.find((prod: any) => prod.id === product_id)?.price || 0;
+      price =
+        filteredProducts?.find((prod: any) => prod.id === product_id)?.price ||
+        0;
     } else if (category === "Service") {
       price = services?.find((serv: any) => serv.id === service_id)?.price || 0;
     }
@@ -113,32 +122,70 @@ export function InvoiceTable({
                 </td>
                 <td className="py-3 px-2 text-sm align-top ">
                   {row.category === "Tire" ? (
-                    <ComboBox
-                      value={row.product_id}
-                      options={
-                        products?.map((prod: any) => ({
-                          label: prod.name,
-                          value: prod.id,
-                        })) || []
-                      }
-                      placeholder="Tire"
-                      onChange={(value) => {
-                        onUpdate(row.id, "product_id", value);
-                        onUpdate(
-                          row.id,
-                          "product_name",
-                          products?.find((prod) => prod.id === value)?.name ||
-                            "",
-                        );
-                        recalculateAmount(
-                          row.id,
-                          row.category,
-                          value,
-                          row.service_id,
-                          row.quantity,
-                        );
-                      }}
-                    />
+                    <div className="flex items-center gap-2">
+                      <ComboBox
+                        value={row.product_id}
+                        options={
+                          filteredProducts?.map((prod: any) => ({
+                            label: prod.name,
+                            value: prod.id,
+                          })) || []
+                        }
+                        placeholder="Tire"
+                        onChange={(value) => {
+                          onUpdate(row.id, "product_id", value);
+                          onUpdate(
+                            row.id,
+                            "product_name",
+                            filteredProducts?.find((prod) => prod.id === value)
+                              ?.name || "",
+                          );
+                          recalculateAmount(
+                            row.id,
+                            row.category,
+                            value,
+                            row.service_id,
+                            row.quantity,
+                          );
+                        }}
+                      />
+                      <div className="flex">
+                        <button
+                          className={`flex items-center gap-1.5 border border-gray-300 p-1.5 rounded rounded-r-none text-sm cursor-pointer  ${
+                            condition === "NEW"
+                              ? "bg-primary-600 text-white"
+                              : "bg-white text-primary-600 hover:bg-gray-100"
+                          }`}
+                          onClick={() => {
+                            onUpdate(row.id, "product_id", "");
+                            onUpdate(row.id, "product_name", "");
+                            condition === "NEW"
+                              ? setCondition("")
+                              : setCondition("NEW");
+                          }}
+                          type="button"
+                        >
+                          New
+                        </button>
+                        <button
+                          className={`flex items-center gap-1.5 border border-l-0 border-gray-300 p-1.5 rounded rounded-l-none text-sm cursor-pointer  ${
+                            condition === "USED"
+                              ? "bg-primary-600 text-white"
+                              : "bg-white text-primary-600 hover:bg-gray-100"
+                          }`}
+                          onClick={() => {
+                            onUpdate(row.id, "product_id", "");
+                            onUpdate(row.id, "product_name", "");
+                            condition === "USED"
+                              ? setCondition("")
+                              : setCondition("USED");
+                          }}
+                          type="button"
+                        >
+                          Used
+                        </button>
+                      </div>
+                    </div>
                   ) : row.category === "Service" ? (
                     <ComboBox
                       value={row.service_id}
