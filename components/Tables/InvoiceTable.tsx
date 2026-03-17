@@ -39,8 +39,13 @@ export function InvoiceTable({
   // });
   console.log("Products in InvoiceTable:", rows);
   const filteredProducts = products?.filter((p) =>
-    condition ? p.condition === condition : true,
+    condition
+      ? condition === "USED SET"
+        ? p.quantity % 4 === 0 && p.condition === "USED"
+        : p.condition === condition
+      : true,
   );
+
   const recalculateAmount = (
     id: string,
     category: string,
@@ -74,7 +79,7 @@ export function InvoiceTable({
               <th className="p-2 min-w-17">Category</th>
               <th className="p-2 min-w-17">Product/Service</th>
               {/* <th className="p-2 min-w-17">Description</th> */}
-              <th className="p-2 min-w-17">Quantity</th>
+              <th className="p-2 min-w-17">Quantity (Tire)</th>
               <th className="p-2 min-w-17">Total Price</th>
               <th className="p-2 min-w-17 text-center">Actions</th>
             </tr>
@@ -183,6 +188,23 @@ export function InvoiceTable({
                           type="button"
                         >
                           Used
+                        </button>
+                        <button
+                          className={`flex items-center gap-1.5 border border-l-0 border-gray-300 p-1.5 rounded rounded-l-none text-sm cursor-pointer  ${
+                            condition === "USED SET"
+                              ? "bg-primary-600 text-white"
+                              : "bg-white text-primary-600 hover:bg-gray-100"
+                          }`}
+                          onClick={() => {
+                            onUpdate(row.id, "product_id", "");
+                            onUpdate(row.id, "product_name", "");
+                            condition === "USED SET"
+                              ? setCondition("")
+                              : setCondition("USED SET");
+                          }}
+                          type="button"
+                        >
+                          Set
                         </button>
                       </div>
                     </div>

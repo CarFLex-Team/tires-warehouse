@@ -23,9 +23,23 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const { size, brand, price, cost, quantity, condition } = await req.json();
-
+    console.log("Received data:", {
+      size,
+      brand,
+      price,
+      cost,
+      quantity,
+      condition,
+    });
     // Validate input
-    if (!size || !brand || !price || !cost || !quantity || !condition) {
+    if (
+      !size ||
+      !brand ||
+      !price ||
+      !cost ||
+      quantity === undefined ||
+      !condition
+    ) {
       return NextResponse.json(
         {
           error:

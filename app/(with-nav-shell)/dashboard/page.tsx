@@ -98,7 +98,7 @@ export default function dashboard() {
   ];
   const InventoryColumn: TableColumn<InventorySummary>[] = [
     { header: "Product", accessor: "name" },
-    { header: "Quantity", accessor: "quantity" },
+    { header: "Quantity (Tire)", accessor: "quantity" },
     {
       header: "Status",
       accessor: (row) =>

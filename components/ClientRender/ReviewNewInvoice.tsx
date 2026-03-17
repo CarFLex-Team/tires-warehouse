@@ -46,7 +46,7 @@ export default function ReviewNewInvoice({
       accessor: (item) =>
         item.category === "Tire" ? item.product_name : item.service_name,
     },
-    { header: "Quantity", accessor: "quantity" },
+    { header: "Quantity (Tire)", accessor: "quantity" },
     // { header: "Description", accessor: "description" },
     { header: "Amount", accessor: "amount" },
   ];

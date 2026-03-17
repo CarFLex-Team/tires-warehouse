@@ -127,7 +127,7 @@ export function EditProductForm({
         />
       </div>
       <div className="flex justify-between items-center gap-4">
-        <label className="flex-2">New Quantity</label>
+        <label className="flex-2">New Quantity (Tire)</label>
         <input
           className="p-2 border border-gray-300 rounded-lg flex-5"
           value={quantity}

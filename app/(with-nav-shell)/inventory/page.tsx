@@ -79,7 +79,7 @@ export default function Service() {
     // { header: "SKU", accessor: "sku" },
     { header: "Price", accessor: "price" },
     { header: "Cost", accessor: "cost" },
-    { header: "Quantity", accessor: "quantity" },
+    { header: "Quantity (Tire)", accessor: "quantity" },
     // {
     //   header: "Status",
     //   accessor: (row) => (row.is_active ? "Active" : "Inactive"),
@@ -111,7 +111,11 @@ export default function Service() {
       product.condition.toLowerCase().includes(value);
 
     // Check if the condition filter is applied
-    const matchesCondition = condition ? product.condition === condition : true;
+    const matchesCondition = condition
+      ? condition === "USED SET"
+        ? product.quantity % 4 === 0 && product.condition === "USED"
+        : product.condition === condition
+      : true;
 
     return matchesSearch && matchesCondition;
   });
@@ -184,6 +188,21 @@ export default function Service() {
                   type="button"
                 >
                   Used
+                </button>
+                <button
+                  className={`flex items-center gap-1.5  border-b border-gray-300 border-l-0 p-2  text-sm cursor-pointer  ${
+                    condition === "USED SET"
+                      ? "bg-primary-600 text-white"
+                      : "bg-white text-primary-600 hover:bg-gray-100"
+                  }`}
+                  onClick={() =>
+                    condition === "USED SET"
+                      ? setCondition("")
+                      : setCondition("USED SET")
+                  }
+                  type="button"
+                >
+                  Used Set
                 </button>
               </div>
               <input

@@ -168,7 +168,7 @@ export function AddProductForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="flex justify-between items-center gap-4">
-        <label className="flex-2">Quantity</label>
+        <label className="flex-2">Quantity (Tire)</label>
         <input
           className="p-2 border border-gray-300 rounded-lg flex-5"
           value={quantity}

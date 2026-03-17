@@ -77,7 +77,7 @@ export default function Service() {
     // { header: "SKU", accessor: "sku" },
     { header: "Price", accessor: "price" },
     { header: "Cost", accessor: "cost" },
-    { header: "Quantity", accessor: "quantity" },
+    { header: "Quantity (Tire)", accessor: "quantity" },
     // {
     //   header: "Status",
     //   accessor: (row) => (row.is_active ? "Active" : "Inactive"),
