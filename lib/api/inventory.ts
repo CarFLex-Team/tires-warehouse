@@ -8,7 +8,7 @@ export interface InventoryProduct {
   cost: number;
   quantity: number;
   is_active: boolean;
-  condition: "USED" | "NEW";
+  condition: "USED" | "NEW" | "SET";
   created_at: string;
   updated_at: string;
 }
@@ -27,7 +27,7 @@ export async function getInventory(): Promise<InventoryProduct[]> {
 }
 
 export async function createInventoryProduct(data: {
-  condition: "USED" | "NEW" | "";
+  condition: "USED" | "NEW" | "SET"|"";
   size: string;
   brand: string;
   price: number;

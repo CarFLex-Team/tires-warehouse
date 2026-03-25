@@ -124,6 +124,7 @@ export default function dashboard() {
         row.category === "Tire" ? row.product_name : row.service_name,
     },
     // { header: "Description", accessor: "description" },
+    { header: "Quantity", accessor: "quantity" },
     { header: "Amount", accessor: "amount" },
     { header: "Payment Method", accessor: "payment_method" },
 

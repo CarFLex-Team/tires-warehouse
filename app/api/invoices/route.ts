@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
+import handleTireSet from "@/lib/handleTireSet";
 export async function GET() {
   try {
     const { rows } = await db.query(`
@@ -23,6 +24,7 @@ ORDER BY i.created_at DESC
     );
   }
 }
+
 export async function POST(req: Request) {
   const client = await db.connect();
 
@@ -96,7 +98,7 @@ export async function POST(req: Request) {
             status,
           ],
         );
-        await client.query(
+        const { rows: updatedInventoryRows } = await client.query(
           `
           UPDATE "Inventory" i
           SET quantity = quantity - $1
@@ -104,7 +106,8 @@ export async function POST(req: Request) {
           WHERE p.id = $2
             AND i.product_id = p.id
             AND p.deleted_at IS NULL
-            AND i.quantity >= $1;
+            AND i.quantity >= $1
+            RETURNING p.id, quantity, price ,cost ,size
         
         `,
           [tx.quantity, tx.product_id],
@@ -117,6 +120,13 @@ export async function POST(req: Request) {
           `,
           [tx.product_id, tx.quantity, invoiceId],
         );
+        const productRes = await client.query(
+          `SELECT condition, size FROM "Product" WHERE id = $1`,
+          [tx.product_id],
+        );
+        if (productRes.rows[0].condition === "SET" && tx.quantity % 4 !== 0) {
+          await handleTireSet(client, updatedInventoryRows[0]);
+        }
       } else if (tx.category === "Service") {
         await client.query(
           `

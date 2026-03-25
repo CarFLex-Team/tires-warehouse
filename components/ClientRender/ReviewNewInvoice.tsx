@@ -36,6 +36,9 @@ export default function ReviewNewInvoice({
       clear();
       router.push(`/customers/${customer_Id}/invoices`);
     },
+    onError: (error: any) => {
+      setAlertMessage(error.message || "An error occurred");
+    },
   });
 
   const invoiceItemColumns: TableColumn<InvoiceItem>[] = [

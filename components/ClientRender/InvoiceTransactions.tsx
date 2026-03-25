@@ -28,6 +28,7 @@ export default function invoiceTransactions({
       header: "Product/Service",
       accessor: (tx) => tx.product_name || tx.service_name,
     },
+    { header: "Quantity", accessor: "quantity" },
     { header: "Type", accessor: "type" },
     { header: "Category", accessor: "category" },
 

@@ -13,7 +13,7 @@ export function AddProductForm({ onSuccess }: { onSuccess: () => void }) {
   const [price, setPrice] = useState("");
   const [cost, setCost] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [condition, setCondition] = useState<"USED" | "NEW" | "">("");
+  const [condition, setCondition] = useState<"USED" | "NEW" | "SET" | "">("");
   const [isPercent, setIsPercent] = useState(false);
   const [markupPercent, setMarkupPercent] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -98,6 +98,17 @@ export function AddProductForm({ onSuccess }: { onSuccess: () => void }) {
             type="button"
           >
             Used
+          </button>
+          <button
+            className={`flex items-center gap-1.5 rounded border border-primary-600 p-2  text-sm cursor-pointer  ${
+              condition === "SET"
+                ? "bg-primary-600 text-white"
+                : "bg-white text-primary-600 hover:bg-gray-100"
+            }`}
+            onClick={() => setCondition("SET")}
+            type="button"
+          >
+            Used Set
           </button>
         </div>
       </div>
