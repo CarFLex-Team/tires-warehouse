@@ -20,6 +20,8 @@ export default function Service() {
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [condition, setCondition] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] =
@@ -100,6 +102,19 @@ export default function Service() {
         ),
     },
   ];
+  const filteredInventory = data?.filter((product) => {
+    const value = search.toLowerCase();
+    const matchesSearch =
+      product.name.toLowerCase().includes(value) ||
+      product.brand.toLowerCase().includes(value) ||
+      product.size.includes(value) ||
+      product.condition.toLowerCase().includes(value);
+
+    // Check if the condition filter is applied
+    const matchesCondition = condition ? product.condition === condition : true;
+
+    return matchesSearch && matchesCondition;
+  });
   if (error) return <p>Error {error.message}</p>;
 
   return (
@@ -122,28 +137,84 @@ export default function Service() {
         </Modal>
       )}
       <DataTable
-        title="Inventory"
         columns={productColumns}
         data={
           isLoading
             ? []
-            : data?.slice((page - 1) * pageSize, page * pageSize) || []
+            : filteredInventory?.slice(
+                (page - 1) * pageSize,
+                page * pageSize,
+              ) || []
         }
         isLoading={isLoading}
         pagination={{
           page,
           pageSize,
-          total: data?.length || 1,
+          total: filteredInventory?.length || 1,
           onPageChange: setPage,
         }}
         action={
-          <CustomButton
-            onClick={() => {
-              setOpen(true);
-            }}
-          >
-            Add Product
-          </CustomButton>
+          <>
+            <div className="flex">
+              <div className="flex">
+                <button
+                  className={`flex items-center gap-1.5 border-b border-gray-300 p-2  text-sm cursor-pointer  ${
+                    condition === "NEW"
+                      ? "bg-primary-600 text-white"
+                      : "bg-white text-primary-600 hover:bg-gray-100"
+                  }`}
+                  onClick={() =>
+                    condition === "NEW" ? setCondition("") : setCondition("NEW")
+                  }
+                  type="button"
+                >
+                  New
+                </button>
+                <button
+                  className={`flex items-center gap-1.5  border-b border-gray-300 border-l-0 p-2  text-sm cursor-pointer  ${
+                    condition === "USED"
+                      ? "bg-primary-600 text-white"
+                      : "bg-white text-primary-600 hover:bg-gray-100"
+                  }`}
+                  onClick={() =>
+                    condition === "USED"
+                      ? setCondition("")
+                      : setCondition("USED")
+                  }
+                  type="button"
+                >
+                  Used
+                </button>
+                <button
+                  className={`flex items-center gap-1.5  border-b border-gray-300 border-l-0 p-2  text-sm cursor-pointer  ${
+                    condition === "SET"
+                      ? "bg-primary-600 text-white"
+                      : "bg-white text-primary-600 hover:bg-gray-100"
+                  }`}
+                  onClick={() =>
+                    condition === "SET" ? setCondition("") : setCondition("SET")
+                  }
+                  type="button"
+                >
+                  Used Set
+                </button>
+              </div>
+              <input
+                type="text"
+                placeholder="Search Inventory"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className=" p-2 border-b border-gray-300 focus:outline-none min-w-25"
+              />
+            </div>
+            <CustomButton
+              onClick={() => {
+                setOpen(true);
+              }}
+            >
+              Add Product
+            </CustomButton>
+          </>
         }
         renderActions={(row) => (
           <>

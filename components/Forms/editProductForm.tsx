@@ -8,9 +8,11 @@ import { useEffect, useState } from "react";
 export function EditProductForm({
   onSuccess,
   product,
+  forAddNew = false,
 }: {
   onSuccess: () => void;
   product: InventoryProduct | null;
+  forAddNew?: boolean;
 }) {
   const queryClient = useQueryClient();
   // const [name, setName] = useState("");
@@ -78,7 +80,9 @@ export function EditProductForm({
       price: Number(price),
       cost: Number(cost),
       is_active: product!.is_active,
-      quantity: Number(quantity) + Number(oldQuantity),
+      quantity: forAddNew
+        ? Number(quantity) + Number(oldQuantity)
+        : Number(quantity),
     });
   }
 
@@ -106,34 +110,44 @@ export function EditProductForm({
           disabled
         />
       </div>
-      <div className="flex justify-between items-center gap-4">
-        <label className="flex-2">New Cost</label>
-        <input
-          className="p-2 border border-gray-300 rounded-lg flex-5 disabled:bg-gray-100"
-          value={cost}
-          onChange={(e) => setCost(e.target.value)}
-          placeholder="Enter Cost"
-          required
-        />
-      </div>
+      {forAddNew && (
+        <>
+          <div className="flex justify-between items-center gap-4">
+            <label className="flex-2">New Cost</label>
+            <input
+              className="p-2 border border-gray-300 rounded-lg flex-5 disabled:bg-gray-100"
+              value={cost}
+              onChange={(e) => setCost(e.target.value)}
+              placeholder="Enter Cost"
+              required
+            />
+          </div>
 
+          <div className="flex justify-between items-center gap-4">
+            <label className="flex-2">New Price</label>
+            <input
+              className="p-2 border border-gray-300 rounded-lg flex-5"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              required
+            />
+          </div>
+        </>
+      )}
       <div className="flex justify-between items-center gap-4">
-        <label className="flex-2">New Price</label>
-        <input
-          className="p-2 border border-gray-300 rounded-lg flex-5"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          required
-        />
-      </div>
-      <div className="flex justify-between items-center gap-4">
-        <label className="flex-2">New Quantity (Tire)</label>
+        <label className="flex-2">
+          {forAddNew ? "New Quantity (Tire)" : "Edit Quantity (Tire)"}
+        </label>
         <input
           className="p-2 border border-gray-300 rounded-lg flex-5"
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
           required
-          placeholder="Enter quantity to add to inventory"
+          placeholder={
+            forAddNew
+              ? "Enter quantity to add to inventory"
+              : "Enter quantity to edit"
+          }
         />
       </div>
       <div className="flex justify-end gap-2 pt-2">

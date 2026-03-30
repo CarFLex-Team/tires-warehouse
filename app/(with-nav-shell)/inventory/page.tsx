@@ -19,6 +19,7 @@ import { EditProductForm } from "@/components/Forms/editProductForm";
 export default function Service() {
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [condition, setCondition] = useState("");
@@ -124,6 +125,19 @@ export default function Service() {
           <AddProductForm onSuccess={() => setOpen(false)} />
         </Modal>
       )}
+      {addOpen && (
+        <Modal
+          isOpen={addOpen}
+          onClose={() => setAddOpen(false)}
+          title="Add Stock"
+        >
+          <EditProductForm
+            product={selectedProduct}
+            onSuccess={() => setAddOpen(false)}
+            forAddNew={true}
+          />
+        </Modal>
+      )}
       {editOpen && (
         <Modal
           isOpen={editOpen}
@@ -192,9 +206,7 @@ export default function Service() {
                       : "bg-white text-primary-600 hover:bg-gray-100"
                   }`}
                   onClick={() =>
-                    condition === "SET"
-                      ? setCondition("")
-                      : setCondition("SET")
+                    condition === "SET" ? setCondition("") : setCondition("SET")
                   }
                   type="button"
                 >
@@ -245,11 +257,22 @@ export default function Service() {
                       setSelectedMenuId(row.id);
                       setSelectedId(row.id);
                       setSelectedProduct(row);
-                      setEditOpen(true);
+                      setAddOpen(true);
                     }}
                     className="block px-4 py-2 text-sm rounded-t-md text-gray-700 hover:bg-gray-100 w-full text-left"
                   >
                     Add New
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedMenuId(row.id);
+                      setSelectedId(row.id);
+                      setSelectedProduct(row);
+                      setEditOpen(true);
+                    }}
+                    className="block px-4 py-2 text-sm rounded-t-md text-gray-700 hover:bg-gray-100 w-full text-left"
+                  >
+                    Edit
                   </button>
 
                   {/* Trash Option */}
