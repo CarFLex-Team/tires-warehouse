@@ -71,7 +71,7 @@ export default function customers() {
           pagination={{
             page,
             pageSize,
-            total: filteredCustomers?.length || 1,
+            total: filteredCustomers?.length || 0,
             onPageChange: setPage,
           }}
           action={

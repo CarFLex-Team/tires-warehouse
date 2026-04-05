@@ -65,7 +65,7 @@ export default function ServicePage() {
         pagination={{
           page,
           pageSize,
-          total: data?.length || 1,
+          total: data?.length || 0,
           onPageChange: setPage,
         }}
         action={

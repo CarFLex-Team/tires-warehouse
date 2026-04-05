@@ -116,7 +116,7 @@ export default function CustomerInvoices({
         pagination={{
           page,
           pageSize,
-          total: customer?.invoices.length || 1,
+          total: customer?.invoices.length || 0,
           onPageChange: setPage,
         }}
         action={

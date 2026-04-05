@@ -234,7 +234,7 @@ export default function dashboard() {
           pagination={{
             page,
             pageSize,
-            total: data ? data.length : 1,
+            total: data ? data.length : 0,
             onPageChange: setPage,
           }}
           // action={
