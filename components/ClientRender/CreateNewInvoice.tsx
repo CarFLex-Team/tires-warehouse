@@ -37,6 +37,7 @@ export default function CreateNewInvoice({
         service_name: "",
         description: "",
         amount: "",
+        cost: "",
         quantity: 1,
         type: "Sales",
       },

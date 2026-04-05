@@ -29,9 +29,10 @@ export function DataTable<T>({
   renderActions,
 }: DataTableProps<T>) {
   const totalPages = pagination
-    ? Math.ceil(pagination.total / pagination.pageSize)
+    ? Math.ceil(pagination.total / pagination.pageSize) === 0
+      ? 1
+      : Math.ceil(pagination.total / pagination.pageSize)
     : 0;
-
   return (
     <div className="rounded-xl bg-white p-5 m-4 shadow-sm">
       {/* Header */}
@@ -81,7 +82,7 @@ export function DataTable<T>({
                     <td key={colIndex} className="py-3 px-2 text-sm">
                       {typeof col.accessor === "function"
                         ? col.accessor(row)
-                        : col.header === "Amount"
+                        : col.header === "Amount" || col.header === "Cost"
                           ? "$" + (row[col.accessor] as React.ReactNode)
                           : (row[col.accessor] as React.ReactNode)}
                     </td>
@@ -121,7 +122,7 @@ export function DataTable<T>({
         </div>
       )}
       <div className="mt-4 flex items-center justify-center text-md text-gray-500">
-        <span>Total Records: {data.length}</span>
+        <span>Total Records: {pagination?.total || data.length || 0}</span>
       </div>
     </div>
   );

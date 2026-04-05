@@ -41,7 +41,6 @@ export function InvoiceTable({
   const filteredProducts = products?.filter((p) =>
     condition ? p.condition === condition : true,
   );
-
   const recalculateAmount = (
     id: string,
     category: string,
@@ -76,7 +75,8 @@ export function InvoiceTable({
               <th className="p-2 min-w-17">Product/Service</th>
               {/* <th className="p-2 min-w-17">Description</th> */}
               <th className="p-2 min-w-17">Quantity (Tire)</th>
-              <th className="p-2 min-w-17">Total Price</th>
+              <th className="p-2 min-w-17">Price</th>
+              <th className="p-2 min-w-17">Cost</th>
               <th className="p-2 min-w-17 text-center">Actions</th>
             </tr>
           </thead>
@@ -140,6 +140,12 @@ export function InvoiceTable({
                             "product_name",
                             filteredProducts?.find((prod) => prod.id === value)
                               ?.name || "",
+                          );
+                          onUpdate(
+                            row.id,
+                            "cost",
+                            filteredProducts?.find((prod) => prod.id === value)
+                              ?.cost || 0,
                           );
                           recalculateAmount(
                             row.id,
@@ -222,6 +228,7 @@ export function InvoiceTable({
                           services?.find((serv) => serv.id === value)?.name ||
                             "",
                         );
+                        onUpdate(row.id, "cost", 0);
                         recalculateAmount(
                           row.id,
                           row.category,
@@ -257,6 +264,14 @@ export function InvoiceTable({
                   <input
                     disabled
                     value={row.amount}
+                    // onChange={(e) => onUpdate(row.id, "amount", e.target.value)}
+                    className="w-full rounded border px-2 py-1"
+                  />
+                </td>
+                <td className="py-3 px-2 text-sm align-top">
+                  <input
+                    disabled
+                    value={row.cost}
                     // onChange={(e) => onUpdate(row.id, "amount", e.target.value)}
                     className="w-full rounded border px-2 py-1"
                   />

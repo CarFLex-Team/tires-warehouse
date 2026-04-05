@@ -52,6 +52,7 @@ export default function ReviewNewInvoice({
     { header: "Quantity (Tire)", accessor: "quantity" },
     // { header: "Description", accessor: "description" },
     { header: "Amount", accessor: "amount" },
+    { header: "Cost", accessor: "cost" },
   ];
   const subTotal = items.reduce(
     (total, item) => total + Number(item.amount),

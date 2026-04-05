@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation";
 export default function dashboard() {
   const router = useRouter();
   const [page, setPage] = useState(1);
+  const [stockPage, setStockPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -200,10 +201,19 @@ export default function dashboard() {
             summaryInventoryLoading
               ? []
               : summaryInventoryData
-                ? summaryInventoryData
+                ? summaryInventoryData.slice(
+                    (stockPage - 1) * pageSize,
+                    stockPage * pageSize,
+                  )
                 : []
           }
           isLoading={summaryInventoryLoading}
+          pagination={{
+            page: stockPage,
+            pageSize,
+            total: summaryInventoryData?.length || 0,
+            onPageChange: setStockPage,
+          }}
         />
         <OverviewStats
           title="Daily Overview"
@@ -246,7 +256,7 @@ export default function dashboard() {
           pagination={{
             page,
             pageSize,
-            total: data?.length || 1,
+            total: data?.length || 0,
             onPageChange: setPage,
           }}
           // action={
