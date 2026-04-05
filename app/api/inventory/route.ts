@@ -8,7 +8,7 @@ export async function GET() {
       FROM "Inventory" as i , "Product" as p
       WHERE i.product_id = p.id
         AND p.deleted_at IS NULL
-      ORDER BY p.created_at DESC
+      ORDER BY size ASC
     `);
 
     return NextResponse.json(rows);

@@ -144,7 +144,7 @@ export default function dashboard() {
           <p className="bg-red-300 text-center px-2 py-1 rounded">
             Out of Stock
           </p>
-        ) : row.quantity <= 10 ? (
+        ) : row.quantity <= 4 ? (
           <p className="bg-yellow-300 text-center px-2 py-1 rounded">
             Low Stock
           </p>

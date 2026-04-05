@@ -120,6 +120,9 @@ export function DataTable<T>({
           </button>
         </div>
       )}
+      <div className="mt-4 flex items-center justify-center text-md text-gray-500">
+        <span>Total Records: {data.length}</span>
+      </div>
     </div>
   );
 }

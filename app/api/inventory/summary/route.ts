@@ -7,7 +7,7 @@ export async function GET() {
       SELECT i.id AS inventory_id, p.id AS id,name,size,brand,sku, price, cost,quantity,is_active,  p.created_at,  p.updated_at,condition
       FROM "Inventory" as i , "Product" as p
       WHERE i.product_id = p.id
-        AND p.deleted_at IS NULL AND i.quantity <= 10
+        AND p.deleted_at IS NULL AND i.quantity <= 4
       ORDER BY i.quantity ASC
     `);
 
