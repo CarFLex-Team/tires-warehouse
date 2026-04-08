@@ -34,7 +34,7 @@ export default function invoiceTransactions({
 
     { header: "Amount", accessor: "amount" },
   ];
-
+  if (error) return <p>Error {error.message}</p>;
   return (
     <>
       <InfoCard

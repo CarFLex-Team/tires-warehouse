@@ -182,6 +182,17 @@ export default function dashboard() {
           columns={invoiceColumns}
           data={invoiceLoading ? [] : invoiceData ? invoiceData : []}
           isLoading={invoiceLoading}
+          action={
+            <CustomButton
+              onClick={() => {
+                router.push(
+                  `/customers/88edfb3d-5402-4f8f-833f-0659d6dc60ff/invoices/new`,
+                );
+              }}
+            >
+              Create Invoice
+            </CustomButton>
+          }
           renderActions={(row) => (
             <CustomButton
               onClick={() => {

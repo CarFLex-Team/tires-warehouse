@@ -18,6 +18,7 @@ export default function ReviewNewInvoice({
   const { items, customerId } = useInvoiceDraft();
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string>("");
+  const [tax, setTax] = useState(0);
   const clear = useInvoiceDraft((s) => s.clear);
   useEffect(() => {
     if (!items.length) {
@@ -58,7 +59,14 @@ export default function ReviewNewInvoice({
     (total, item) => total + Number(item.amount),
     0,
   );
-  const tax = paymentMethod === "Debit" ? Math.floor(subTotal * 0.07) : 0;
+  useEffect(() => {
+    if (paymentMethod === "Debit") {
+      setTax(Math.floor(subTotal * 0.07));
+    } else {
+      setTax(0);
+    }
+  }, [paymentMethod, subTotal]);
+
   const totalAmount = subTotal + tax;
 
   function saveInvoice() {
@@ -138,7 +146,15 @@ export default function ReviewNewInvoice({
             </p>
           )}
           {paymentMethod === "Debit" && (
-            <p className="text-sm text-gray-500">Tax(10%): ${tax.toFixed(2)}</p>
+            <p className="text-sm text-gray-500">
+              Tax(10%): $
+              <input
+                type="text"
+                value={tax}
+                onChange={(e) => setTax(Number(e.target.value))}
+                className=" w-6 rounded border border-gray-300 px-1 py-0.5  text-sm"
+              />
+            </p>
           )}
           <p className="text-sm text-gray-500">
             Total: ${totalAmount.toFixed(2)}

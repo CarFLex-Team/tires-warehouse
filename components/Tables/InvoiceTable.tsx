@@ -164,8 +164,6 @@ export function InvoiceTable({
                               : "bg-white text-primary-600 hover:bg-gray-100"
                           }`}
                           onClick={() => {
-                            onUpdate(row.id, "product_id", "");
-                            onUpdate(row.id, "product_name", "");
                             condition === "NEW"
                               ? setCondition("")
                               : setCondition("NEW");
@@ -181,8 +179,6 @@ export function InvoiceTable({
                               : "bg-white text-primary-600 hover:bg-gray-100"
                           }`}
                           onClick={() => {
-                            onUpdate(row.id, "product_id", "");
-                            onUpdate(row.id, "product_name", "");
                             condition === "USED"
                               ? setCondition("")
                               : setCondition("USED");
@@ -198,8 +194,8 @@ export function InvoiceTable({
                               : "bg-white text-primary-600 hover:bg-gray-100"
                           }`}
                           onClick={() => {
-                            onUpdate(row.id, "product_id", "");
-                            onUpdate(row.id, "product_name", "");
+                            // onUpdate(row.id, "product_id", "");
+                            // onUpdate(row.id, "product_name", "");
                             condition === "SET"
                               ? setCondition("")
                               : setCondition("SET");
@@ -262,9 +258,8 @@ export function InvoiceTable({
 
                 <td className="py-3 px-2 text-sm align-top">
                   <input
-                    disabled
                     value={row.amount}
-                    // onChange={(e) => onUpdate(row.id, "amount", e.target.value)}
+                    onChange={(e) => onUpdate(row.id, "amount", e.target.value)}
                     className="w-full rounded border px-2 py-1"
                   />
                 </td>
