@@ -40,11 +40,11 @@ export async function PUT(
     await client.query(
       `
    UPDATE "Product"
-      SET  price = $2, cost = $3, is_active = $4, updated_at = NOW()
+      SET  price = $2, cost = $3, is_active = $4, updated_at = NOW(), size = $5
       WHERE id = $1
 
       `,
-      [id, body.price, body.cost, body.is_active],
+      [id, body.price, body.cost, body.is_active, body.size],
     );
     await client.query(
       `

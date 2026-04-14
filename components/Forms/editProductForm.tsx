@@ -32,7 +32,7 @@ export function EditProductForm({
       setPrice(product.price.toString());
       setOldCost(product.cost.toString());
       setCost(product.cost.toString());
-
+      setQuantity(product.quantity.toString());
       setOldQuantity(product.quantity.toString());
       setOldPrice(product.price.toString());
     }
@@ -77,6 +77,7 @@ export function EditProductForm({
 
     mutation.mutate({
       id: product!.id,
+      size,
       price: Number(price),
       cost: Number(cost),
       is_active: product!.is_active,
@@ -107,7 +108,6 @@ export function EditProductForm({
           onChange={(e) => setSize(e.target.value)}
           placeholder="Enter Product Size"
           required
-          disabled
         />
       </div>
       {forAddNew && (

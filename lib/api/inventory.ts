@@ -27,7 +27,7 @@ export async function getInventory(): Promise<InventoryProduct[]> {
 }
 
 export async function createInventoryProduct(data: {
-  condition: "USED" | "NEW" | "SET"|"";
+  condition: "USED" | "NEW" | "SET" | "";
   size: string;
   brand: string;
   price: number;
@@ -54,6 +54,7 @@ export async function deleteProduct(id: string) {
 }
 export async function editInventoryProduct(data: {
   id: string;
+  size: string;
   price: number;
   cost: number;
   is_active: boolean;
