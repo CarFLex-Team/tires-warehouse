@@ -8,7 +8,9 @@ import { useEffect, useState } from "react";
 export function AddProductForm({ onSuccess }: { onSuccess: () => void }) {
   const queryClient = useQueryClient();
   // const [name, setName] = useState("");
-  const [size, setSize] = useState("");
+  const [size1, setSize1] = useState("");
+  const [size2, setSize2] = useState("");
+  const [size3, setSize3] = useState("");
   const [brand, setBrand] = useState("");
   const [price, setPrice] = useState("");
   const [cost, setCost] = useState("");
@@ -33,7 +35,9 @@ export function AddProductForm({ onSuccess }: { onSuccess: () => void }) {
     mutationFn: createInventoryProduct,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
-      setSize("");
+      setSize1("");
+      setSize2("");
+      setSize3("");
       setBrand("");
       setPrice("");
       setCost("");
@@ -50,7 +54,9 @@ export function AddProductForm({ onSuccess }: { onSuccess: () => void }) {
     e.preventDefault();
     if (
       !condition ||
-      !size ||
+      !size1 ||
+      !size2 ||
+      !size3 ||
       !brand ||
       !price ||
       !cost ||
@@ -63,7 +69,7 @@ export function AddProductForm({ onSuccess }: { onSuccess: () => void }) {
 
     mutation.mutate({
       condition,
-      size,
+      size: `${size1}/${size2}/${size3}`,
       brand,
       price: Number(price),
       cost: Number(cost),
@@ -123,14 +129,29 @@ export function AddProductForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div className="flex justify-between items-center gap-4">
-        <label className="flex-2">Size</label>
-        <input
-          className="p-2 border border-gray-300 rounded-lg flex-5"
-          value={size}
-          onChange={(e) => setSize(e.target.value)}
-          placeholder="Enter Product Size"
-          required
-        />
+        <label className="flex-3">Size</label>
+        <div className="flex items-center flex-8 gap-1 ">
+          <input
+            className="p-2 border border-gray-300 rounded-lg w-full "
+            value={size1}
+            onChange={(e) => setSize1(e.target.value)}
+            required
+          />
+          <span>/</span>
+          <input
+            className="p-2 border border-gray-300 rounded-lg w-full "
+            value={size2}
+            onChange={(e) => setSize2(e.target.value)}
+            required
+          />
+          <span>/</span>
+          <input
+            className=" p-2 border border-gray-300 rounded-lg w-full"
+            value={size3}
+            onChange={(e) => setSize3(e.target.value)}
+            required
+          />
+        </div>
       </div>
 
       <div className="">
