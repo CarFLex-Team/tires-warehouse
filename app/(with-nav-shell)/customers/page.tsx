@@ -44,8 +44,12 @@ export default function customers() {
     { header: "Phone", accessor: "phone" },
     { header: "Added At", accessor: "created_at" },
   ];
-
-  const filteredCustomers = data?.filter((customer) => {
+  const sortedData = [...(data || [])].sort((a, b) => {
+    if (a.id === "88edfb3d-5402-4f8f-833f-0659d6dc60ff") return -1; // a goes first
+    if (b.id === "88edfb3d-5402-4f8f-833f-0659d6dc60ff") return 1; // b goes after
+    return 0; // keep the original order for others
+  });
+  const filteredCustomers = sortedData?.filter((customer) => {
     const value = search.toLowerCase();
 
     return (
@@ -54,6 +58,7 @@ export default function customers() {
       customer.phone.includes(value)
     );
   });
+
   if (error) return <p>Error {error.message}</p>;
   return (
     <>
@@ -101,18 +106,21 @@ export default function customers() {
               </CustomButton>
             </>
           }
-          renderActions={(row) => (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedId(row.id);
-                setConfirmOpen(true);
-              }}
-              className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
-            >
-              <Trash size={16} />
-            </button>
-          )}
+          renderActions={(row) => {
+            if (row.id === "88edfb3d-5402-4f8f-833f-0659d6dc60ff") return null;
+            return (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedId(row.id);
+                  setConfirmOpen(true);
+                }}
+                className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+              >
+                <Trash size={16} />
+              </button>
+            );
+          }}
         />
       </div>
       <ConfirmDialog
