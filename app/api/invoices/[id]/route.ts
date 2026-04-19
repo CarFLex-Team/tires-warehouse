@@ -18,6 +18,8 @@ SELECT
   i.subtotal,
   i.tax,
   i.payment_method,
+  i.cash_amount,
+  i.debit_amount,
   COALESCE(
     json_agg(
       jsonb_build_object(
@@ -74,11 +76,19 @@ export async function PUT(
     await client.query(
       `
    UPDATE "Invoice"
-      SET  total_amount = $2, subtotal = $3, tax = $4, payment_method = $5, updated_at = NOW(),status = 'finished'
+      SET  total_amount = $2, subtotal = $3, tax = $4, payment_method = $5, updated_at = NOW(),status = 'finished' ,cash_amount = $6, debit_amount = $7
       WHERE id = $1
 
       `,
-      [id, body.total_amount, body.subtotal, body.tax, body.payment_method],
+      [
+        id,
+        body.total_amount,
+        body.subtotal,
+        body.tax,
+        body.payment_method,
+        body.cash_amount,
+        body.debit_amount,
+      ],
     );
     await client.query(
       `

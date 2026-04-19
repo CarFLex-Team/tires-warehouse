@@ -55,14 +55,23 @@ export default function CustomerInvoices({
       ),
     },
     {
-      header: "Amount",
+      header: "Total Amount",
       accessor: (row) => `$${row.total_amount ?? row.subtotal}`,
     },
+    {
+      header: "SubTotal",
+      accessor: (row) => `$${row.subtotal}`,
+    },
+    // {
+    //   header: "Tax",
+    //   accessor: (row) => `$${row.tax ?? 0}`,
+    // },
     {
       header: "Status",
       accessor: (row) => <p className="capitalize">{row.status}</p>,
     },
-    { header: "Payment Method", accessor: "payment_method" },
+    // { header: "Payment Method", accessor: "payment_method" },
+
     { header: "Created By", accessor: "created_by" },
   ];
   const actionColumn = !isOwner

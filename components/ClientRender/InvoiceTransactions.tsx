@@ -38,8 +38,29 @@ export default function invoiceTransactions({
   return (
     <>
       <InfoCard
-        title={"Invoice Total"}
-        subtitle={`$${data?.total_amount || "Amount not available"}`}
+        title={"Invoice Details"}
+        // subtitle={`Total $${data?.total_amount || "Amount not available"}`}
+        extraSubtitle={
+          <>
+            <p className="text-sm text-gray-500">
+              <span className="font-medium">Subtotal</span> $
+              {data?.subtotal || "0.00"}
+            </p>
+            <p className="text-sm text-gray-500">
+              <span className="font-medium">Tax</span> ${data?.tax || "0.00"}
+            </p>
+            <p className="text-sm text-gray-500">
+              <span className="font-medium">Total</span> $
+              {data?.total_amount || "0.00"}
+            </p>
+            <p className="text-sm text-gray-500">
+              <span className="text-red-500 font-medium">Cash</span> $
+              {data?.cash_amount || "0.00"} |{" "}
+              <span className="text-purple-500 font-medium">Debit</span> $
+              {data?.debit_amount || "0.00"}
+            </p>
+          </>
+        }
         meta={`Created at ${data ? formatDate(data.created_at) : "Date not available"}`}
         isLoading={isLoading}
       />

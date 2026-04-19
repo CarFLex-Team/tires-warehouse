@@ -3,7 +3,7 @@ import CustomButton from "@/components/ui/CustomButton";
 import { DataTable } from "@/components/Tables/DataTable";
 import { TableColumn } from "@/components/Tables/Type";
 import { useRouter } from "next/navigation";
-import { Banknote, CreditCard } from "lucide-react";
+import { Banknote, CreditCard, Merge } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createInvoice, editInvoice, getInvoiceById } from "@/lib/api/invoices";
@@ -20,6 +20,9 @@ export default function EditInvoice({
   const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string>("");
+  const [tax, setTax] = useState(0);
+  const [cashAmount, setCashAmount] = useState(0);
+  const [debitAmount, setDebitAmount] = useState(0);
   const { data, isLoading, error } = useQuery<Invoice>({
     queryKey: ["invoices", invoice_Id],
     queryFn: () => getInvoiceById(invoice_Id),
@@ -28,11 +31,16 @@ export default function EditInvoice({
     mutationFn: (data: {
       total_amount?: number;
       subtotal: number;
+      cash_amount?: number;
+      debit_amount?: number;
       tax?: number;
       payment_method?: string;
     }) => editInvoice(invoice_Id, data),
     onSuccess: () => {
       router.push(`/customers/${customer_Id}/invoices/${invoice_Id}`);
+    },
+    onError: (error: any) => {
+      setAlertMessage(error.message || "An error occurred");
     },
   });
   const transactions = data ? data?.transactions : [];
@@ -53,8 +61,27 @@ export default function EditInvoice({
     (total, item) => total + Number(item.amount),
     0,
   );
-  const tax = paymentMethod === "Debit" ? Math.floor(subTotal * 0.07) : 0;
   const totalAmount = subTotal + tax;
+  useEffect(() => {
+    if (paymentMethod === "Debit") {
+      setTax(Math.floor(subTotal * 0.07));
+      setDebitAmount(subTotal + Math.floor(subTotal * 0.07));
+      setCashAmount(0);
+    } else if (paymentMethod === "Cash") {
+      setTax(0);
+      setCashAmount(totalAmount);
+      setDebitAmount(0);
+    } else if (paymentMethod === "Mix") {
+      const calculatedTax = Math.floor(subTotal * 0.07);
+      setTax(calculatedTax);
+      setDebitAmount((subTotal + calculatedTax) / 2);
+      setCashAmount(subTotal + calculatedTax - (subTotal + calculatedTax) / 2);
+    } else {
+      setTax(0);
+      setCashAmount(0);
+      setDebitAmount(0);
+    }
+  }, [paymentMethod, subTotal]);
 
   function saveInvoice() {
     if (!paymentMethod) {
@@ -69,6 +96,8 @@ export default function EditInvoice({
       total_amount: totalAmount,
       subtotal: subTotal,
       tax,
+      cash_amount: cashAmount,
+      debit_amount: debitAmount,
       payment_method: paymentMethod,
     });
   }
@@ -113,19 +142,78 @@ export default function EditInvoice({
             >
               <CreditCard /> Debit
             </button>
+            <button
+              className={`flex items-center gap-1.5 rounded border border-primary-600  px-2 py-1 text-sm cursor-pointer m-1  ${
+                paymentMethod === "Mix"
+                  ? "bg-primary-600 text-white"
+                  : "bg-white  text-primary-600 hover:bg-gray-100"
+              }`}
+              onClick={() => {
+                setAlertMessage("");
+                setPaymentMethod("Mix");
+              }}
+            >
+              <Merge /> Mix
+            </button>
           </div>
           <p className="text-red-500">{alertMessage}</p>
         </div>
         <div className="my-6 border-t" />
         <div className="space-y-1">
           <p className="font-semibold text-gray-800">Amount Breakdown</p>
-          {paymentMethod === "Debit" && (
+          {paymentMethod === "Debit" || paymentMethod === "Mix" ? (
             <p className="text-sm text-gray-500">
               SubTotal: ${subTotal.toFixed(2)}
             </p>
-          )}
-          {paymentMethod === "Debit" && (
-            <p className="text-sm text-gray-500">Tax(10%): ${tax.toFixed(2)}</p>
+          ) : null}
+          {paymentMethod === "Debit" || paymentMethod === "Mix" ? (
+            <p className="text-sm text-gray-500">
+              Tax(7%): $
+              <input
+                type="text"
+                value={tax}
+                onChange={(e) => {
+                  setTax(Number(e.target.value));
+                  setCashAmount(
+                    Math.floor(subTotal + Number(e.target.value)) / 2,
+                  );
+                  setDebitAmount(
+                    subTotal +
+                      Number(e.target.value) -
+                      Math.floor((subTotal + Number(e.target.value)) / 2),
+                  );
+                }}
+                className=" w-6 rounded border border-gray-300 px-1 py-0.5  text-sm"
+              />
+            </p>
+          ) : null}
+          {paymentMethod === "Mix" && (
+            <>
+              <p className="text-sm text-gray-500">
+                Cash: $
+                <input
+                  type="text"
+                  value={cashAmount}
+                  onChange={(e) => {
+                    setCashAmount(Number(e.target.value));
+                    setDebitAmount(totalAmount - Number(e.target.value));
+                  }}
+                  className=" w-6 rounded border border-gray-300 px-1 py-0.5  text-sm"
+                />
+              </p>
+              <p className="text-sm text-gray-500">
+                Debit: $
+                <input
+                  type="text"
+                  value={debitAmount}
+                  onChange={(e) => {
+                    setDebitAmount(Number(e.target.value));
+                    setCashAmount(totalAmount - Number(e.target.value));
+                  }}
+                  className=" w-6 rounded border border-gray-300 px-1 py-0.5  text-sm"
+                />
+              </p>
+            </>
           )}
           <p className="text-sm text-gray-500">
             Total: ${totalAmount.toFixed(2)}

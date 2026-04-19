@@ -36,9 +36,9 @@ export default function dashboard() {
   const pageSize = 6;
 
   const queryClient = useQueryClient();
-  const { data, isLoading, error } = useQuery<Transaction[]>({
-    queryKey: ["transactions", date],
-    queryFn: () => getTransactions({ date: date }),
+  const { data, isLoading, error } = useQuery<Invoice[]>({
+    queryKey: ["invoices", date],
+    queryFn: () => getInvoices("finished", undefined, date),
   });
   const {
     data: summaryData,
@@ -69,8 +69,8 @@ export default function dashboard() {
     isLoading: invoiceLoading,
     error: invoiceError,
   } = useQuery<Invoice[]>({
-    queryKey: ["invoices"],
-    queryFn: () => getInvoices(),
+    queryKey: ["invoices", "pending"],
+    queryFn: () => getInvoices("pending"),
   });
   const dailyTransactionStats = [
     {
@@ -142,15 +142,29 @@ export default function dashboard() {
     },
     { header: "Created by", accessor: "created_by_name" },
   ];
+  // const invoiceColumns: TableColumn<Invoice>[] = [
+  //   { header: "Invoice ID", accessor: "invoice_no" },
+  //   { header: "Customer", accessor: "customer_name" },
+  //   { header: "SubTotal", accessor: (row) => `$${row.subtotal}` },
+  //   {
+  //     header: "Status",
+  //     accessor: (row) => <p className="capitalize">{row.status}</p>,
+  //   },
+
+  //   {
+  //     header: "Created At",
+  //     accessor: (row) => (
+  //       <div>
+  //         <div>{formatDate(row.created_at)}</div>
+  //         <div className="text-xs text-gray-400">
+  //           at {formatTime(row.created_at)}
+  //         </div>
+  //       </div>
+  //     ),
+  //   },
+  // ];
   const invoiceColumns: TableColumn<Invoice>[] = [
     { header: "Invoice ID", accessor: "invoice_no" },
-    { header: "Customer", accessor: "customer_name" },
-    { header: "SubTotal", accessor: (row) => `$${row.subtotal}` },
-    {
-      header: "Status",
-      accessor: (row) => <p className="capitalize">{row.status}</p>,
-    },
-
     {
       header: "Created At",
       accessor: (row) => (
@@ -162,6 +176,38 @@ export default function dashboard() {
         </div>
       ),
     },
+    {
+      header: "Customer",
+      accessor: (row) => (
+        <div>
+          <div>
+            <span className="font-medium">Name:</span> {row.customer_name}
+          </div>
+          <div className="text-xs text-gray-400">
+            <span className="font-medium">Phone:</span> {row.customer_phone}
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Total Amount",
+      accessor: (row) => `$${row.total_amount ?? row.subtotal}`,
+    },
+    {
+      header: "SubTotal",
+      accessor: (row) => `$${row.subtotal}`,
+    },
+    // {
+    //   header: "Tax",
+    //   accessor: (row) => `$${row.tax ?? 0}`,
+    // },
+    {
+      header: "Status",
+      accessor: (row) => <p className="capitalize">{row.status}</p>,
+    },
+    // { header: "Payment Method", accessor: "payment_method" },
+
+    { header: "Created By", accessor: "created_by_name" },
   ];
   if (error) return <p>Error {error.message}</p>;
   if (summaryError) return <p>Error {summaryError.message}</p>;
@@ -254,8 +300,9 @@ export default function dashboard() {
         /> */}
 
         <DataTable
-          title="Transactions"
-          columns={transactionColumns}
+          title="Invoices"
+          columns={invoiceColumns}
+          hoverable={true}
           data={
             isLoading
               ? []
@@ -270,6 +317,12 @@ export default function dashboard() {
             total: data?.length || 0,
             onPageChange: setPage,
           }}
+          onRowClick={(invoice) =>
+            invoice.status === "finished" &&
+            router.push(
+              `customers/${invoice.customer_id}/invoices/${invoice.id}`,
+            )
+          }
           // action={
           //   <CustomButton
           //     onClick={() => {

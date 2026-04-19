@@ -1,7 +1,13 @@
 import { InvoiceItem } from "@/stores/useInvoiceDraft";
 import { Invoice } from "./customers";
-export async function getInvoices(): Promise<Invoice[]> {
-  const res = await fetch(`/api/invoices`);
+export async function getInvoices(
+  status: "pending" | "finished",
+  month?: string,
+  date?: string,
+): Promise<Invoice[]> {
+  const res = await fetch(
+    `/api/invoices?status=${status}${month ? `&month=${month}` : ""}${date ? `&date=${date}` : ""}`,
+  );
   if (!res.ok) throw new Error("Failed to fetch invoices");
   return res.json();
 }
@@ -12,6 +18,8 @@ export async function getInvoiceById(id: string): Promise<Invoice> {
 }
 export async function createInvoice(data: {
   total?: number;
+  cash_amount?: number;
+  debit_amount?: number;
   subtotal: number;
   tax?: number;
   customer_id: string;
@@ -32,6 +40,8 @@ export async function editInvoice(
   id: string,
   data: {
     total_amount?: number;
+    cash_amount?: number;
+    debit_amount?: number;
     subtotal: number;
     tax?: number;
     payment_method?: string;

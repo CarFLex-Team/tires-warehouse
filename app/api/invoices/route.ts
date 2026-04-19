@@ -3,18 +3,45 @@ import { db } from "@/lib/db";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import handleTireSet from "@/lib/handleTireSet";
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const date = searchParams.get("date");
+  const month = searchParams.get("month");
+  const status = searchParams.get("status");
+  let whereClause = ``;
+  const params: any[] = [];
+  if (date) {
+    params.push(date);
+    whereClause += `
+      AND i.created_at >= $${params.length}::date
+      AND i.created_at < $${params.length}::date + INTERVAL '1 day'
+    `;
+  }
+  if (month) {
+    params.push(`${month}-01`);
+    whereClause += `
+      AND i.created_at >= date_trunc('month', $${params.length}::date)
+      AND i.created_at < date_trunc('month', $${params.length}::date) + INTERVAL '1 month'
+    `;
+  }
   try {
-    const { rows } = await db.query(`
+    const { rows } = await db.query(
+      `
 SELECT
   i.*,
-  c.name AS customer_name
+  c.name AS customer_name,
+  c.phone AS customer_phone,
+  u.name AS created_by_name
 FROM "Invoice" i
 LEFT JOIN "Customer" c ON c.id = i.customer_id
-WHERE i.deleted_at IS NULL AND i.status = 'pending'
+LEFT JOIN "User" u ON u.id = i.created_by
+WHERE i.deleted_at IS NULL AND i.status = $${params.length + 1}
+${whereClause}
 ORDER BY i.created_at DESC
 
-    `);
+    `,
+      [...params, status],
+    );
 
     return NextResponse.json(rows);
   } catch (error: any) {
@@ -37,6 +64,8 @@ export async function POST(req: Request) {
       payment_method,
       status,
       transactions,
+      cash_amount,
+      debit_amount,
     } = await req.json();
     const session = await getServerSession(authOptions);
 
@@ -58,8 +87,8 @@ export async function POST(req: Request) {
     // 1️⃣ Create invoice
     const invoiceRes = await client.query(
       `
-      INSERT INTO "Invoice" (customer_id, created_by, total_amount, subtotal, tax, created_at, payment_method,status)
-      VALUES ($1, $2, $3, $4, $5, NOW(), $6,$7)
+      INSERT INTO "Invoice" (customer_id, created_by, total_amount, subtotal, tax, cash_amount, debit_amount, created_at, payment_method,status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8,$9)
       RETURNING id
       `,
       [
@@ -68,6 +97,8 @@ export async function POST(req: Request) {
         total || null,
         subtotal,
         tax || null,
+        cash_amount || null,
+        debit_amount || null,
         payment_method || null,
         status,
       ],

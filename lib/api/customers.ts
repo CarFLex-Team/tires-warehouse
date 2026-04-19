@@ -17,12 +17,17 @@ export interface Invoice {
   subtotal: string;
   tax: string;
   created_by: string;
+  created_by_name: string;
+
   // invoice_status: string;
   payment_method: string;
   transactions: Transaction[];
   status: "pending" | "finished";
   customer_id: string;
   customer_name: string;
+  customer_phone: string;
+  cash_amount?: number;
+  debit_amount?: number;
 }
 export interface CustomerMonthlySummary {
   customer: string;

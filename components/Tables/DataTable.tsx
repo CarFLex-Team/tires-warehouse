@@ -16,6 +16,7 @@ type DataTableProps<T> = {
   isLoading?: boolean;
   onRowClick?: (row: T) => void;
   renderActions?: (row: T) => React.ReactNode;
+  hoverable?: boolean;
 };
 
 export function DataTable<T>({
@@ -27,6 +28,7 @@ export function DataTable<T>({
   isLoading = false,
   onRowClick,
   renderActions,
+  hoverable = false,
 }: DataTableProps<T>) {
   const totalPages = pagination
     ? Math.ceil(pagination.total / pagination.pageSize) === 0
@@ -76,7 +78,7 @@ export function DataTable<T>({
                   onClick={() => onRowClick?.(row)}
                   className={`border-b last:border-0  ${
                     onRowClick ? "cursor-pointer" : ""
-                  }`}
+                  } ${hoverable ? "hover:bg-gray-100" : ""}`}
                 >
                   {columns.map((col, colIndex) => (
                     <td key={colIndex} className="py-3 px-2 text-sm">
