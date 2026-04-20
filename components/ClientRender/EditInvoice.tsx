@@ -175,7 +175,7 @@ export default function EditInvoice({
                 onChange={(e) => {
                   setTax(Number(e.target.value));
                   setCashAmount(
-                    Math.floor(subTotal + Number(e.target.value)) / 2,
+                    Math.floor((subTotal + Number(e.target.value)) / 2),
                   );
                   setDebitAmount(
                     subTotal +

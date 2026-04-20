@@ -1,5 +1,6 @@
 import { InvoiceItem } from "@/stores/useInvoiceDraft";
 import { Invoice } from "./customers";
+import { Transaction } from "./transactions";
 export interface InvoiceSummary {
   total_transactions: number;
   total_sales_count: number;
@@ -72,9 +73,10 @@ export async function editInvoice(
     body: JSON.stringify(data),
   });
 }
-export async function deleteInvoice(id: string) {
+export async function deleteInvoice(id: string, Transactions: Transaction[]) {
   const res = await fetch(`/api/invoices/${id}`, {
     method: "DELETE",
+    body: JSON.stringify({ items: Transactions }),
   });
 
   if (!res.ok) throw new Error("Failed to delete invoice");

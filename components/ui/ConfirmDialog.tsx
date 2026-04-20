@@ -1,5 +1,7 @@
 "use client";
 
+import LoadingSpinner from "./LoadingSpinner";
+
 interface ConfirmDialogProps {
   isOpen: boolean;
   title?: string;
@@ -7,6 +9,8 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
   onCancel: () => void;
   loading?: boolean;
+
+  extraBody?: React.ReactNode;
 }
 
 export default function ConfirmDialog({
@@ -16,15 +20,26 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
   loading = false,
+
+  extraBody,
 }: ConfirmDialogProps) {
   if (!isOpen) return null;
-
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg flex flex-col items-center">
+          <LoadingSpinner />
+          <p className="mt-4 text-gray-600">Processing...</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg">
         <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
         <p className="mt-2 text-sm text-gray-600">{description}</p>
-
+        {extraBody}
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={onCancel}

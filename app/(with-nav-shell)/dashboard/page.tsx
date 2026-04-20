@@ -23,6 +23,8 @@ import { formatTime } from "@/lib/formatTime";
 import { Invoice } from "@/lib/api/customers";
 import { getInventorySummary, InventorySummary } from "@/lib/api/inventory";
 import {
+  deleteInvoice,
+  getInvoiceById,
   getInvoices,
   getInvoiceSummary,
   InvoiceSummary,
@@ -35,6 +37,8 @@ export default function dashboard() {
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [items, setItems] = useState<Transaction[]>([]);
+  const [modalLoading, setModalLoading] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
   const [date, setDate] = useState(today);
   const pageSize = 6;
@@ -53,9 +57,10 @@ export default function dashboard() {
     queryFn: () => getInvoiceSummary(date),
   });
   const deleteMutation = useMutation({
-    mutationFn: deleteTransaction,
+    mutationFn: (id: string) => deleteInvoice(id, items),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions", date] });
+      queryClient.invalidateQueries({ queryKey: ["invoiceSummary", date] });
+      queryClient.invalidateQueries({ queryKey: ["invoices", date] });
       setSelectedId(null);
       setConfirmOpen(false);
     },
@@ -76,6 +81,17 @@ export default function dashboard() {
     queryKey: ["invoices", "pending"],
     queryFn: () => getInvoices("pending"),
   });
+  async function getItems(invoiceId: string) {
+    setModalLoading(true);
+    const invoice = await getInvoiceById(invoiceId);
+    const invoiceItems = invoice.transactions.filter((item) => {
+      if (item.product_name) {
+        return item;
+      }
+    });
+    setItems(invoiceItems);
+    setModalLoading(false);
+  }
   const dailyInvoiceStats = [
     {
       label: "Total Transactions",
@@ -146,27 +162,20 @@ export default function dashboard() {
     },
     { header: "Created by", accessor: "created_by_name" },
   ];
-  // const invoiceColumns: TableColumn<Invoice>[] = [
-  //   { header: "Invoice ID", accessor: "invoice_no" },
-  //   { header: "Customer", accessor: "customer_name" },
-  //   { header: "SubTotal", accessor: (row) => `$${row.subtotal}` },
-  //   {
-  //     header: "Status",
-  //     accessor: (row) => <p className="capitalize">{row.status}</p>,
-  //   },
+  const actionColumn = (invoice: Invoice) => (
+    <button
+      className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+      onClick={async (e) => {
+        e.stopPropagation();
+        setSelectedId(invoice.id);
+        setConfirmOpen(true);
+        await getItems(invoice.id);
+      }}
+    >
+      <Trash size={16} />
+    </button>
+  );
 
-  //   {
-  //     header: "Created At",
-  //     accessor: (row) => (
-  //       <div>
-  //         <div>{formatDate(row.created_at)}</div>
-  //         <div className="text-xs text-gray-400">
-  //           at {formatTime(row.created_at)}
-  //         </div>
-  //       </div>
-  //     ),
-  //   },
-  // ];
   const invoiceColumns: TableColumn<Invoice>[] = [
     { header: "Invoice ID", accessor: "invoice_no" },
     {
@@ -347,6 +356,7 @@ export default function dashboard() {
           //     <Trash size={16} />
           //   </button>
           // )}
+          renderActions={actionColumn}
         />
       </div>
       <ConfirmDialog
@@ -357,8 +367,30 @@ export default function dashboard() {
             deleteMutation.mutate(selectedId);
           }
         }}
-        description="Do you want to Delete this transaction?"
-        loading={deleteMutation.isPending}
+        extraBody={
+          <div>
+            {items.length > 0 && (
+              <p className="mt-2 text-sm text-gray-600">
+                These Items will be returned to inventory:
+              </p>
+            )}
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="border px-2 rounded my-2 flex justify-between "
+              >
+                <p className="flex-2 p-2">{item.product_name}</p>
+                <p className="border border-gray-600"></p>
+
+                <p className="flex-1 p-2 text-center ">
+                  Quantity: {item.quantity}
+                </p>
+              </div>
+            ))}
+          </div>
+        }
+        description="Do you want to Delete this invoice?"
+        loading={deleteMutation.isPending || modalLoading}
       />
     </>
   );

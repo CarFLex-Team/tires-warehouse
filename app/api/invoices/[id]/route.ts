@@ -30,6 +30,7 @@ SELECT
         'category', t.category,
         'quantity', t.quantity,
         'product_name', p.name,
+        'product_id', t.product_id,
         'service_name', s.name
    
 
@@ -112,15 +113,16 @@ export async function PUT(
   }
 }
 export async function DELETE(
-  _req: Request,
+  req: Request,
   context: { params: Promise<{ id: string }> },
 ) {
+  const client = await db.connect();
   try {
     const { id } = await context.params;
+    const body = await req.json();
+    await client.query("BEGIN");
 
-    await db.query("BEGIN");
-
-    await db.query(
+    await client.query(
       `
   UPDATE "Invoice"
   SET deleted_at = NOW()
@@ -130,7 +132,7 @@ export async function DELETE(
       [id],
     );
 
-    await db.query(
+    await client.query(
       `
   UPDATE "Transaction"
   SET deleted_at = NOW()
@@ -139,13 +141,34 @@ export async function DELETE(
   `,
       [id],
     );
+    for (const transaction of body.items) {
+      if (transaction.product_id) {
+        await client.query(
+          `
+          UPDATE "Inventory"
+          SET quantity = quantity + $1, updated_at = NOW()
+          WHERE product_id = $2
+          `,
+          [transaction.quantity, transaction.product_id],
+        );
+      }
+      await client.query(
+        `
+         INSERT INTO "Inventory_movement" (product_id, quantity, created_at,reason,invoice_id)
+        VALUES ($1, $2, NOW(), 'return', $3)
 
-    await db.query("COMMIT");
+          `,
+        [transaction.product_id, transaction.quantity, id],
+      );
+    }
+
+    await client.query("COMMIT");
     return NextResponse.json(
       { message: "Invoice deleted (soft)" },
       { status: 200 },
     );
   } catch (err) {
+    await client.query("ROLLBACK");
     return NextResponse.json(
       { error: "Failed to delete invoice" },
       { status: 500 },
