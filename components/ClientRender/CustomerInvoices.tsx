@@ -89,8 +89,19 @@ export default function CustomerInvoices({
     { header: "Created By", accessor: "created_by" },
   ];
   const actionColumn = !isOwner
-    ? (invoice: Invoice) =>
-        invoice.status === "finished" ? (
+    ? (invoice: Invoice) => (
+        <div className="flex gap-2 justify-center">
+          {invoice.status !== "finished" && (
+            <CustomButton
+              onClick={() =>
+                router.push(
+                  `/customers/${customerId}/invoices/${invoice.id}/edit`,
+                )
+              }
+            >
+              Finish Invoice
+            </CustomButton>
+          )}
           <button
             className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
             onClick={async (e) => {
@@ -102,18 +113,10 @@ export default function CustomerInvoices({
           >
             <Trash size={16} />
           </button>
-        ) : (
-          <CustomButton
-            onClick={() =>
-              router.push(
-                `/customers/${customerId}/invoices/${invoice.id}/edit`,
-              )
-            }
-          >
-            Finish Invoice
-          </CustomButton>
-        )
+        </div>
+      )
     : undefined;
+
   return (
     <>
       <InfoCard

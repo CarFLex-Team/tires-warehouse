@@ -61,6 +61,7 @@ export default function dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoiceSummary", date] });
       queryClient.invalidateQueries({ queryKey: ["invoices", date] });
+      queryClient.invalidateQueries({ queryKey: ["invoices", "pending"] });
       setSelectedId(null);
       setConfirmOpen(false);
     },
@@ -253,15 +254,18 @@ export default function dashboard() {
             </CustomButton>
           }
           renderActions={(row) => (
-            <CustomButton
-              onClick={() => {
-                router.push(
-                  `/customers/${row.customer_id}/invoices/${row.id}/edit`,
-                );
-              }}
-            >
-              Finish Invoice
-            </CustomButton>
+            <div className="flex space-x-2">
+              <CustomButton
+                onClick={() => {
+                  router.push(
+                    `/customers/${row.customer_id}/invoices/${row.id}/edit`,
+                  );
+                }}
+              >
+                Finish Invoice
+              </CustomButton>
+              {actionColumn(row)}
+            </div>
           )}
         />
         <DataTable
