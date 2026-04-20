@@ -84,8 +84,9 @@ export function InvoiceTable({
           <tbody>
             {rows.map((row) => (
               <tr key={row.id} className="border-b last:border-0">
-                <td className="py-3 px-2 text-sm align-top">
-                  <select
+                <td className="py-3 px-2  align-top">
+                  <p className="w-full  px-2 py-1">{row.type}</p>
+                  {/* <select
                     className="w-full rounded border px-2 py-1"
                     value={row.type}
                     onChange={(e) =>
@@ -98,7 +99,7 @@ export function InvoiceTable({
                     </option>
                     <option value="Sales">Sales</option>
                     <option value="Expense">Expense</option>
-                  </select>
+                  </select> */}
                 </td>
                 <td className="py-3 px-2 text-sm align-top">
                   <select

@@ -22,7 +22,11 @@ import formatDate from "@/lib/formatDate";
 import { formatTime } from "@/lib/formatTime";
 import { Invoice } from "@/lib/api/customers";
 import { getInventorySummary, InventorySummary } from "@/lib/api/inventory";
-import { getInvoices } from "@/lib/api/invoices";
+import {
+  getInvoices,
+  getInvoiceSummary,
+  InvoiceSummary,
+} from "@/lib/api/invoices";
 import { useRouter } from "next/navigation";
 export default function dashboard() {
   const router = useRouter();
@@ -44,9 +48,9 @@ export default function dashboard() {
     data: summaryData,
     isLoading: summaryLoading,
     error: summaryError,
-  } = useQuery<TransactionSummary>({
-    queryKey: ["transactionsSummary", date],
-    queryFn: () => getTransactionsDailySummary(date),
+  } = useQuery<InvoiceSummary>({
+    queryKey: ["invoiceSummary", date],
+    queryFn: () => getInvoiceSummary(date),
   });
   const deleteMutation = useMutation({
     mutationFn: deleteTransaction,
@@ -72,14 +76,14 @@ export default function dashboard() {
     queryKey: ["invoices", "pending"],
     queryFn: () => getInvoices("pending"),
   });
-  const dailyTransactionStats = [
+  const dailyInvoiceStats = [
     {
       label: "Total Transactions",
       value: summaryData ? summaryData.total_transactions : 0,
       color: "text-primary-500",
     },
     {
-      label: "Total Sales",
+      label: "Total Sales (with Tax)",
       value: summaryData ? summaryData.total_sales_count : 0,
       subValue: `$${summaryData ? summaryData.total_sales_amount : 0}`,
       color: "text-orange-400",
@@ -91,7 +95,7 @@ export default function dashboard() {
       color: "text-red-400",
     },
     {
-      label: "Debit Sales",
+      label: "Debit Sales (with Tax)",
       value: summaryData ? summaryData.debit_sales_count : 0,
       subValue: `$${summaryData ? summaryData.debit_sales_amount : 0}`,
       color: "text-purple-400",
@@ -274,7 +278,7 @@ export default function dashboard() {
         />
         <OverviewStats
           title="Daily Overview"
-          stats={dailyTransactionStats}
+          stats={dailyInvoiceStats}
           isLoading={summaryLoading}
           action={
             <input

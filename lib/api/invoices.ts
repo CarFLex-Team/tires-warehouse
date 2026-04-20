@@ -1,5 +1,14 @@
 import { InvoiceItem } from "@/stores/useInvoiceDraft";
 import { Invoice } from "./customers";
+export interface InvoiceSummary {
+  total_transactions: number;
+  total_sales_count: number;
+  total_sales_amount: number;
+  cash_sales_count: number;
+  cash_sales_amount: number;
+  debit_sales_count: number;
+  debit_sales_amount: number;
+}
 export async function getInvoices(
   status: "pending" | "finished",
   month?: string,
@@ -9,6 +18,16 @@ export async function getInvoices(
     `/api/invoices?status=${status}${month ? `&month=${month}` : ""}${date ? `&date=${date}` : ""}`,
   );
   if (!res.ok) throw new Error("Failed to fetch invoices");
+  return res.json();
+}
+export async function getInvoiceSummary(
+  month?: string,
+  date?: string,
+): Promise<InvoiceSummary> {
+  const res = await fetch(
+    `/api/invoices/summary${month ? `?month=${month}` : date ? `?date=${date}` : ""}`,
+  );
+  if (!res.ok) throw new Error("Failed to fetch invoice summary");
   return res.json();
 }
 export async function getInvoiceById(id: string): Promise<Invoice> {
