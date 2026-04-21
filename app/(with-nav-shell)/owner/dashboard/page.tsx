@@ -1,84 +1,58 @@
 "use client";
-import { DataTable } from "@/components/Tables/DataTable";
-import { TableColumn } from "@/components/Tables/Type";
 import { OverviewStats } from "@/components/overview/Overview-stats";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { Trash } from "lucide-react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Transaction } from "@/lib/api/transactions";
+import { Invoice } from "@/lib/api/customers";
 import {
-  getTransactions,
-  getTransactionsMonthlySummary,
-  Transaction,
-  TransactionSummary,
-} from "@/lib/api/transactions";
-import { formatTime } from "@/lib/formatTime";
-import formatDate from "@/lib/formatDate";
-import {
-  InventorySummary,
-  ProductMonthlySummary,
-  getInventorySummary,
-  getProductSummary,
-} from "@/lib/api/inventory";
-import {
-  ServiceMonthlySummary,
-  getServicesMonthlySummary,
-} from "@/lib/api/services";
+  deleteInvoice,
+  getInvoiceById,
+  getInvoiceSummary,
+  InvoiceSummary,
+} from "@/lib/api/invoices";
+import PendingInvoices from "@/components/ClientRender/PendingInvoices";
+import StockAlert from "@/components/ClientRender/StockAlert";
+import InvoicesInTime from "@/components/ClientRender/InvoicesInTime";
 export default function dashboard() {
-  const [page, setPage] = useState(1);
-
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [items, setItems] = useState<Transaction[]>([]);
+  const [modalLoading, setModalLoading] = useState(false);
   const currentMonth = new Date().toISOString().slice(0, 7);
   const [month, setMonth] = useState(currentMonth);
-  const pageSize = 6;
-  const { data, isLoading, error } = useQuery<Transaction[]>({
-    queryKey: ["transactions", month],
-    queryFn: () => getTransactions({ month: month }),
-    enabled: !!month,
-  });
+  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const {
     data: summaryData,
     isLoading: summaryLoading,
     error: summaryError,
-  } = useQuery<TransactionSummary>({
-    queryKey: ["transactionsSummary", month],
-    queryFn: () => getTransactionsMonthlySummary(month),
-    enabled: !!month,
+  } = useQuery<InvoiceSummary>({
+    queryKey: ["invoiceSummary", month],
+    queryFn: () => getInvoiceSummary(month),
   });
-  const {
-    data: summaryInventoryData,
-    isLoading: summaryInventoryLoading,
-    error: summaryInventoryError,
-  } = useQuery<InventorySummary[]>({
-    queryKey: ["inventorySummary", month],
-    queryFn: () => getInventorySummary(),
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteInvoice(id, items),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoiceSummary", month] });
+      queryClient.invalidateQueries({ queryKey: ["invoices", month] });
+      queryClient.invalidateQueries({ queryKey: ["invoices", "pending"] });
+      setSelectedId(null);
+      setConfirmOpen(false);
+    },
   });
-
-  const {
-    data: summaryProductData,
-    isLoading: summaryProductLoading,
-    error: summaryProductError,
-  } = useQuery<ProductMonthlySummary[]>({
-    queryKey: ["productsSummary", month],
-    queryFn: () => getProductSummary(month),
-    enabled: !!month,
-  });
-  // const {
-  //   data: summaryCustomerData,
-  //   isLoading: summaryCustomerLoading,
-  //   error: summaryCustomerError,
-  // } = useQuery<CustomerMonthlySummary[]>({
-  //   queryKey: ["customersSummary", month],
-  //   queryFn: () => getCustomerMonthlySummary(month),
-  //   enabled: !!month,
-  // });
-  const {
-    data: summaryServiceData,
-    isLoading: summaryServiceLoading,
-    error: summaryServiceError,
-  } = useQuery<ServiceMonthlySummary[]>({
-    queryKey: ["servicesSummary", month],
-    queryFn: () => getServicesMonthlySummary(month),
-    enabled: !!month,
-  });
-
+  async function getItems(invoiceId: string) {
+    setModalLoading(true);
+    const invoice = await getInvoiceById(invoiceId);
+    const invoiceItems = invoice.transactions.filter((item) => {
+      if (item.product_name) {
+        return item;
+      }
+    });
+    setItems(invoiceItems);
+    setModalLoading(false);
+  }
   const monthlyTransactionStats = [
     {
       label: "Total Transactions",
@@ -86,7 +60,7 @@ export default function dashboard() {
       color: "text-primary-500",
     },
     {
-      label: "Total Sales",
+      label: "Total Sales (with Tax)",
       value: summaryData ? summaryData.total_sales_count : 0,
       subValue: `$${summaryData ? summaryData.total_sales_amount : 0}`,
       color: "text-orange-400",
@@ -98,88 +72,38 @@ export default function dashboard() {
       color: "text-red-400",
     },
     {
-      label: "Debit Sales",
+      label: "Debit Sales (with Tax)",
       value: summaryData ? summaryData.debit_sales_count : 0,
       subValue: `$${summaryData ? summaryData.debit_sales_amount : 0}`,
       color: "text-purple-400",
     },
   ];
 
-  const transactionColumns: TableColumn<Transaction>[] = [
-    { header: "Type", accessor: "type" },
-    { header: "Category", accessor: "category" },
-    {
-      header: "Product/Service",
-      accessor: (row) =>
-        row.category === "Tire" ? row.product_name : row.service_name,
-    },
-    // { header: "Description", accessor: "description" },
-    { header: "Amount", accessor: "amount" },
-    { header: "Payment Method", accessor: "payment_method" },
+  const actionColumn = (invoice: Invoice) => (
+    <button
+      className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+      onClick={async (e) => {
+        e.stopPropagation();
+        setSelectedId(invoice.id);
+        setConfirmOpen(true);
+        await getItems(invoice.id);
+      }}
+    >
+      <Trash size={16} />
+    </button>
+  );
 
-    {
-      header: "Created At",
-      accessor: (row) => (
-        <div>
-          <div>{formatDate(row.created_at)}</div>
-          <div className="text-xs text-gray-400">
-            at {formatTime(row.created_at)}
-          </div>
-        </div>
-      ),
-    },
-    { header: "Created by", accessor: "created_by_name" },
-  ];
-  const ServiceColumn: TableColumn<ServiceMonthlySummary>[] = [
-    { header: "Service", accessor: "service" },
-    { header: "Turn Over", accessor: "turn_over" },
-  ];
-  const InventoryColumn: TableColumn<InventorySummary>[] = [
-    { header: "Product", accessor: "name" },
-    { header: "Quantity (Tire)", accessor: "quantity" },
-    {
-      header: "Status",
-      accessor: (row) =>
-        row.quantity <= 0 ? (
-          <p className="bg-red-300 text-center px-2 py-1 rounded">
-            Out of Stock
-          </p>
-        ) : row.quantity <= 4 ? (
-          <p className="bg-yellow-300 text-center px-2 py-1 rounded">
-            Low Stock
-          </p>
-        ) : (
-          <p className="bg-green-300 text-center px-2 py-1 rounded">In Stock</p>
-        ),
-    },
-  ];
-  const ProductSummaryColumn: TableColumn<ProductMonthlySummary>[] = [
-    { header: "Product", accessor: "name" },
-    { header: "Turn Over", accessor: "turn_over" },
-  ];
-  if (error) return <p>Error {error.message}</p>;
-  if (
-    summaryError ||
-    summaryServiceError ||
-    summaryProductError ||
-    summaryInventoryError
-  )
-    return <p>Error</p>;
+  if (error || summaryError)
+    return (
+      <p className="text-red-500 text-center">
+        Error {error || summaryError?.message || "An error occurred"}
+      </p>
+    );
   return (
     <>
       <div className=" ">
-        <DataTable
-          title="Stock Alert"
-          columns={InventoryColumn}
-          data={
-            summaryInventoryLoading
-              ? []
-              : summaryInventoryData
-                ? summaryInventoryData
-                : []
-          }
-          isLoading={summaryInventoryLoading}
-        />
+        <PendingInvoices renderActions={actionColumn} setError={setError} />
+        <StockAlert setError={setError} />
         <OverviewStats
           title="Monthly Overview"
           stats={monthlyTransactionStats}
@@ -194,78 +118,45 @@ export default function dashboard() {
             />
           }
         />
-        <div className=" grid grid-cols-1 md:grid-cols-2 ">
-          <DataTable
-            title="Most Selling Services"
-            columns={ServiceColumn}
-            data={
-              summaryServiceLoading
-                ? []
-                : summaryServiceData
-                  ? summaryServiceData
-                  : []
-            }
-            isLoading={summaryServiceLoading}
-          />
-          <DataTable
-            title="Most Selling Products"
-            columns={ProductSummaryColumn}
-            data={
-              summaryProductLoading
-                ? []
-                : summaryProductData
-                  ? summaryProductData
-                  : []
-            }
-            isLoading={summaryProductLoading}
-          />
-        </div>
-        <DataTable
-          title="Transactions"
-          columns={transactionColumns}
-          data={
-            isLoading
-              ? []
-              : data
-                ? data.slice((page - 1) * pageSize, page * pageSize)
-                : []
-          }
-          isLoading={isLoading}
-          pagination={{
-            page,
-            pageSize,
-            total: data ? data.length : 0,
-            onPageChange: setPage,
-          }}
-          // action={
-          //   <CustomButton
-          //     onClick={() => {
-          //       setOpen(true);
-          //     }}
-          //   >
-          //     Add Transaction
-          //   </CustomButton>
-          // }
-          // renderActions={(row) => (
-          //   <button
-          //     onClick={() => {
-          //       setConfirmOpen(true);
-          //     }}
-          //     className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
-          //   >
-          //     <Trash size={16} />
-          //   </button>
-          // )}
+        <InvoicesInTime
+          month={month}
+          renderActions={actionColumn}
+          setError={setError}
         />
       </div>
-
-      {/* <ConfirmDialog
+      <ConfirmDialog
         isOpen={confirmOpen}
         onCancel={() => setConfirmOpen(false)}
-        onConfirm={() => {}}
-        description="Do you want to Delete this transaction?"
-        loading={confirmLoading}
-      /> */}
+        onConfirm={() => {
+          if (selectedId) {
+            deleteMutation.mutate(selectedId);
+          }
+        }}
+        extraBody={
+          <div>
+            {items.length > 0 && (
+              <p className="mt-2 text-sm text-gray-600">
+                These Items will be returned to inventory:
+              </p>
+            )}
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="border px-2 rounded my-2 flex justify-between "
+              >
+                <p className="flex-2 p-2">{item.product_name}</p>
+                <p className="border border-gray-600"></p>
+
+                <p className="flex-1 p-2 text-center ">
+                  Quantity: {item.quantity}
+                </p>
+              </div>
+            ))}
+          </div>
+        }
+        description="Do you want to Delete this invoice?"
+        loading={deleteMutation.isPending || modalLoading}
+      />
     </>
   );
 }
