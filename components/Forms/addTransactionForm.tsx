@@ -5,11 +5,13 @@ import { getServices } from "@/lib/api/services";
 import { useState, useEffect } from "react";
 import { ComboBox } from "../ui/ComboBox";
 import { createTransaction } from "@/lib/api/transactions";
+import { useSession } from "next-auth/react";
 
 type CategoryType = "Sales" | "Expense";
 type PaymentMethod = "Cash" | "Debit";
 
 export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
+  const { data: session } = useSession();
   const queryClient = useQueryClient();
   const [description, setDescription] = useState("");
   const [type, setType] = useState<CategoryType | "">("");
@@ -52,6 +54,7 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
       category_id: Number(categoryId),
       amount: Number(amount),
       payment_method: paymentMethod,
+      created_by: session?.user?.id || 10,
     });
   }
 

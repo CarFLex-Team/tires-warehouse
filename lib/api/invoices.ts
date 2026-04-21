@@ -16,7 +16,7 @@ export async function getInvoices(
   date?: string,
 ): Promise<Invoice[]> {
   const res = await fetch(
-    `/api/invoices?status=${status}${month ? `&month=${month}` : ""}${date ? `&date=${date}` : ""}`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices?status=${status}${month ? `&month=${month}` : ""}${date ? `&date=${date}` : ""}`,
   );
   if (!res.ok) throw new Error("Failed to fetch invoices");
   return res.json();
@@ -26,13 +26,15 @@ export async function getInvoiceSummary(
   date?: string,
 ): Promise<InvoiceSummary> {
   const res = await fetch(
-    `/api/invoices/summary${month ? `?month=${month}` : date ? `?date=${date}` : ""}`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices/summary${month ? `?month=${month}` : date ? `?date=${date}` : ""}`,
   );
   if (!res.ok) throw new Error("Failed to fetch invoice summary");
   return res.json();
 }
 export async function getInvoiceById(id: string): Promise<Invoice> {
-  const res = await fetch(`/api/invoices/${id}`);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices/${id}`,
+  );
   if (!res.ok) throw new Error("Failed to fetch invoice");
   return res.json();
 }
@@ -46,12 +48,16 @@ export async function createInvoice(data: {
   payment_method?: string;
   status: "pending" | "finished";
   transactions: InvoiceItem[];
+  created_by: number;
 }) {
-  const res = await fetch("/api/invoices", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  );
 
   if (!res.ok) throw new Error("Failed to add invoice");
   return res.json();
@@ -65,19 +71,26 @@ export async function editInvoice(
     subtotal: number;
     tax?: number;
     payment_method?: string;
+    created_by: number;
   },
 ) {
-  const res = await fetch(`/api/invoices/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices/${id}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  );
 }
 export async function deleteInvoice(id: string, Transactions: Transaction[]) {
-  const res = await fetch(`/api/invoices/${id}`, {
-    method: "DELETE",
-    body: JSON.stringify({ items: Transactions }),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices/${id}`,
+    {
+      method: "DELETE",
+      body: JSON.stringify({ items: Transactions }),
+    },
+  );
 
   if (!res.ok) throw new Error("Failed to delete invoice");
 }

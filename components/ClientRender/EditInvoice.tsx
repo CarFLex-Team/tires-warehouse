@@ -9,6 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createInvoice, editInvoice, getInvoiceById } from "@/lib/api/invoices";
 import { Transaction } from "@/lib/api/transactions";
 import { Invoice } from "@/lib/api/customers";
+import { useSession } from "next-auth/react";
 
 export default function EditInvoice({
   customer_Id,
@@ -17,6 +18,7 @@ export default function EditInvoice({
   customer_Id: string;
   invoice_Id: string;
 }) {
+  const { data: session } = useSession();
   const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string>("");
@@ -35,6 +37,7 @@ export default function EditInvoice({
       debit_amount?: number;
       tax?: number;
       payment_method?: string;
+      created_by: number;
     }) => editInvoice(invoice_Id, data),
     onSuccess: () => {
       router.push(`/customers/${customer_Id}/invoices/${invoice_Id}`);
@@ -99,6 +102,7 @@ export default function EditInvoice({
       cash_amount: cashAmount,
       debit_amount: debitAmount,
       payment_method: paymentMethod,
+      created_by: session?.user?.id || 10,
     });
   }
 
@@ -198,7 +202,7 @@ export default function EditInvoice({
                     setCashAmount(Number(e.target.value));
                     setDebitAmount(totalAmount - Number(e.target.value));
                   }}
-                  className=" w-6 rounded border border-gray-300 px-1 py-0.5  text-sm"
+                  className=" w-8 rounded border border-gray-300 px-1 py-0.5  text-sm"
                 />
               </p>
               <p className="text-sm text-gray-500">
@@ -210,7 +214,7 @@ export default function EditInvoice({
                     setDebitAmount(Number(e.target.value));
                     setCashAmount(totalAmount - Number(e.target.value));
                   }}
-                  className=" w-6 rounded border border-gray-300 px-1 py-0.5  text-sm"
+                  className=" w-8 rounded border border-gray-300 px-1 py-0.5  text-sm"
                 />
               </p>
             </>

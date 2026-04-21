@@ -35,12 +35,16 @@ export interface CustomerMonthlySummary {
 }
 
 export async function getCustomers(): Promise<Customer[]> {
-  const res = await fetch("/api/customers");
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers`,
+  );
   if (!res.ok) throw new Error("Failed to fetch customers");
   return res.json();
 }
 export async function getCustomerById(id: string): Promise<Customer> {
-  const res = await fetch(`/api/customers/${id}`);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers/${id}`,
+  );
   if (!res.ok) throw new Error("Failed to fetch customer");
   return res.json();
 }
@@ -48,8 +52,8 @@ export async function getCustomerMonthlySummary(
   month?: string,
 ): Promise<CustomerMonthlySummary[]> {
   const url = month
-    ? `/api/customers/summary/monthly?month=${month}`
-    : `/api/customers/summary`;
+    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers/summary/monthly?month=${month}`
+    : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers/summary`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch customers monthly summary");
@@ -60,20 +64,26 @@ export async function createCustomer(data: {
   phone: string;
   email: string;
 }) {
-  const res = await fetch("/api/customers", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  );
 
   if (!res.ok) throw new Error("Failed to add customer");
   return res.json();
 }
 
 export async function deleteCustomer(id: string) {
-  const res = await fetch(`/api/customers/${id}`, {
-    method: "DELETE",
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers/${id}`,
+    {
+      method: "DELETE",
+    },
+  );
 
   if (!res.ok) throw new Error("Failed to delete customer");
 }

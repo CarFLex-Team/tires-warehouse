@@ -21,7 +21,9 @@ export interface ProductMonthlySummary {
   turn_over: number;
 }
 export async function getInventory(): Promise<InventoryProduct[]> {
-  const res = await fetch("/api/inventory");
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inventory`,
+  );
   if (!res.ok) throw new Error("Failed to fetch inventory");
   return res.json();
 }
@@ -34,11 +36,14 @@ export async function createInventoryProduct(data: {
   cost: number;
   quantity: number;
 }) {
-  const res = await fetch("/api/inventory", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inventory`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  );
 
   if (!res.ok)
     throw new Error("Failed to create inventory product" + res.statusText);
@@ -46,9 +51,12 @@ export async function createInventoryProduct(data: {
 }
 
 export async function deleteProduct(id: string) {
-  const res = await fetch(`/api/inventory/${id}`, {
-    method: "DELETE",
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inventory/${id}`,
+    {
+      method: "DELETE",
+    },
+  );
 
   if (!res.ok) throw new Error("Failed to delete product");
 }
@@ -60,16 +68,21 @@ export async function editInventoryProduct(data: {
   is_active: boolean;
   quantity: number;
 }) {
-  const res = await fetch(`/api/inventory/${data.id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inventory/${data.id}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  );
 
   if (!res.ok) throw new Error("Failed to edit product");
 }
 export async function getInventorySummary(): Promise<InventorySummary[]> {
-  const res = await fetch("/api/inventory/summary");
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inventory/summary`,
+  );
   if (!res.ok) throw new Error("Failed to fetch inventory summary");
   return res.json();
 }
@@ -77,7 +90,7 @@ export async function getProductSummary(
   month: string,
 ): Promise<ProductMonthlySummary[]> {
   const res = await fetch(
-    `/api/inventory/summary/product-monthly?month=${month}`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inventory/summary/product-monthly?month=${month}`,
   );
   if (!res.ok) throw new Error("Failed to fetch product monthly summary");
   return res.json();

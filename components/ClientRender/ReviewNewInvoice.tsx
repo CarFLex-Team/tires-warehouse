@@ -8,6 +8,7 @@ import { Banknote, CreditCard, Merge } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createInvoice } from "@/lib/api/invoices";
+import { useSession } from "next-auth/react";
 
 export default function ReviewNewInvoice({
   customer_Id,
@@ -15,6 +16,7 @@ export default function ReviewNewInvoice({
   customer_Id: string;
 }) {
   const router = useRouter();
+  const { data: session } = useSession();
   const { items, customerId } = useInvoiceDraft();
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string>("");
@@ -102,6 +104,7 @@ export default function ReviewNewInvoice({
       status: "finished",
       payment_method: paymentMethod,
       transactions: items,
+      created_by: session?.user?.id || 10,
     });
   }
   function saveInvoiceAsPending() {
@@ -113,6 +116,7 @@ export default function ReviewNewInvoice({
       customer_id: customerId,
       status: "pending",
       transactions: items,
+      created_by: session?.user?.id || 10,
     });
   }
 
@@ -207,7 +211,7 @@ export default function ReviewNewInvoice({
                     setCashAmount(Number(e.target.value));
                     setDebitAmount(totalAmount - Number(e.target.value));
                   }}
-                  className=" w-6 rounded border border-gray-300 px-1 py-0.5  text-sm"
+                  className=" w-8 rounded border border-gray-300 px-1 py-0.5  text-sm"
                 />
               </p>
               <p className="text-sm text-gray-500">
@@ -219,7 +223,7 @@ export default function ReviewNewInvoice({
                     setDebitAmount(Number(e.target.value));
                     setCashAmount(totalAmount - Number(e.target.value));
                   }}
-                  className=" w-6 rounded border border-gray-300 px-1 py-0.5  text-sm"
+                  className=" w-8 rounded border border-gray-300 px-1 py-0.5  text-sm"
                 />
               </p>
             </>
