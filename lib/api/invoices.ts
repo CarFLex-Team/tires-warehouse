@@ -88,6 +88,7 @@ export async function deleteInvoice(id: string, Transactions: Transaction[]) {
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices/${id}`,
     {
       method: "DELETE",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ items: Transactions }),
     },
   );
