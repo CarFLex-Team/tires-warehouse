@@ -7,6 +7,7 @@ interface ConfirmDialogProps {
   title?: string;
   buttonText?: string;
   children?: React.ReactNode;
+  width?: string;
   onClose: () => void;
   onConfirm?: () => void;
   isPending?: boolean;
@@ -18,6 +19,7 @@ export default function ConfirmDialog({
   title,
   onClose,
   children,
+  width = "max-w-lg",
 }: ConfirmDialogProps) {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -39,7 +41,9 @@ export default function ConfirmDialog({
       <div onClick={onClose} className="absolute inset-0 bg-black/40" />
 
       {/* Modal */}
-      <div className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-lg max-h-[90vh] overflow-auto">
+      <div
+        className={`relative z-10 w-full ${width} rounded-lg bg-white p-6 shadow-lg max-h-[90vh] overflow-auto`}
+      >
         <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
 
         {children}
