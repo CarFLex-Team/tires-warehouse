@@ -9,7 +9,7 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
   onCancel: () => void;
   loading?: boolean;
-
+  error?: string;
   extraBody?: React.ReactNode;
 }
 
@@ -20,6 +20,7 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
   loading = false,
+  error,
 
   extraBody,
 }: ConfirmDialogProps) {
@@ -40,6 +41,11 @@ export default function ConfirmDialog({
         <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
         <p className="mt-2 text-sm text-gray-600">{description}</p>
         {extraBody}
+        {error && (
+          <p className="mt-2 text-sm text-red-500">
+            {error || "An error occurred"}
+          </p>
+        )}
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={onCancel}

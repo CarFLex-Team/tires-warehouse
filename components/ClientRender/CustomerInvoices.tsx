@@ -191,6 +191,7 @@ export default function CustomerInvoices({
         }
         description="Do you want to Delete this invoice?"
         loading={deleteMutation.isPending || modalLoading}
+        error={deleteMutation.error?.message}
       />
     </>
   );

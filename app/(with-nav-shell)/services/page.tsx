@@ -99,6 +99,7 @@ export default function ServicePage() {
         }}
         description="Do you want to Delete this service?"
         loading={deleteMutation.isPending}
+        error={deleteMutation.error?.message}
       />
     </>
   );

@@ -358,6 +358,7 @@ export default function Service() {
         }}
         description="Do you want to Delete this product?"
         loading={deleteMutation.isPending}
+        error={deleteMutation.error?.message}
       />
     </>
   );

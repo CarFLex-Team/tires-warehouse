@@ -156,6 +156,7 @@ export default function dashboard() {
         }
         description="Do you want to Delete this invoice?"
         loading={deleteMutation.isPending || modalLoading}
+        error={deleteMutation.error?.message}
       />
     </>
   );

@@ -139,6 +139,7 @@ export default function CustomerPage({
         }}
         description="Do you want to Delete this Customer?"
         loading={deleteMutation.isPending}
+        error={deleteMutation.error?.message}
       />
     </>
   );
