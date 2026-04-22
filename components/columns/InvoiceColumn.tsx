@@ -45,7 +45,7 @@ const invoiceColumns: TableColumn<Invoice>[] = [
     header: "Status",
     accessor: (row) => <p className="capitalize">{row.status}</p>,
   },
-  // { header: "Payment Method", accessor: "payment_method" },
+  { header: "Payment Method", accessor: "payment_method" },
 
   { header: "Created By", accessor: "created_by_name" },
 ];
