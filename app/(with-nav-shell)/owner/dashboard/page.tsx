@@ -32,6 +32,7 @@ export default function dashboard() {
     queryKey: ["invoiceSummary", month],
     queryFn: () => getInvoiceSummary(month),
   });
+  console.log("Summary Data:", summaryData);
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteInvoice(id, items),
     onSuccess: () => {

@@ -16,12 +16,12 @@ export const navByRole: Record<Role, NavItem[]> = {
       href: "/owner/dashboard",
       icon: Home,
     },
-    {
-      id: "ownerTransactions",
-      label: "Transactions",
-      href: "/owner/transactions",
-      icon: CreditCard,
-    },
+    // {
+    //   id: "ownerTransactions",
+    //   label: "Transactions",
+    //   href: "/owner/transactions",
+    //   icon: CreditCard,
+    // },
     {
       id: "ownerInventory",
       label: "Inventory",

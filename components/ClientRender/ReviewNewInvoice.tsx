@@ -20,9 +20,9 @@ export default function ReviewNewInvoice({
   const { items, customerId } = useInvoiceDraft();
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string>("");
-  const [tax, setTax] = useState(0);
-  const [cashAmount, setCashAmount] = useState(0);
-  const [debitAmount, setDebitAmount] = useState(0);
+  const [tax, setTax] = useState<string>("");
+  const [cashAmount, setCashAmount] = useState<string>("");
+  const [debitAmount, setDebitAmount] = useState<string>("");
   const clear = useInvoiceDraft((s) => s.clear);
   useEffect(() => {
     if (!items.length) {
@@ -65,26 +65,28 @@ export default function ReviewNewInvoice({
   );
   useEffect(() => {
     if (paymentMethod === "Debit") {
-      setTax(Math.floor(subTotal * 0.07));
-      setDebitAmount(subTotal + Math.floor(subTotal * 0.07));
-      setCashAmount(0);
+      setTax((subTotal * 0.07).toString());
+      setDebitAmount((subTotal + subTotal * 0.07).toString());
+      setCashAmount("0");
     } else if (paymentMethod === "Cash") {
-      setTax(0);
-      setCashAmount(totalAmount);
-      setDebitAmount(0);
+      setTax("0");
+      setCashAmount(totalAmount.toString());
+      setDebitAmount("0");
     } else if (paymentMethod === "Mix") {
-      const calculatedTax = Math.floor(subTotal * 0.07);
-      setTax(calculatedTax);
-      setDebitAmount((subTotal + calculatedTax) / 2);
-      setCashAmount(subTotal + calculatedTax - (subTotal + calculatedTax) / 2);
+      const calculatedTax = subTotal * 0.07;
+      setTax(calculatedTax.toString());
+      setDebitAmount(((subTotal + calculatedTax) / 2).toString());
+      setCashAmount(
+        (subTotal + calculatedTax - (subTotal + calculatedTax) / 2).toString(),
+      );
     } else {
-      setTax(0);
-      setCashAmount(0);
-      setDebitAmount(0);
+      setTax("0");
+      setCashAmount("0");
+      setDebitAmount("0");
     }
   }, [paymentMethod, subTotal]);
 
-  const totalAmount = subTotal + tax;
+  const totalAmount = subTotal + parseFloat(tax || "0");
 
   function saveInvoice() {
     if (!paymentMethod) {
@@ -96,10 +98,10 @@ export default function ReviewNewInvoice({
     }
     mutation.mutate({
       total: totalAmount,
-      cash_amount: cashAmount,
-      debit_amount: debitAmount,
+      cash_amount: parseFloat(cashAmount) || 0,
+      debit_amount: parseFloat(debitAmount) || 0,
       subtotal: subTotal,
-      tax,
+      tax: parseFloat(tax || "0"),
       customer_id: customerId,
       status: "finished",
       payment_method: paymentMethod,
@@ -186,17 +188,18 @@ export default function ReviewNewInvoice({
                 type="text"
                 value={tax}
                 onChange={(e) => {
-                  setTax(Number(e.target.value));
-                  setCashAmount(
-                    Math.floor((subTotal + Number(e.target.value)) / 2),
-                  );
-                  setDebitAmount(
-                    subTotal +
-                      Number(e.target.value) -
-                      Math.floor((subTotal + Number(e.target.value)) / 2),
-                  );
+                  const val = e.target.value;
+                  setTax(val);
+                  const numericVal = parseFloat(val) || 0;
+
+                  // Use toFixed(2) to round to 2 decimals
+                  const cash = Math.floor((subTotal + numericVal) / 2);
+                  const debit = (subTotal + numericVal - cash).toFixed(2);
+
+                  setCashAmount(cash.toString());
+                  setDebitAmount(debit);
                 }}
-                className=" w-6 rounded border border-gray-300 px-1 py-0.5  text-sm"
+                className=" w-9 rounded border border-gray-300 px-1 py-0.5  text-sm"
               />
             </p>
           ) : null}
@@ -208,10 +211,14 @@ export default function ReviewNewInvoice({
                   type="text"
                   value={cashAmount}
                   onChange={(e) => {
-                    setCashAmount(Number(e.target.value));
-                    setDebitAmount(totalAmount - Number(e.target.value));
+                    setCashAmount(e.target.value);
+                    setDebitAmount(
+                      (
+                        totalAmount - parseFloat(e.target.value || "0")
+                      ).toString(),
+                    );
                   }}
-                  className=" w-8 rounded border border-gray-300 px-1 py-0.5  text-sm"
+                  className=" w-9 rounded border border-gray-300 px-1 py-0.5  text-sm"
                 />
               </p>
               <p className="text-sm text-gray-500">
@@ -219,11 +226,17 @@ export default function ReviewNewInvoice({
                 <input
                   type="text"
                   value={debitAmount}
+                  max={totalAmount}
+                  min={0}
                   onChange={(e) => {
-                    setDebitAmount(Number(e.target.value));
-                    setCashAmount(totalAmount - Number(e.target.value));
+                    setDebitAmount(e.target.value);
+                    setCashAmount(
+                      (
+                        totalAmount - parseFloat(e.target.value || "0")
+                      ).toString(),
+                    );
                   }}
-                  className=" w-8 rounded border border-gray-300 px-1 py-0.5  text-sm"
+                  className=" w-9 rounded border border-gray-300 px-1 py-0.5  text-sm"
                 />
               </p>
             </>
