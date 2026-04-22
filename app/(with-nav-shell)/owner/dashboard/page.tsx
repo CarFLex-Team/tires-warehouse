@@ -103,7 +103,7 @@ export default function dashboard() {
     <>
       <div className=" ">
         <PendingInvoices renderActions={actionColumn} setError={setError} />
-        <StockAlert setError={setError} />
+
         <OverviewStats
           title="Monthly Overview"
           stats={monthlyTransactionStats}
