@@ -5,11 +5,13 @@ import CustomButton from "@/components/ui/CustomButton";
 import { useEffect, useRef, useState } from "react";
 
 import Modal from "@/components/ui/Modal";
-import { EllipsisVertical } from "lucide-react";
+import { CircleX, EllipsisVertical, Loader2, Plus, X } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  addProductImage,
   deleteProduct,
+  deleteProductImage,
   getInventory,
   InventoryProduct,
 } from "@/lib/api/inventory";
@@ -30,7 +32,9 @@ export default function Inventory({
   const [ratioFilter, setRatioFilter] = useState("");
   const [condition, setCondition] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmImageOpen, setConfirmImageOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] =
     useState<InventoryProduct | null>(null);
   const [selectedMenuId, setSelectedMenuId] = useState<string | null>(null);
@@ -49,6 +53,17 @@ export default function Inventory({
       document.removeEventListener("mousedown", handleClickOutside); // Cleanup event listener on component unmount
     };
   }, []);
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setPreviewImage(null);
+    }
+
+    if (previewImage) {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [previewImage]);
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery<InventoryProduct[]>({
     queryKey: ["inventory"],
@@ -68,6 +83,22 @@ export default function Inventory({
       setConfirmOpen(false);
     },
   });
+  const addImageMutation = useMutation({
+    mutationFn: addProductImage,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      setSelectedId(null);
+      setConfirmImageOpen(false);
+    },
+  });
+  const deleteImageMutation = useMutation({
+    mutationFn: deleteProductImage,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      setSelectedId(null);
+      setConfirmImageOpen(false);
+    },
+  });
   const handleMenuToggle = (id: string) => {
     if (selectedMenuId === id) {
       // If the same product's menu is clicked, toggle it off
@@ -77,8 +108,61 @@ export default function Inventory({
       setSelectedMenuId(id);
     }
   };
-
+  // console.log("Inventory data:", data?.[0]);
   const productColumns: TableColumn<InventoryProduct>[] = [
+    {
+      header: "Image",
+      accessor: (row) => {
+        return row.image_url ? (
+          <div className="relative w-8 h-8 group">
+            <img
+              src={row.image_url}
+              alt={row.name}
+              className="w-8 h-8 object-cover rounded "
+              onClick={() => setPreviewImage(row.image_url)}
+            />
+            <button
+              className="absolute -top-1 -right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => {
+                /* handle remove image or whatever */
+                setSelectedId(row.id);
+                setConfirmImageOpen(true);
+              }}
+            >
+              <CircleX size={13} className="text-red-500 cursor-pointer" />
+            </button>
+          </div>
+        ) : (
+          <button
+            className="relative rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+            onClick={() => {
+              setSelectedId(row.id);
+            }}
+          >
+            {addImageMutation.isPending && row.id === selectedId ? (
+              <Loader2
+                size={16}
+                className="text-gray-500 animate-spin cursor-not-allowed"
+              />
+            ) : (
+              <Plus size={16} className="text-gray-500" />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              className="opacity-0 absolute inset-0 cursor-pointer disabled:cursor-not-allowed"
+              disabled={addImageMutation.isPending && row.id === selectedId}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  addImageMutation.mutate({ id: row.id, image: file });
+                }
+              }}
+            />
+          </button>
+        );
+      },
+    },
     { header: "Condition", accessor: "condition" },
     // { header: "Conditi", accessor: "id" },
     { header: "Brand", accessor: "brand" },
@@ -164,6 +248,26 @@ export default function Inventory({
 
   return (
     <>
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="relative bg-white flex items-center justify-center p-4 rounded-2xl">
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="max-w-[80vw] max-h-[80vh] rounded"
+            />
+            <button
+              className="absolute top-2 right-2 text-black text-xl font-bold"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X size={24} />
+            </button>
+          </div>
+        </div>
+      )}
       {open && (
         <Modal isOpen={open} onClose={() => setOpen(false)} title="New Product">
           <AddProductForm onSuccess={() => setOpen(false)} />
@@ -352,6 +456,18 @@ export default function Inventory({
             )}
           </>
         )}
+      />
+      <ConfirmDialog
+        isOpen={confirmImageOpen}
+        onCancel={() => setConfirmImageOpen(false)}
+        onConfirm={() => {
+          if (selectedId) {
+            deleteImageMutation.mutate(selectedId);
+          }
+        }}
+        description="Do you want to Delete this Image?"
+        loading={deleteImageMutation.isPending}
+        error={deleteImageMutation.error?.message}
       />
       <ConfirmDialog
         isOpen={confirmOpen}

@@ -11,6 +11,7 @@ export interface InventoryProduct {
   condition: "USED" | "NEW" | "SET";
   created_at: string;
   updated_at: string;
+  image_url: string;
 }
 export interface InventorySummary {
   name: string;
@@ -78,6 +79,30 @@ export async function editInventoryProduct(data: {
   );
 
   if (!res.ok) throw new Error("Failed to edit product");
+}
+export async function addProductImage(data: {
+  id: string;
+  image: File | null;
+}) {
+  const formData = new FormData();
+  formData.append("image", data.image!);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inventory/${data.id}/image`,
+    {
+      method: "PUT",
+      body: formData,
+    },
+  );
+  if (!res.ok) throw new Error("Failed to add image to product");
+}
+export async function deleteProductImage(id: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inventory/${id}/image`,
+    {
+      method: "DELETE",
+    },
+  );
+  if (!res.ok) throw new Error("Failed to delete product image");
 }
 export async function getInventorySummary(): Promise<InventorySummary[]> {
   const res = await fetch(
