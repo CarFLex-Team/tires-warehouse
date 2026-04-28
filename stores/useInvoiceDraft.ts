@@ -12,6 +12,7 @@ export type InvoiceItem = {
   amount: string;
   type: TransactionType;
   cost?: string;
+  condition?: string;
 };
 
 type InvoiceDraftState = {
