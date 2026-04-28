@@ -10,6 +10,7 @@ import formatDate from "@/lib/formatDate";
 import CustomButton from "../ui/CustomButton";
 import { downloadPdf } from "@/lib/api/donwloadPdf";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function invoiceTransactions({
   invoice_id,
@@ -76,7 +77,14 @@ export default function invoiceTransactions({
             }}
             isLoading={isdownloading}
           >
-            {isdownloading ? "Downloading..." : "Download PDF"}
+            {isdownloading ? (
+              <Loader2
+                size={16}
+                className="text-white animate-spin cursor-not-allowed"
+              />
+            ) : (
+              "Print Invoice"
+            )}
           </CustomButton>
         }
       />

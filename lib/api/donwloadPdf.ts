@@ -33,9 +33,18 @@ export function downloadPdf(
     .then((response) => response.blob())
     .then((blob) => {
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `invoice-${invoice.id}.pdf`;
-      link.click();
+      const blobUrl = URL.createObjectURL(blob);
+      const newWindow = window.open(blobUrl); // Open PDF in a new tab
+
+      if (newWindow) {
+        // Give it a short delay to load before printing
+        newWindow.onload = () => {
+          newWindow.focus();
+          newWindow.print(); // Show print dialog immediately
+        };
+      } else {
+        alert("Please allow pop-ups to print the PDF.");
+      }
       setIsDownloading(false);
     })
     .catch((error) => {
