@@ -67,19 +67,23 @@ export default function EditInvoice({
   const totalAmount = subTotal + (parseFloat(tax) || 0);
   useEffect(() => {
     if (paymentMethod === "Debit") {
-      setTax((subTotal * 0.07).toString());
-      setDebitAmount((subTotal + subTotal * 0.07).toString());
+      setTax((subTotal * 0.07).toFixed(2).toString());
+      setDebitAmount((subTotal + subTotal * 0.07).toFixed(2).toString());
       setCashAmount("0");
     } else if (paymentMethod === "Cash") {
       setTax("0");
       setCashAmount(totalAmount.toString());
       setDebitAmount("0");
     } else if (paymentMethod === "Mix") {
-      const calculatedTax = subTotal * 0.07;
+      const calculatedTax = (subTotal * 0.07).toFixed(2);
       setTax(calculatedTax.toString());
-      setDebitAmount(((subTotal + calculatedTax) / 2).toString());
+      setDebitAmount(((subTotal + parseFloat(calculatedTax)) / 2).toString());
       setCashAmount(
-        (subTotal + calculatedTax - (subTotal + calculatedTax) / 2).toString(),
+        (
+          subTotal +
+          parseFloat(calculatedTax) -
+          (subTotal + parseFloat(calculatedTax)) / 2
+        ).toString(),
       );
     } else {
       setTax("0");
@@ -204,9 +208,9 @@ export default function EditInvoice({
                   onChange={(e) => {
                     setCashAmount(e.target.value);
                     setDebitAmount(
-                      (
-                        totalAmount - parseFloat(e.target.value || "0")
-                      ).toString(),
+                      (totalAmount - parseFloat(e.target.value || "0"))
+                        .toFixed(2)
+                        .toString(),
                     );
                   }}
                   className=" w-9 rounded border border-gray-300 px-1 py-0.5  text-sm"
@@ -220,9 +224,9 @@ export default function EditInvoice({
                   onChange={(e) => {
                     setDebitAmount(e.target.value);
                     setCashAmount(
-                      (
-                        totalAmount - parseFloat(e.target.value || "0")
-                      ).toString(),
+                      (totalAmount - parseFloat(e.target.value || "0"))
+                        .toFixed(2)
+                        .toString(),
                     );
                   }}
                   className=" w-9 rounded border border-gray-300 px-1 py-0.5  text-sm"
