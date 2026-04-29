@@ -14,20 +14,17 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const [description, setDescription] = useState("");
-  const [type, setType] = useState<CategoryType | "">("");
+  const [type, setType] = useState<CategoryType | "">("Expense");
   const [categoryId, setCategoryId] = useState("");
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
   const [errorMessage, setErrorMessage] = useState("");
-  const { data: services } = useQuery({
-    queryKey: ["services"],
-    queryFn: getServices,
-  });
+
   // const filteredServices = services?.filter((c) => c.type === type);
-  const filteredServices = services;
-  useEffect(() => {
-    setCategoryId("");
-  }, [type]);
+
+  // useEffect(() => {
+  //   setCategoryId("");
+  // }, [type]);
   const mutation = useMutation({
     mutationFn: createTransaction,
     onSuccess: () => {
@@ -43,7 +40,7 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!description || !type || !categoryId || !amount || !paymentMethod) {
+    if (!description || !type || !amount || !paymentMethod) {
       setErrorMessage("Please fill in all fields.");
       return;
     }
@@ -63,7 +60,8 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
       <div className="flex justify-between items-center gap-4">
         <label className="flex-2">Type</label>
         <div className="flex gap-2 flex-5">
-          <button
+          Expense
+          {/* <button
             type="button"
             className={`flex items-center gap-1.5 rounded border border-primary-600 p-2  text-sm cursor-pointer  ${
               type === "Sales"
@@ -85,34 +83,10 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
             type="button"
           >
             Expense
-          </button>
+          </button> */}
         </div>
       </div>
-      <div className="flex justify-between items-center gap-4">
-        <label className="flex-2">Service</label>
-        {filteredServices?.length !== 0 ? (
-          <div className="flex gap-1 flex-5 flex-wrap">
-            {filteredServices?.map((cat: any) => (
-              <button
-                key={cat.id}
-                className={`flex items-center gap-1.5 rounded border border-primary-600 p-1 text-sm cursor-pointer m-0.5 ${
-                  categoryId === String(cat.id)
-                    ? "bg-primary-600 text-white"
-                    : "bg-white text-primary-600 hover:bg-gray-100"
-                }`}
-                onClick={() => setCategoryId(String(cat.id))}
-                type="button"
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <p className="flex-5 text-gray-400">
-            Type has no categories available
-          </p>
-        )}
-      </div>
+
       <div className="flex justify-between items-center gap-4">
         <label className="flex-2">Description</label>
         <textarea

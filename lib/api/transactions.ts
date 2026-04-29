@@ -33,10 +33,10 @@ export async function getTransactions({
   month?: string;
 }): Promise<Transaction[]> {
   const url = date
-    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions?date=${date}`
+    ? `/api/transactions?date=${date}`
     : month
-      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions?month=${month}`
-      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions`;
+      ? `/api/transactions?month=${month}`
+      : `/api/transactions`;
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch transactions");
   return res.json();
@@ -69,14 +69,11 @@ export async function createTransaction(data: {
   payment_method: string;
   created_by: number;
 }) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    },
-  );
+  const res = await fetch(`/api/transactions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 
   if (!res.ok) throw new Error("Failed to add transaction");
   return res.json();

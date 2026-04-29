@@ -1,4 +1,11 @@
-import { Home, Users, CreditCard, Hammer, Package } from "lucide-react";
+import {
+  Home,
+  Users,
+  CreditCard,
+  Hammer,
+  Package,
+  BanknoteArrowUp,
+} from "lucide-react";
 
 export type NavItem = {
   id: string;
@@ -16,12 +23,12 @@ export const navByRole: Record<Role, NavItem[]> = {
       href: "/owner/dashboard",
       icon: Home,
     },
-    // {
-    //   id: "ownerTransactions",
-    //   label: "Transactions",
-    //   href: "/owner/transactions",
-    //   icon: CreditCard,
-    // },
+    {
+      id: "ownerPayOuts",
+      label: "Pay Outs",
+      href: "/owner/payouts",
+      icon: BanknoteArrowUp,
+    },
     {
       id: "ownerInventory",
       label: "Inventory",
@@ -56,6 +63,12 @@ export const navByRole: Record<Role, NavItem[]> = {
       label: "Customers",
       href: "/customers",
       icon: Users,
+    },
+    {
+      id: "teamPayOuts",
+      label: "PayOuts",
+      href: "/payouts",
+      icon: BanknoteArrowUp,
     },
     {
       id: "teamInventory",
