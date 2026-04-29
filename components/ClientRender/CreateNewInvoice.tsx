@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import { InvoiceItem, useInvoiceDraft } from "@/stores/useInvoiceDraft";
 import { getInventory } from "@/lib/api/inventory";
 import { useQuery } from "@tanstack/react-query";
+import Modal from "../ui/Modal";
+import CustomerPage from "./CustomerPage";
+import { getCustomerById } from "@/lib/api/customers";
+import LoadingSpinner from "../ui/LoadingSpinner";
 
 export default function CreateNewInvoice({
   customer_Id,
@@ -14,6 +18,7 @@ export default function CreateNewInvoice({
 }) {
   const [rows, setRows] = useState<InvoiceItem[]>([]);
   const [showAlert, setShowAlert] = useState<string>("");
+  const [open, setOpen] = useState(false);
   const setItems = useInvoiceDraft((s) => s.setItems);
   const setCustomer = useInvoiceDraft((s) => s.setCustomer);
   const router = useRouter();
@@ -21,6 +26,10 @@ export default function CreateNewInvoice({
   const { data: products } = useQuery({
     queryKey: ["products"],
     queryFn: getInventory,
+  });
+  const { data: customer, isLoading } = useQuery({
+    queryKey: ["customer"],
+    queryFn: () => getCustomerById(customer_Id),
   });
   useEffect(() => {
     if (items.length && customerId === customer_Id) {
@@ -95,20 +104,60 @@ export default function CreateNewInvoice({
     setItems(rows);
     router.push(`/customers/${customer_Id}/invoices/new/review`);
   }
-
-  return (
-    <div className=" relative space-y-4 bg-white p-5 m-4 rounded-xl shadow-sm">
-      <InvoiceTable
-        rows={rows}
-        onAdd={addRow}
-        onUpdate={updateRow}
-        onRemove={removeRow}
-        products={products}
-      />
-      {showAlert && <div className="text-red-500 text-sm">{showAlert}</div>}
-      <div className="flex justify-end gap-3">
-        <CustomButton onClick={submit}>Review & Submit</CustomButton>
+  if (isLoading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <LoadingSpinner width={8} height={8} />
       </div>
-    </div>
+    );
+  }
+  return (
+    <>
+      {open && (
+        <Modal
+          title="Pick Customer"
+          onClose={() => setOpen(false)}
+          isOpen={open}
+          width="max-w-[70vw]"
+        >
+          <CustomerPage isCreateInvoice={true} />
+        </Modal>
+      )}
+      <div className=" relative space-y-4 bg-white p-5 m-4 rounded-xl shadow-sm">
+        <div className="flex  flex-col  p-4 gap-1">
+          <div className="flex items-center justify-between gap-2">
+            <p>
+              Creating new invoice for:{" "}
+              <span className="text-lg font-semibold">
+                {customer?.name.split(" ")[0]}
+              </span>
+            </p>
+            <CustomButton
+              className=""
+              onClick={() => {
+                setOpen(true);
+              }}
+            >
+              Change Customer
+            </CustomButton>
+          </div>
+          <p className="text-gray-500">
+            Note: If you want to change the customer. Make sure you change it
+            before adding items.
+          </p>
+        </div>
+        <InvoiceTable
+          rows={rows}
+          onAdd={addRow}
+          onUpdate={updateRow}
+          onRemove={removeRow}
+          products={products}
+        />
+        {showAlert && <div className="text-red-500 text-sm">{showAlert}</div>}
+        <div className="flex justify-end gap-3">
+          <CustomButton onClick={submit}>Review & Submit</CustomButton>
+        </div>
+      </div>
+    </>
   );
 }

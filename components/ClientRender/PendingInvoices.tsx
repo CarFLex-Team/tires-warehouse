@@ -6,9 +6,6 @@ import CustomButton from "../ui/CustomButton";
 import { Invoice } from "@/lib/api/customers";
 import { getInvoices } from "@/lib/api/invoices";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import Modal from "../ui/Modal";
-import CustomerPage from "./CustomerPage";
 export default function PendingInvoices({
   renderActions,
   setError,
@@ -17,7 +14,6 @@ export default function PendingInvoices({
   setError: (message: string) => void;
 }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
 
   const {
     data: invoiceData,
@@ -34,16 +30,6 @@ export default function PendingInvoices({
   }
   return (
     <>
-      {open && (
-        <Modal
-          title="Pick Customer"
-          onClose={() => setOpen(false)}
-          isOpen={open}
-          width="max-w-[70vw]"
-        >
-          <CustomerPage isCreateInvoice={true} />
-        </Modal>
-      )}
       <DataTable
         title="Pending Invoices "
         columns={invoiceColumns}
@@ -52,10 +38,9 @@ export default function PendingInvoices({
         action={
           <CustomButton
             onClick={() => {
-              // router.push(
-              //   `/customers/88edfb3d-5402-4f8f-833f-0659d6dc60ff/invoices/new`,
-              // );
-              setOpen(true);
+              router.push(
+                `/customers/88edfb3d-5402-4f8f-833f-0659d6dc60ff/invoices/new`,
+              );
             }}
           >
             Create Invoice
