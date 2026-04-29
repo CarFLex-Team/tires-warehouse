@@ -15,6 +15,7 @@ import {
 import PendingInvoices from "@/components/ClientRender/PendingInvoices";
 import StockAlert from "@/components/ClientRender/StockAlert";
 import InvoicesInTime from "@/components/ClientRender/InvoicesInTime";
+import PayoutTransactions from "@/components/ClientRender/PayoutTransactions";
 export default function dashboard() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -119,6 +120,7 @@ export default function dashboard() {
             />
           }
         />
+        <PayoutTransactions month={month} />
         <InvoicesInTime
           month={month}
           renderActions={actionColumn}
