@@ -72,6 +72,9 @@ export async function editInvoice(
     tax?: number;
     payment_method?: string;
     created_by: number;
+    transactions: Transaction[];
+    status: "pending" | "finished";
+    customer_id?: string;
   },
 ) {
   const res = await fetch(

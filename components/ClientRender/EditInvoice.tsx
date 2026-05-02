@@ -10,6 +10,7 @@ import { createInvoice, editInvoice, getInvoiceById } from "@/lib/api/invoices";
 import { Transaction } from "@/lib/api/transactions";
 import { Invoice } from "@/lib/api/customers";
 import { useSession } from "next-auth/react";
+import { InvoiceItem } from "@/stores/useInvoiceDraft";
 
 export default function EditInvoice({
   customer_Id,
@@ -35,9 +36,12 @@ export default function EditInvoice({
       subtotal: number;
       cash_amount?: number;
       debit_amount?: number;
+      customer_id?: string;
       tax?: number;
       payment_method?: string;
       created_by: number;
+      transactions: Transaction[];
+      status: "pending" | "finished";
     }) => editInvoice(invoice_Id, data),
     onSuccess: () => {
       router.push(`/customers/${customer_Id}/invoices/${invoice_Id}`);
@@ -107,8 +111,11 @@ export default function EditInvoice({
       tax: parseFloat(tax) || 0,
       cash_amount: parseFloat(cashAmount) || 0,
       debit_amount: parseFloat(debitAmount) || 0,
+      customer_id: customer_Id,
       payment_method: paymentMethod,
       created_by: session?.user?.id || 10,
+      transactions: transactions,
+      status: "finished",
     });
   }
 
