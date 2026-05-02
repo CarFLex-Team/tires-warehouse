@@ -7,7 +7,12 @@ import CustomButton from "../ui/CustomButton";
 import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
 import ConfirmDialog from "../ui/ConfirmDialog";
-import { Customer, getCustomerById, Invoice } from "@/lib/api/customers";
+import {
+  Customer,
+  getCustomerById,
+  getCustomerInvoices,
+  Invoice,
+} from "@/lib/api/customers";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import formatDate from "@/lib/formatDate";
 import { formatTime } from "@/lib/formatTime";
@@ -31,7 +36,7 @@ export default function CustomerInvoices({
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery<Customer>({
     queryKey: ["customers", customerId],
-    queryFn: () => getCustomerById(customerId || ""),
+    queryFn: () => getCustomerInvoices(customerId || ""),
   });
   const customer = data;
   const deleteMutation = useMutation({

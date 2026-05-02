@@ -48,6 +48,13 @@ export async function getCustomerById(id: string): Promise<Customer> {
   if (!res.ok) throw new Error("Failed to fetch customer");
   return res.json();
 }
+export async function getCustomerInvoices(id: string): Promise<Customer> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers/${id}/invoices`,
+  );
+  if (!res.ok) throw new Error("Failed to fetch customer invoices");
+  return res.json();
+}
 export async function getCustomerMonthlySummary(
   month?: string,
 ): Promise<CustomerMonthlySummary[]> {
