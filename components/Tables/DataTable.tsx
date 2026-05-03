@@ -83,7 +83,7 @@ export function DataTable<T>({
                   {columns.map((col, colIndex) => (
                     <td key={colIndex} className="py-3 px-2 text-sm">
                       {typeof col.accessor === "function"
-                        ? col.accessor(row)
+                        ? col.accessor(row, rowIndex)
                         : col.header === "Amount" || col.header === "Cost"
                           ? "$" + (row[col.accessor] as React.ReactNode)
                           : (row[col.accessor] as React.ReactNode)}

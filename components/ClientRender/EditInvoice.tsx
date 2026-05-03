@@ -11,6 +11,7 @@ import { Transaction } from "@/lib/api/transactions";
 import { Invoice } from "@/lib/api/customers";
 import { useSession } from "next-auth/react";
 import { InvoiceItem } from "@/stores/useInvoiceDraft";
+import { getInventory } from "@/lib/api/inventory";
 
 export default function EditInvoice({
   customer_Id,
@@ -26,10 +27,22 @@ export default function EditInvoice({
   const [tax, setTax] = useState<string>("");
   const [cashAmount, setCashAmount] = useState<string>("");
   const [debitAmount, setDebitAmount] = useState<string>("");
+
   const { data, isLoading, error } = useQuery<Invoice>({
     queryKey: ["invoices", invoice_Id],
     queryFn: () => getInvoiceById(invoice_Id),
   });
+  const { data: products } = useQuery({
+    queryKey: ["products"],
+    queryFn: () => getInventory(),
+  });
+  const [transactions, setTransactions] = useState<Transaction[]>(
+    data?.transactions || [],
+  );
+  useEffect(() => {
+    if (data?.transactions) setTransactions(data.transactions);
+  }, [data]);
+
   const mutation = useMutation({
     mutationFn: (data: {
       total_amount?: number;
@@ -50,18 +63,49 @@ export default function EditInvoice({
       setAlertMessage(error.message || "An error occurred");
     },
   });
-  const transactions = data ? data?.transactions : [];
+  // const transactions = data ? data?.transactions : [];
 
   const invoiceItemColumns: TableColumn<Transaction>[] = [
     { header: "Type", accessor: "type" },
     { header: "Category", accessor: "category" },
     {
       header: "Product/Service",
-      accessor: (item) =>
-        item.category === "Tire" ? item.product_name : item.service_name,
+      accessor: (item, index) => (
+        <input
+          type="text"
+          value={
+            item.category === "Tire" ? item.product_name : item.service_name
+          }
+          onChange={(e) => {
+            // if (index === undefined) return;
+            const newTransactions = [...transactions];
+            if (item.category === "Tire") {
+              newTransactions[index].product_name = e.target.value;
+            } else {
+              newTransactions[index].service_name = e.target.value;
+            }
+            setTransactions(newTransactions);
+          }}
+          className="border rounded px-1 py-0.5 text-sm w-full"
+        />
+      ),
     },
-    { header: "Quantity (Tire)", accessor: "quantity" },
-    // { header: "Description", accessor: "description" },
+    {
+      header: "Quantity (Tire)",
+      accessor: (item, index) => (
+        <input
+          type="text"
+          value={item.quantity}
+          onChange={(e) => {
+            if (index === undefined) return;
+            const newTransactions = [...transactions];
+            newTransactions[index].quantity = Number(e.target.value || "0");
+            setTransactions(newTransactions);
+          }}
+          className="border rounded px-1 py-0.5 text-sm w-16"
+        />
+      ),
+    },
     { header: "Amount", accessor: "amount" },
   ];
   const subTotal = transactions.reduce(
