@@ -4,7 +4,7 @@ export default async function invoice({
 }: {
   params: { id: string; invoiceId: string };
 }) {
-  const { invoiceId } = await params;
+  const { invoiceId, id } = await params;
 
-  return <InvoiceTransactions invoice_id={invoiceId} />;
+  return <InvoiceTransactions invoice_id={invoiceId} id={id} />;
 }

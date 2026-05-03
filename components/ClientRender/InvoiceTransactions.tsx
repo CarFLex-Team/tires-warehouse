@@ -11,12 +11,16 @@ import CustomButton from "../ui/CustomButton";
 import { downloadPdf } from "@/lib/api/donwloadPdf";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function invoiceTransactions({
   invoice_id,
+  id,
 }: {
   invoice_id: string;
+  id?: string;
 }) {
+  const router = useRouter();
   const [isdownloading, setIsDownloading] = useState(false);
   const { data, isLoading, error } = useQuery<Invoice>({
     queryKey: ["invoices", invoice_id],
@@ -71,21 +75,32 @@ export default function invoiceTransactions({
         data={isLoading ? [] : transactions}
         isLoading={isLoading}
         action={
-          <CustomButton
-            onClick={() => {
-              downloadPdf(data!, setIsDownloading);
-            }}
-            isLoading={isdownloading}
-          >
-            {isdownloading ? (
-              <Loader2
-                size={16}
-                className="text-white animate-spin cursor-not-allowed"
-              />
-            ) : (
-              "Print Invoice"
-            )}
-          </CustomButton>
+          <div className="flex gap-2">
+            <CustomButton
+              onClick={() => {
+                downloadPdf(data!, setIsDownloading);
+              }}
+              isLoading={isdownloading}
+            >
+              {isdownloading ? (
+                <Loader2
+                  size={16}
+                  className="text-white animate-spin cursor-not-allowed"
+                />
+              ) : (
+                "Print Invoice"
+              )}
+            </CustomButton>
+            <CustomButton
+              onClick={() => {
+                router.push(
+                  `/customers/${id}/invoices/${invoice_id}/edit/review`,
+                );
+              }}
+            >
+              Edit Invoice
+            </CustomButton>
+          </div>
         }
       />
     </>
