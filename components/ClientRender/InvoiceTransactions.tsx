@@ -78,6 +78,15 @@ export default function invoiceTransactions({
           <div className="flex gap-2">
             <CustomButton
               onClick={() => {
+                router.push(
+                  `/customers/${id}/invoices/${invoice_id}/edit/review`,
+                );
+              }}
+            >
+              Edit Invoice
+            </CustomButton>
+            <CustomButton
+              onClick={() => {
                 downloadPdf(data!, setIsDownloading);
               }}
               isLoading={isdownloading}
@@ -90,15 +99,6 @@ export default function invoiceTransactions({
               ) : (
                 "Print Invoice"
               )}
-            </CustomButton>
-            <CustomButton
-              onClick={() => {
-                router.push(
-                  `/customers/${id}/invoices/${invoice_id}/edit/review`,
-                );
-              }}
-            >
-              Edit Invoice
             </CustomButton>
           </div>
         }
