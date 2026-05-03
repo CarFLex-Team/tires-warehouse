@@ -6,6 +6,8 @@ import CustomButton from "../ui/CustomButton";
 import { Invoice } from "@/lib/api/customers";
 import { getInvoices } from "@/lib/api/invoices";
 import { useRouter } from "next/navigation";
+import { useInvoiceDraft } from "@/stores/useInvoiceDraft";
+
 export default function PendingInvoices({
   renderActions,
   setError,
@@ -14,7 +16,7 @@ export default function PendingInvoices({
   setError: (message: string) => void;
 }) {
   const router = useRouter();
-
+  const clear = useInvoiceDraft((s) => s.clear);
   const {
     data: invoiceData,
     isLoading: invoiceLoading,
@@ -50,8 +52,9 @@ export default function PendingInvoices({
           <div className="flex space-x-2">
             <CustomButton
               onClick={() => {
+                clear();
                 router.push(
-                  `/customers/${row.customer_id}/invoices/${row.id}/edit`,
+                  `/customers/${row.customer_id}/invoices/${row.id}/edit/review`,
                 );
               }}
             >

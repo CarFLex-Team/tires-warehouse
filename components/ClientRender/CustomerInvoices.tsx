@@ -100,7 +100,7 @@ export default function CustomerInvoices({
             <CustomButton
               onClick={() =>
                 router.push(
-                  `/customers/${customerId}/invoices/${invoice.id}/edit`,
+                  `/customers/${customerId}/invoices/${invoice.id}/edit/review`,
                 )
               }
             >

@@ -11,7 +11,7 @@ import { Transaction } from "@/lib/api/transactions";
 import { Invoice } from "@/lib/api/customers";
 import { useSession } from "next-auth/react";
 import { useInvoiceDraft } from "@/stores/useInvoiceDraft";
-export default function EditInvoice({
+export default function ReviewEditInvoice({
   customer_Id,
   invoice_Id,
 }: {
@@ -20,23 +20,29 @@ export default function EditInvoice({
 }) {
   const { data: session } = useSession();
   const router = useRouter();
-  const { items, customerId } = useInvoiceDraft();
+  const { items: savedItems, customerId } = useInvoiceDraft();
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [tax, setTax] = useState<string>("");
   const [cashAmount, setCashAmount] = useState<string>("");
   const [debitAmount, setDebitAmount] = useState<string>("");
   const clear = useInvoiceDraft((s) => s.clear);
-
+  const [items, setItems] = useState<Transaction[]>([]);
+  const { data, isLoading, error } = useQuery<Invoice>({
+    queryKey: ["invoices", invoice_Id],
+    queryFn: () => getInvoiceById(invoice_Id),
+  });
   useEffect(() => {
-    // if (!items.length) {
-    //   router.push(`/customers/${customer_Id}/invoices`);
-    // }
+    if (!savedItems.length && data?.transactions) {
+      setItems(data.transactions);
+    } else {
+      setItems(savedItems);
+    }
     if (customerId && customerId !== customer_Id) {
       clear();
       router.replace("/customers");
     }
-  }, [items.length, customerId, router, customer_Id]);
+  }, [savedItems.length, customerId, router, customer_Id, data]);
   const mutation = useMutation({
     mutationFn: (data: {
       total_amount?: number;
@@ -132,7 +138,18 @@ export default function EditInvoice({
         <DataTable
           title="Finishing Invoice"
           columns={invoiceItemColumns}
-          // isLoading={isLoading}
+          isLoading={isLoading}
+          action={
+            <CustomButton
+              onClick={() => {
+                router.push(
+                  `/customers/${customer_Id}/invoices/${invoice_Id}/edit`,
+                );
+              }}
+            >
+              Edit Items
+            </CustomButton>
+          }
           data={items}
         />
       </div>
