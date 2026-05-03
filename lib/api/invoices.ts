@@ -1,4 +1,3 @@
-import { InvoiceItem } from "@/stores/useInvoiceDraft";
 import { Invoice } from "./customers";
 import { Transaction } from "./transactions";
 export interface InvoiceSummary {
@@ -47,7 +46,7 @@ export async function createInvoice(data: {
   customer_id: string;
   payment_method?: string;
   status: "pending" | "finished";
-  transactions: InvoiceItem[];
+  transactions: Transaction[];
   created_by: number;
 }) {
   const res = await fetch(

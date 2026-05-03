@@ -3,20 +3,21 @@ import { useEffect, useState } from "react";
 import { InvoiceTable } from "../Tables/InvoiceTable";
 import CustomButton from "../ui/CustomButton";
 import { useRouter } from "next/navigation";
-import { InvoiceItem, useInvoiceDraft } from "@/stores/useInvoiceDraft";
+import { useInvoiceDraft } from "@/stores/useInvoiceDraft";
 import { getInventory } from "@/lib/api/inventory";
 import { useQuery } from "@tanstack/react-query";
 import Modal from "../ui/Modal";
 import CustomerPage from "./CustomerPage";
 import { getCustomerById } from "@/lib/api/customers";
 import LoadingSpinner from "../ui/LoadingSpinner";
+import { Transaction } from "@/lib/api/transactions";
 
 export default function CreateNewInvoice({
   customer_Id,
 }: {
   customer_Id: string;
 }) {
-  const [rows, setRows] = useState<InvoiceItem[]>([]);
+  const [rows, setRows] = useState<Transaction[]>([]);
   const [showAlert, setShowAlert] = useState<string>("");
   const [open, setOpen] = useState(false);
   const setItems = useInvoiceDraft((s) => s.setItems);
@@ -45,17 +46,19 @@ export default function CreateNewInvoice({
         product_name: "",
         service_name: "",
         description: "",
-        amount: "",
-        cost: "",
+        amount: 0,
+        cost: "0",
         quantity: 1,
         type: "Sales",
+        payment_method: "",
+        created_at: new Date().toISOString(),
       },
     ]);
     setShowAlert("");
   }
   function updateRow(
     id: string,
-    field: keyof InvoiceItem,
+    field: keyof Transaction,
     value: string | number,
   ) {
     setRows((prev) =>

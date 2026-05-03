@@ -2,22 +2,24 @@
 import CustomButton from "@/components/ui/CustomButton";
 import { DataTable } from "@/components/Tables/DataTable";
 import { TableColumn } from "@/components/Tables/Type";
-import { redirect, useRouter } from "next/navigation";
-import { useInvoiceDraft } from "@/stores/useInvoiceDraft";
+import { useRouter } from "next/navigation";
 import { Banknote, CreditCard, Merge } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createInvoice } from "@/lib/api/invoices";
-import { useSession } from "next-auth/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createInvoice, editInvoice, getInvoiceById } from "@/lib/api/invoices";
 import { Transaction } from "@/lib/api/transactions";
-
-export default function ReviewNewInvoice({
+import { Invoice } from "@/lib/api/customers";
+import { useSession } from "next-auth/react";
+import { useInvoiceDraft } from "@/stores/useInvoiceDraft";
+export default function EditInvoice({
   customer_Id,
+  invoice_Id,
 }: {
   customer_Id: string;
+  invoice_Id: string;
 }) {
-  const router = useRouter();
   const { data: session } = useSession();
+  const router = useRouter();
   const { items, customerId } = useInvoiceDraft();
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string>("");
@@ -25,27 +27,38 @@ export default function ReviewNewInvoice({
   const [cashAmount, setCashAmount] = useState<string>("");
   const [debitAmount, setDebitAmount] = useState<string>("");
   const clear = useInvoiceDraft((s) => s.clear);
+
   useEffect(() => {
-    if (!items.length) {
-      router.push(`/customers/${customer_Id}/invoices`);
-    }
+    // if (!items.length) {
+    //   router.push(`/customers/${customer_Id}/invoices`);
+    // }
     if (customerId && customerId !== customer_Id) {
       clear();
       router.replace("/customers");
     }
   }, [items.length, customerId, router, customer_Id]);
-  const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: createInvoice,
+    mutationFn: (data: {
+      total_amount?: number;
+      subtotal: number;
+      cash_amount?: number;
+      debit_amount?: number;
+      customer_id?: string;
+      tax?: number;
+      payment_method?: string;
+      created_by: number;
+      transactions: Transaction[];
+      status: "pending" | "finished";
+    }) => editInvoice(invoice_Id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
       clear();
-      router.push(`/customers/${customer_Id}/invoices`);
+      router.push(`/customers/${customer_Id}/invoices/${invoice_Id}`);
     },
     onError: (error: any) => {
       setAlertMessage(error.message || "An error occurred");
     },
   });
+  // const transactions = data ? data?.transactions : [];
 
   const invoiceItemColumns: TableColumn<Transaction>[] = [
     { header: "Type", accessor: "type" },
@@ -56,14 +69,13 @@ export default function ReviewNewInvoice({
         item.category === "Tire" ? item.product_name : item.service_name,
     },
     { header: "Quantity (Tire)", accessor: "quantity" },
-    // { header: "Description", accessor: "description" },
     { header: "Amount", accessor: "amount" },
-    { header: "Cost", accessor: "cost" },
   ];
   const subTotal = items.reduce(
     (total, item) => total + Number(item.amount),
     0,
   );
+  const totalAmount = subTotal + (parseFloat(tax) || 0);
   useEffect(() => {
     if (paymentMethod === "Debit") {
       setTax((subTotal * 0.07).toFixed(2).toString());
@@ -91,46 +103,38 @@ export default function ReviewNewInvoice({
     }
   }, [paymentMethod, subTotal]);
 
-  const totalAmount = subTotal + parseFloat(tax || "0");
-
   function saveInvoice() {
     if (!paymentMethod) {
       setAlertMessage("Please select a payment method");
       return;
     }
-    if (!customerId) {
+    if (!customer_Id) {
       return;
     }
+
     mutation.mutate({
-      total: totalAmount,
+      total_amount: totalAmount,
+      subtotal: subTotal,
+      tax: parseFloat(tax) || 0,
       cash_amount: parseFloat(cashAmount) || 0,
       debit_amount: parseFloat(debitAmount) || 0,
-      subtotal: subTotal,
-      tax: parseFloat(tax || "0"),
-      customer_id: customerId,
-      status: "finished",
+      customer_id: customer_Id,
       payment_method: paymentMethod,
-      transactions: items,
       created_by: session?.user?.id || 10,
-    });
-  }
-  function saveInvoiceAsPending() {
-    if (!customerId) {
-      return;
-    }
-    mutation.mutate({
-      subtotal: subTotal,
-      customer_id: customerId,
-      status: "pending",
       transactions: items,
-      created_by: session?.user?.id || 10,
+      status: "finished",
     });
   }
 
   return (
     <div className="flex flex-col sm:flex-row  ">
       <div className="flex-3">
-        <DataTable title="Review" columns={invoiceItemColumns} data={items} />
+        <DataTable
+          title="Finishing Invoice"
+          columns={invoiceItemColumns}
+          // isLoading={isLoading}
+          data={items}
+        />
       </div>
       <div className="relative rounded-xl bg-white p-5 m-4 shadow-sm min-h-full flex-1 ">
         <div className="space-y-1">
@@ -231,8 +235,6 @@ export default function ReviewNewInvoice({
                 <input
                   type="text"
                   value={debitAmount}
-                  max={totalAmount}
-                  min={0}
                   onChange={(e) => {
                     setDebitAmount(e.target.value);
                     setCashAmount(
@@ -249,13 +251,7 @@ export default function ReviewNewInvoice({
           <p className="text-sm text-gray-500">
             Total: ${totalAmount.toFixed(2)}
           </p>
-          <CustomButton
-            className="mt-4 w-full"
-            onClick={saveInvoiceAsPending}
-            isLoading={mutation.isPending}
-          >
-            Save Invoice as Pending
-          </CustomButton>
+
           <CustomButton
             className="mt-4 w-full"
             onClick={saveInvoice}

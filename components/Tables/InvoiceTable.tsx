@@ -1,27 +1,25 @@
 import { Plus, Trash2 } from "lucide-react";
 import { ComboBox } from "../ui/ComboBox";
 import CustomButton from "../ui/CustomButton";
-import { InvoiceItem } from "@/stores/useInvoiceDraft";
 import { useQuery } from "@tanstack/react-query";
 import { ServiceType, getServices } from "@/lib/api/services";
-import { getInventory } from "@/lib/api/inventory";
-import { ca } from "zod/locales";
-import { useState } from "react";
-import { on } from "events";
+import { Transaction } from "@/lib/api/transactions";
 
 type Props = {
-  rows: InvoiceItem[];
-  onAdd: () => void;
+  title?: string;
+  rows: Transaction[];
+  onAdd?: () => void;
   onUpdate: (
     id: string,
-    field: keyof InvoiceItem,
+    field: keyof Transaction,
     value: string | number,
   ) => void;
-  onRemove: (id: string) => void;
+  onRemove?: (id: string) => void;
   products?: any[];
 };
 
 export function InvoiceTable({
+  title,
   rows,
   onAdd,
   onUpdate,
@@ -38,7 +36,7 @@ export function InvoiceTable({
   //   queryFn: getInventory,
   // });
   console.log("Products in InvoiceTable:", rows);
-
+  // console.log("Products in InvoiceTable (products prop):", products);
   const recalculateAmount = (
     id: string,
     category: string,
@@ -69,7 +67,7 @@ export function InvoiceTable({
     <div className="rounded-xl bg-white p-5 m-4 shadow-sm">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold">Create Invoice</h2>
+        <h2 className="text-lg font-semibold">{title || "Create Invoice"}</h2>
       </div>
       <div className="overflow-x-auto ">
         <table className="w-full border-collapse">
@@ -82,7 +80,9 @@ export function InvoiceTable({
               <th className="p-2 min-w-17">Quantity (Tire)</th>
               <th className="p-2 min-w-17">Price</th>
               <th className="p-2 min-w-17">Cost</th>
-              <th className="p-2 min-w-17 text-center">Actions</th>
+              {onRemove && (
+                <th className="p-2 min-w-17 text-center">Actions</th>
+              )}
             </tr>
           </thead>
 
@@ -282,20 +282,21 @@ export function InvoiceTable({
                   <td className="py-3 px-2 text-sm align-top">
                     <input
                       disabled
-                      value={row.cost}
+                      value={row.cost || 0}
                       // onChange={(e) => onUpdate(row.id, "amount", e.target.value)}
                       className="w-full rounded border px-2 py-1"
                     />
                   </td>
-
-                  <td className="py-3 px-2 text-sm text-center">
-                    <button
-                      onClick={() => onRemove(row.id)}
-                      className="rounded p-2 text-gray-500 hover:bg-gray-100"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
+                  {onRemove && (
+                    <td className="py-3 px-2 text-sm text-center">
+                      <button
+                        onClick={() => onRemove(row.id)}
+                        className="rounded p-2 text-gray-500 hover:bg-gray-100"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -313,10 +314,12 @@ export function InvoiceTable({
           </tbody>
         </table>
       </div>
-      <CustomButton onClick={onAdd} className="flex items-center gap-1 mt-4">
-        <Plus size={16} />
-        Add Item
-      </CustomButton>
+      {onAdd && (
+        <CustomButton onClick={onAdd} className="flex items-center gap-1 mt-4">
+          <Plus size={16} />
+          Add Item
+        </CustomButton>
+      )}
     </div>
   );
 }

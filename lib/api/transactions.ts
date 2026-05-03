@@ -14,6 +14,8 @@ export interface Transaction {
   payment_method: string;
   created_by_name?: string;
   created_at: string;
+  cost?: string;
+  condition?: string;
 }
 export interface TransactionSummary {
   total_transactions: number;

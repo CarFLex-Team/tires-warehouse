@@ -31,7 +31,7 @@ export function ComboBox({
   const filtered = options.filter((o) =>
     o.label.toLowerCase().includes(query.toLowerCase()),
   );
-
+  console.log("Filtered options:", value);
   // Close on outside click
   useEffect(() => {
     function handler(e: MouseEvent) {
