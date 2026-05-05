@@ -10,39 +10,15 @@ export async function GET(req: Request) {
   const { rows } = await db.query(
     `
     SELECT
-     COUNT(*) FILTER (WHERE t.deleted_at IS NULL) AS total_transactions,
-
         COUNT(*) FILTER (
-          WHERE t.type = 'Sales' AND t.deleted_at IS NULL
-        ) AS total_sales_count,
+          WHERE t.type = 'Expense' AND t.deleted_at IS NULL
+        ) AS total_expenses_count,
 
         COALESCE(SUM(t.amount) FILTER (
-          WHERE t.type = 'Sales' AND t.deleted_at IS NULL
-        ), 0) AS total_sales_amount,
+          WHERE t.type = 'Expense' AND t.deleted_at IS NULL
+        ), 0) AS total_expenses_amount
 
-        COUNT(*) FILTER (
-          WHERE t.type = 'Sales'
-            AND t.payment_method = 'Cash'
-            AND t.deleted_at IS NULL
-        ) AS cash_sales_count,
-
-        COALESCE(SUM(t.amount) FILTER (
-          WHERE t.type = 'Sales'
-            AND t.payment_method = 'Cash'
-            AND t.deleted_at IS NULL
-        ), 0) AS cash_sales_amount,
-
-        COUNT(*) FILTER (
-          WHERE t.type = 'Sales'
-            AND t.payment_method = 'Debit'
-            AND t.deleted_at IS NULL
-        ) AS debit_sales_count,
-
-        COALESCE(SUM(t.amount) FILTER (
-          WHERE t.type = 'Sales'
-            AND t.payment_method = 'Debit'
-            AND t.deleted_at IS NULL
-        ), 0) AS debit_sales_amount
+       
     FROM "Transaction" t
     WHERE
       t.created_at >= date_trunc('month', $1::date)

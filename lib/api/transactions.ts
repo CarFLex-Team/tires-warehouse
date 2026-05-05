@@ -19,10 +19,10 @@ export interface Transaction {
 }
 export interface TransactionSummary {
   total_transactions: number;
-  total_sales_count: number;
-  total_sales_amount: number;
-  cash_sales_count: number;
-  cash_sales_amount: number;
+  total_expenses_count: number;
+  total_expenses_amount: number;
+  cash_expenses_count: number;
+  cash_expenses_amount: number;
   debit_sales_count: number;
   debit_sales_amount: number;
 }
@@ -57,7 +57,7 @@ export async function getTransactionsMonthlySummary(
   month?: string,
 ): Promise<TransactionSummary> {
   const url = month
-    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions/summary/monthly?month=${month}`
+    ? `/api/transactions/summary/monthly?month=${month}`
     : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions/summary`;
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch transactions monthly summary");
