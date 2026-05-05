@@ -26,6 +26,7 @@ export default function ReviewNewInvoice({
   const [tax, setTax] = useState<string>("");
   const [cashAmount, setCashAmount] = useState<string>("");
   const [debitAmount, setDebitAmount] = useState<string>("");
+  const [checkAmount, setCheckAmount] = useState<string>("");
   const clear = useInvoiceDraft((s) => s.clear);
   useEffect(() => {
     if (!items.length) {
@@ -75,6 +76,11 @@ export default function ReviewNewInvoice({
       setTax("0");
       setCashAmount(totalAmount.toString());
       setDebitAmount("0");
+    } else if (paymentMethod === "Check") {
+      setTax("0");
+      setCashAmount("0");
+      setDebitAmount("0");
+      setCheckAmount(totalAmount.toString());
     } else if (paymentMethod === "Mix") {
       const calculatedTax = (subTotal * 0.07).toFixed(2);
       setTax(calculatedTax.toString());
@@ -86,10 +92,12 @@ export default function ReviewNewInvoice({
           (subTotal + parseFloat(calculatedTax)) / 2
         ).toString(),
       );
+      setCheckAmount("0");
     } else {
       setTax("0");
       setCashAmount("0");
       setDebitAmount("0");
+      setCheckAmount("0");
     }
   }, [paymentMethod, subTotal]);
 
@@ -232,7 +240,11 @@ export default function ReviewNewInvoice({
                   onChange={(e) => {
                     setCashAmount(e.target.value);
                     setDebitAmount(
-                      (totalAmount - parseFloat(e.target.value || "0"))
+                      (
+                        totalAmount -
+                        parseFloat(cashAmount) -
+                        parseFloat(e.target.value || "0")
+                      )
                         .toFixed(2)
                         .toString(),
                     );
@@ -250,9 +262,33 @@ export default function ReviewNewInvoice({
                   onChange={(e) => {
                     setDebitAmount(e.target.value);
                     setCashAmount(
-                      (totalAmount - parseFloat(e.target.value || "0"))
+                      (
+                        totalAmount -
+                        parseFloat(cashAmount) -
+                        parseFloat(e.target.value || "0")
+                      )
                         .toFixed(2)
                         .toString(),
+                    );
+                  }}
+                  className=" w-9 rounded border border-gray-300 px-1 py-0.5  text-sm"
+                />
+              </p>
+              <p className="text-sm text-gray-500">
+                Check: $
+                <input
+                  type="text"
+                  value={checkAmount}
+                  max={totalAmount}
+                  min={0}
+                  onChange={(e) => {
+                    setCheckAmount(e.target.value);
+                    const remaining =
+                      totalAmount - parseFloat(e.target.value || "0");
+                    const calculatedDebit = (remaining / 2).toFixed(2);
+                    setDebitAmount(calculatedDebit.toString());
+                    setCashAmount(
+                      (remaining - parseFloat(calculatedDebit)).toString(),
                     );
                   }}
                   className=" w-9 rounded border border-gray-300 px-1 py-0.5  text-sm"
