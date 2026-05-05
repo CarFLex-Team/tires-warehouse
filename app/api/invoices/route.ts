@@ -66,6 +66,7 @@ export async function POST(req: Request) {
       transactions,
       cash_amount,
       debit_amount,
+      created_at,
     } = await req.json();
     const session = await getServerSession(authOptions);
 
@@ -88,7 +89,7 @@ export async function POST(req: Request) {
     const invoiceRes = await client.query(
       `
       INSERT INTO "Invoice" (customer_id, created_by, total_amount, subtotal, tax, cash_amount, debit_amount, created_at, payment_method,status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), $8,$9)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10)
       RETURNING id
       `,
       [
@@ -99,6 +100,7 @@ export async function POST(req: Request) {
         tax || null,
         cash_amount || null,
         debit_amount || null,
+        created_at || new Date(),
         payment_method || null,
         status,
       ],
@@ -113,13 +115,14 @@ export async function POST(req: Request) {
         await client.query(
           `
         INSERT INTO "Transaction" (invoice_id, amount, description, created_at,type,category,created_by,payment_method,product_id,quantity,status)
-        VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8,$9,$10)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11)
         
         `,
           [
             invoiceId,
             tx.amount,
             tx.description,
+            tx.created_at || new Date(),
             tx.type,
             tx.category,
             created_by,
@@ -162,12 +165,13 @@ export async function POST(req: Request) {
         await client.query(
           `
           INSERT INTO "Transaction" (invoice_id, amount, description, created_at,type,category,created_by,payment_method,service_id,quantity,status)
-          VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8,$9,$10)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11)
           `,
           [
             invoiceId,
             tx.amount,
             tx.description,
+            tx.created_at || new Date(),
             tx.type,
             tx.category,
             created_by,

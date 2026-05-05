@@ -20,6 +20,8 @@ export default function ReviewNewInvoice({
   const { data: session } = useSession();
   const { items, customerId } = useInvoiceDraft();
   const [paymentMethod, setPaymentMethod] = useState<string>("");
+  const now = new Date().toISOString().slice(0, 16);
+  const [cratedAt, setCreatedAt] = useState<string>(now);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [tax, setTax] = useState<string>("");
   const [cashAmount, setCashAmount] = useState<string>("");
@@ -112,6 +114,7 @@ export default function ReviewNewInvoice({
       payment_method: paymentMethod,
       transactions: items,
       created_by: session?.user?.id || 10,
+      created_at: cratedAt,
     });
   }
   function saveInvoiceAsPending() {
@@ -124,6 +127,7 @@ export default function ReviewNewInvoice({
       status: "pending",
       transactions: items,
       created_by: session?.user?.id || 10,
+      created_at: cratedAt,
     });
   }
 
@@ -133,6 +137,16 @@ export default function ReviewNewInvoice({
         <DataTable title="Review" columns={invoiceItemColumns} data={items} />
       </div>
       <div className="relative rounded-xl bg-white p-5 m-4 shadow-sm min-h-full flex-1 ">
+        <div className="space-y-1">
+          <p className="font-semibold text-gray-800">Invoice Date</p>
+          <input
+            type="datetime-local"
+            value={cratedAt}
+            max={now}
+            onChange={(e) => setCreatedAt(e.target.value)}
+            className=" flex items-center gap-1.5 rounded border border-primary-600  px-2 py-1 text-sm  cursor-pointer m-1 "
+          />
+        </div>
         <div className="space-y-1">
           <p className="font-semibold text-gray-800">Payment Method</p>
           <div className="flex gap-2">

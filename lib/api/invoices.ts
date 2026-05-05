@@ -48,15 +48,13 @@ export async function createInvoice(data: {
   status: "pending" | "finished";
   transactions: Transaction[];
   created_by: number;
+  created_at?: string;
 }) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    },
-  );
+  const res = await fetch(`/api/invoices`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 
   if (!res.ok) throw new Error("Failed to add invoice");
   return res.json();
