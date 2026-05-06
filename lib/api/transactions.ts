@@ -53,6 +53,7 @@ export async function getTransactionsDailySummary(
   if (!res.ok) throw new Error("Failed to fetch transactions daily summary");
   return res.json();
 }
+// api local
 export async function getTransactionsMonthlySummary(
   month?: string,
 ): Promise<TransactionSummary> {

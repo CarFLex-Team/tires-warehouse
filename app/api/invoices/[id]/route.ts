@@ -77,7 +77,7 @@ export async function PUT(
     await client.query(
       `
    UPDATE "Invoice"
-      SET  total_amount = $2, subtotal = $3, tax = $4, payment_method = $5, updated_at = NOW(),status = 'finished' ,cash_amount = $6, debit_amount = $7
+      SET  total_amount = $2, subtotal = $3, tax = $4, payment_method = $5, updated_at = NOW(),status = 'finished' ,cash_amount = $6, debit_amount = $7,check_amount=$8
       WHERE id = $1
 
       `,
@@ -89,6 +89,7 @@ export async function PUT(
         body.payment_method,
         body.cash_amount,
         body.debit_amount,
+        body.check_amount,
       ],
     );
     await client.query(
