@@ -66,6 +66,7 @@ export async function POST(req: Request) {
       transactions,
       cash_amount,
       debit_amount,
+      check_amount,
       created_at,
     } = await req.json();
     const session = await getServerSession(authOptions);
@@ -88,8 +89,8 @@ export async function POST(req: Request) {
     // 1️⃣ Create invoice
     const invoiceRes = await client.query(
       `
-      INSERT INTO "Invoice" (customer_id, created_by, total_amount, subtotal, tax, cash_amount, debit_amount, created_at, payment_method,status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10)
+      INSERT INTO "Invoice" (customer_id, created_by, total_amount, subtotal, tax, cash_amount, debit_amount, check_amount, created_at, payment_method,status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11)
       RETURNING id
       `,
       [
@@ -100,6 +101,7 @@ export async function POST(req: Request) {
         tax || null,
         cash_amount || null,
         debit_amount || null,
+        check_amount || null,
         created_at || new Date(),
         payment_method || null,
         status,
