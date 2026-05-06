@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import LoadingSkeleton from "../ui/LoadingSkeleton";
 
 import { OverviewStat } from "./types";
@@ -15,6 +16,11 @@ export function OverviewStats({
   isLoading,
   action,
 }: OverviewStatsProps) {
+  const [colNumber, setColNumber] = useState(2);
+  useEffect(() => {
+    setColNumber(stats.length);
+  }, [stats.length]);
+  console.log("colNumber", colNumber);
   return (
     <div className="rounded-xl bg-white p-5 m-4 shadow-sm">
       <div className="flex justify-between">
@@ -23,7 +29,7 @@ export function OverviewStats({
       </div>
 
       <div
-        className={`grid grid-cols-1 divide-y md:grid-cols-${stats.length} md:divide-x divide-gray-200 md:divide-y-0`}
+        className={`grid grid-cols-1 divide-y md:grid-cols-${colNumber} md:divide-x divide-gray-200 md:divide-y-0`}
       >
         {stats.map((stat, index) => (
           <div key={index} className="px-4 py-3">
