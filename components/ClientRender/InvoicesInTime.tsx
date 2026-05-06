@@ -19,9 +19,9 @@ export default function InvoicesInTime({
   setError: (message: string) => void;
 }) {
   const router = useRouter();
-  const [paymentFilter, setPaymentFilter] = useState<"ALL" | "Debit" | "Cash">(
-    "ALL",
-  );
+  const [paymentFilter, setPaymentFilter] = useState<
+    "ALL" | "Debit" | "Cash" | "Check"
+  >("ALL");
   const { data, isLoading, error } = useQuery<Invoice[]>({
     queryKey: ["invoices", date ? date : month],
     queryFn: () => getInvoices("finished", month, date),
@@ -67,6 +67,21 @@ export default function InvoicesInTime({
           >
             Debit Invoices
           </button>
+          <button
+            className={`flex items-center gap-1.5  border-b border-gray-300 border-l-0 p-2  text-sm cursor-pointer  ${
+              paymentFilter === "Check"
+                ? "bg-primary-600 text-white"
+                : "bg-white text-primary-600 hover:bg-gray-100"
+            }`}
+            onClick={() =>
+              paymentFilter === "Check"
+                ? setPaymentFilter("ALL")
+                : setPaymentFilter("Check")
+            }
+            type="button"
+          >
+            Check Invoices
+          </button>
         </div>
       }
       data={
@@ -74,8 +89,13 @@ export default function InvoicesInTime({
           ? []
           : data?.filter((invoice) => {
               if (paymentFilter === "ALL") return true;
-              if (invoice.payment_method === "Mix") return true;
-              return invoice.payment_method === paymentFilter;
+              // if (invoice.payment_method === "Mix") return true;
+              return (
+                invoice.payment_method === paymentFilter ||
+                (paymentFilter === "Debit" && invoice.debit_amount! > 0) ||
+                (paymentFilter === "Check" && invoice.check_amount! > 0) ||
+                (paymentFilter === "Cash" && invoice.cash_amount! > 0)
+              );
             }) || []
       }
       isLoading={isLoading}

@@ -78,6 +78,12 @@ export default function dashboard() {
       subValue: `$${summaryData ? summaryData.debit_sales_amount : 0}`,
       color: "text-purple-400",
     },
+    {
+      label: "Check Sales ",
+      value: summaryData ? summaryData.check_sales_count : 0,
+      subValue: `$${summaryData ? summaryData.check_sales_amount : 0}`,
+      color: "text-green-400",
+    },
   ];
 
   const actionColumn = (invoice: Invoice) => (

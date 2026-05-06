@@ -22,7 +22,9 @@ export function OverviewStats({
         {action}
       </div>
 
-      <div className="grid grid-cols-1 divide-y md:grid-cols-4 md:divide-x divide-gray-200 md:divide-y-0">
+      <div
+        className={`grid grid-cols-1 divide-y md:grid-cols-${stats.length} md:divide-x divide-gray-200 md:divide-y-0`}
+      >
         {stats.map((stat, index) => (
           <div key={index} className="px-4 py-3">
             <p

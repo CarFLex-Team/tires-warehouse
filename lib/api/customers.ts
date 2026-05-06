@@ -28,6 +28,7 @@ export interface Invoice {
   customer_phone: string;
   cash_amount?: number;
   debit_amount?: number;
+  check_amount?: number;
 }
 export interface CustomerMonthlySummary {
   customer: string;
