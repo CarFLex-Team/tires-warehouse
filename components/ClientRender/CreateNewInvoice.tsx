@@ -102,7 +102,7 @@ export default function CreateNewInvoice({
       }
     }
     setShowAlert("");
-    console.log("Create payload:", rows);
+    // console.log("Create payload:", rows);
     setCustomer(customer_Id);
     setItems(rows);
     router.push(`/customers/${customer_Id}/invoices/new/review`);

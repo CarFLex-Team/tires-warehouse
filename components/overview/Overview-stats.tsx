@@ -20,7 +20,7 @@ export function OverviewStats({
   useEffect(() => {
     setColNumber(stats.length);
   }, [stats.length]);
-  console.log("colNumber", colNumber);
+
   return (
     <div className="rounded-xl bg-white p-5 m-4 shadow-sm">
       <div className="flex justify-between">

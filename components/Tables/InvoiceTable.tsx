@@ -35,7 +35,7 @@ export function InvoiceTable({
   //   queryKey: ["products"],
   //   queryFn: getInventory,
   // });
-  console.log("Products in InvoiceTable:", rows);
+  // console.log("Products in InvoiceTable:", rows);
   // console.log("Products in InvoiceTable (products prop):", products);
   const recalculateAmount = (
     id: string,

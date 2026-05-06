@@ -1,11 +1,17 @@
 import splitSets from "./splitSets";
 export default async function handleTireSet(
   client: any,
-  product: { quantity: number; id: string; price: number; cost: number; size: string },
+  product: {
+    quantity: number;
+    id: string;
+    price: number;
+    cost: number;
+    size: string;
+  },
 ) {
   // 1. Get tire info
 
-  console.log("Tire rows for size", product.size, product);
+  // console.log("Tire rows for size", product.size, product);
   if (!product) return;
   const tire = product;
 
@@ -34,7 +40,13 @@ export default async function handleTireSet(
             INSERT INTO "Product" (size, brand, price, cost, is_active, created_at, updated_at,name,condition)
             VALUES ($1, 'Used', $2, $3, true, NOW(), NOW(),$4,$5)
             RETURNING id`,
-        [product.size, tire.price, tire.cost, `USED Used ${product.size}`, "USED"],
+        [
+          product.size,
+          tire.price,
+          tire.cost,
+          `USED Used ${product.size}`,
+          "USED",
+        ],
       );
 
       const productId = productResult.rows[0].id; // Get the productId from the returned result

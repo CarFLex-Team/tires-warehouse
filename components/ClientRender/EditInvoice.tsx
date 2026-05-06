@@ -334,7 +334,7 @@ export default function CreateNewInvoice({
       setRows(data.transactions);
     }
   }, [data]);
-  console.log(data);
+  // console.log(data);
   function updateRow(
     id: string,
     field: keyof Transaction,
