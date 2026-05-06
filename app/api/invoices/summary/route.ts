@@ -22,36 +22,36 @@ export async function GET(req: Request) {
 
         COUNT(*) FILTER (
           WHERE i.status = 'finished'
-            AND (i.cash_amount > 0 OR i.cash_amount IS NOT NULL)
+            AND (i.cash_amount IS NOT NULL AND i.cash_amount > 0 )
             AND i.deleted_at IS NULL
         ) AS cash_sales_count,
 
         COALESCE(SUM(i.cash_amount) FILTER (
           WHERE i.status = 'finished'
-          AND  (i.cash_amount > 0 OR i.cash_amount IS NOT NULL)
+          AND  (i.cash_amount IS NOT NULL AND i.cash_amount > 0 )
             AND i.deleted_at IS NULL
         ), 0) AS cash_sales_amount,
 
         COUNT(*) FILTER (
           WHERE i.status = 'finished'
-            AND (i.debit_amount > 0 OR i.debit_amount IS NOT NULL)
+            AND (i.debit_amount IS NOT NULL AND i.debit_amount > 0 )
             AND i.deleted_at IS NULL
         ) AS debit_sales_count,
 
         COALESCE(SUM(i.debit_amount) FILTER (
           WHERE i.status = 'finished'
-            AND (i.debit_amount > 0 OR i.debit_amount IS NOT NULL)
+            AND (i.debit_amount IS NOT NULL AND i.debit_amount > 0 )
             AND i.deleted_at IS NULL
         ), 0) AS debit_sales_amount,
         COUNT(*) FILTER (
           WHERE i.status = 'finished'
-            AND (i.check_amount > 0 OR i.check_amount IS NOT NULL)
+            AND (i.check_amount IS NOT NULL AND i.check_amount > 0 )
             AND i.deleted_at IS NULL
         ) AS check_sales_count,
 
         COALESCE(SUM(i.check_amount) FILTER (
           WHERE i.status = 'finished'
-            AND (i.check_amount > 0 OR i.check_amount IS NOT NULL)
+            AND (i.check_amount IS NOT NULL AND i.check_amount > 0 )
             AND i.deleted_at IS NULL
         ), 0) AS check_sales_amount
 
