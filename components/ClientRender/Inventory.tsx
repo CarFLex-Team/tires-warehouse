@@ -396,10 +396,10 @@ export default function Inventory({
           </div>
         }
         renderActions={(row) => (
-          <>
+          <div className="relative">
             <button
               onClick={() => handleMenuToggle(row.id)}
-              className="relative rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
+              className=" rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
             >
               <EllipsisVertical size={16} />
             </button>
@@ -454,7 +454,7 @@ export default function Inventory({
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
       />
       <ConfirmDialog

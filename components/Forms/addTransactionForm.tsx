@@ -18,6 +18,9 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
   const [categoryId, setCategoryId] = useState("");
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
+  const [createdAt, setCreatedAt] = useState(
+    new Date().toISOString().slice(0, 16),
+  );
   const [errorMessage, setErrorMessage] = useState("");
 
   // const filteredServices = services?.filter((c) => c.type === type);
@@ -52,6 +55,7 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
       amount: Number(amount),
       payment_method: paymentMethod,
       created_by: session?.user?.id || 10,
+      created_at: new Date(createdAt).toISOString(),
     });
   }
 
@@ -126,6 +130,17 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
           <option value="Cash">Cash</option>
           <option value="Debit">Debit</option>
         </select>
+      </div>
+      <div className="flex justify-between items-center gap-4">
+        <label className=" flex-2">Creation Time</label>
+        <input
+          type="datetime-local"
+          className="p-2 border border-gray-300 rounded-lg flex-5"
+          placeholder="Enter Price Amount"
+          value={createdAt}
+          onChange={(e) => setCreatedAt(e.target.value)}
+          required
+        />
       </div>
       <div className="flex justify-end gap-2 pt-2">
         <button

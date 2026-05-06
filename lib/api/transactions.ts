@@ -64,6 +64,7 @@ export async function getTransactionsMonthlySummary(
   if (!res.ok) throw new Error("Failed to fetch transactions monthly summary");
   return res.json();
 }
+//api local
 export async function createTransaction(data: {
   category_id: number;
   description: string;
@@ -71,17 +72,37 @@ export async function createTransaction(data: {
   type: CategoryType;
   payment_method: string;
   created_by: number;
+  created_at: string;
 }) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    },
-  );
+  const res = await fetch(`/api/transactions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 
   if (!res.ok) throw new Error("Failed to add transaction");
+  return res.json();
+}
+
+//api local
+export async function editTransaction(
+  id: string,
+  data: {
+    category_id?: number;
+    description: string;
+    amount: number;
+    type?: CategoryType;
+    payment_method: string;
+    created_at: string;
+  },
+) {
+  const res = await fetch(`/api/transactions/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) throw new Error("Failed to edit transaction");
   return res.json();
 }
 
