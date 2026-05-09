@@ -62,7 +62,9 @@ export default function invoiceTransactions({
               <span className="text-red-500 font-medium">Cash</span> $
               {data?.cash_amount || "0.00"} |{" "}
               <span className="text-purple-500 font-medium">Debit</span> $
-              {data?.debit_amount || "0.00"}
+              {data?.debit_amount || "0.00"} |{" "}
+              <span className="text-green-500 font-medium">Check</span> $
+              {data?.check_amount || "0.00"}
             </p>
           </>
         }
