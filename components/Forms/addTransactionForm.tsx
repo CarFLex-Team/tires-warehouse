@@ -15,14 +15,25 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
   const queryClient = useQueryClient();
   const [description, setDescription] = useState("");
   const [type, setType] = useState<CategoryType | "">("Expense");
-  const [categoryId, setCategoryId] = useState("");
+  const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
-  const [createdAt, setCreatedAt] = useState(
-    new Date().toISOString().slice(0, 16),
-  );
-  const [errorMessage, setErrorMessage] = useState("");
+  const date = new Date();
 
+  const now = date
+    .toLocaleString("sv-SE", {
+      timeZone: "America/Chicago",
+      hour12: false,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+    .replace(" ", "T"); // "2026-05-13T02:31"
+  const [createdAt, setCreatedAt] = useState(now);
+  const [errorMessage, setErrorMessage] = useState("");
+  console.log("Created at:", createdAt);
   // const filteredServices = services?.filter((c) => c.type === type);
 
   // useEffect(() => {
@@ -32,9 +43,12 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
     mutationFn: createTransaction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({
+        queryKey: ["transactionSummary"],
+      });
       setDescription("");
       setType("");
-      setCategoryId("");
+      setCategory("");
       setAmount("");
       setPaymentMethod("");
       onSuccess();
@@ -51,7 +65,7 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
     mutation.mutate({
       description,
       type,
-      category_id: Number(categoryId),
+      category: category,
       amount: Number(amount),
       payment_method: paymentMethod,
       created_by: session?.user?.id || 10,
@@ -113,6 +127,23 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
           onChange={(e) => setAmount(e.target.value)}
           required
         />
+      </div>
+      <div className="flex justify-between items-center gap-4">
+        <label className=" flex-2">Category</label>
+        <select
+          name="category"
+          id="category"
+          className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          required
+        >
+          <option disabled value="">
+            Category
+          </option>
+          <option value="Tire">Tire</option>
+          <option value="Operational">Operational</option>
+        </select>
       </div>
       <div className="flex justify-between items-center gap-4">
         <label className=" flex-2">Method</label>

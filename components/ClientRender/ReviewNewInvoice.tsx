@@ -20,7 +20,19 @@ export default function ReviewNewInvoice({
   const { data: session } = useSession();
   const { items, customerId } = useInvoiceDraft();
   const [paymentMethod, setPaymentMethod] = useState<string>("");
-  const now = new Date().toISOString().slice(0, 16);
+  const date = new Date();
+
+  const now = date
+    .toLocaleString("sv-SE", {
+      timeZone: "America/Chicago",
+      hour12: false,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+    .replace(" ", "T"); // "2026-05-13T02:31"
   const [cratedAt, setCreatedAt] = useState<string>(now);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [tax, setTax] = useState<string>("");
@@ -132,7 +144,7 @@ export default function ReviewNewInvoice({
       payment_method: paymentMethod,
       transactions: items,
       created_by: session?.user?.id || 10,
-      created_at: cratedAt,
+      created_at: new Date(cratedAt).toISOString(),
     });
   }
   function saveInvoiceAsPending() {
@@ -146,7 +158,7 @@ export default function ReviewNewInvoice({
       status: "pending",
       transactions: items,
       created_by: session?.user?.id || 10,
-      created_at: cratedAt,
+      created_at: new Date(cratedAt).toISOString(),
     });
   }
 

@@ -17,13 +17,29 @@ export default function EditProductForm({
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("" as PaymentMethod | "");
   const [createdAt, setCreatedAt] = useState("");
+  const [category, setCategory] = useState("");
   const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     if (payOutTransaction) {
+      const date = new Date(payOutTransaction.created_at);
+
+      const formattedChicago = date
+        .toLocaleString("sv-SE", {
+          timeZone: "America/Chicago",
+          hour12: false,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+        .replace(" ", "T"); // "2026-05-13T02:31"
       setDescription(payOutTransaction.description);
       setAmount(payOutTransaction.amount.toString());
       setPaymentMethod(payOutTransaction.payment_method as PaymentMethod | "");
-      setCreatedAt(payOutTransaction.created_at.slice(0, 16));
+      setCreatedAt(formattedChicago);
+      setCategory(payOutTransaction.category);
     }
   }, []);
 
@@ -33,6 +49,7 @@ export default function EditProductForm({
       amount: number;
       payment_method: PaymentMethod;
       created_at: string;
+      category: string;
     }) => editTransaction(payOutTransaction.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
@@ -60,6 +77,7 @@ export default function EditProductForm({
       amount: Number(amount),
       payment_method: paymentMethod,
       created_at: new Date(createdAt).toISOString(),
+      category: category,
     });
   }
 
@@ -92,6 +110,23 @@ export default function EditProductForm({
           onChange={(e) => setAmount(e.target.value)}
           required
         />
+      </div>
+      <div className="flex justify-between items-center gap-4">
+        <label className=" flex-2">Category</label>
+        <select
+          name="category"
+          id="category"
+          className="p-2 border border-gray-300 rounded-lg flex-5 text-gray-700"
+          value={category || ""}
+          onChange={(e) => setCategory(e.target.value)}
+          required
+        >
+          <option disabled value="">
+            Category
+          </option>
+          <option value="Tire">Tire</option>
+          <option value="Operational">Operational</option>
+        </select>
       </div>
       <div className="flex justify-between items-center gap-4">
         <label className=" flex-2">Method</label>
@@ -127,7 +162,7 @@ export default function EditProductForm({
           disabled={mutation.isPending}
           className="px-4 py-2 bg-primary-600 text-white rounded-lg disabled:opacity-50"
         >
-          {mutation.isPending ? "Adding..." : "Add Transaction"}
+          {mutation.isPending ? "Saving..." : "Save Transaction"}
         </button>
       </div>
 
