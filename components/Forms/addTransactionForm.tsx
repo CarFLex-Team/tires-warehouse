@@ -33,7 +33,6 @@ export function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
     .replace(" ", "T"); // "2026-05-13T02:31"
   const [createdAt, setCreatedAt] = useState(now);
   const [errorMessage, setErrorMessage] = useState("");
-  console.log("Created at:", createdAt);
   // const filteredServices = services?.filter((c) => c.type === type);
 
   // useEffect(() => {

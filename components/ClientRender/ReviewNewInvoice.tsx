@@ -202,11 +202,10 @@ export default function ReviewNewInvoice({
       customer_name: "",
       customer_phone: "",
     };
-    console.log("Data to print:", data);
     downloadPdf(data, setIsDownloading);
   }
   return (
-    <div className="flex flex-col sm:flex-row  ">
+    <div className="flex flex-col md:flex-row  ">
       <div className="flex-3">
         <DataTable title="Review" columns={invoiceItemColumns} data={items} />
       </div>
@@ -400,7 +399,7 @@ export default function ReviewNewInvoice({
             onClick={printInvoice}
             isLoading={isDownloading}
           >
-            Only Print Invoice
+            Print Invoice without Saving
           </CustomButton>
         </div>
       </div>

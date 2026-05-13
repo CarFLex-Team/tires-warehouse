@@ -55,7 +55,6 @@ export default function payOutTransactions({
 
   useEffect(() => {
     if (menuRef.current) {
-      console.log("Menu ref:", menuRef.current);
       const rect = menuRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
       setIsOverflowing(rect.bottom > viewportHeight); // true if it would overflow
