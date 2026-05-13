@@ -81,6 +81,9 @@ export default function payOutTransactions({
       queryClient.invalidateQueries({
         queryKey: ["transactions", date ? date : month ? month : undefined],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["transactionSummary", month ? month : undefined],
+      });
       setSelectedId(null);
       setConfirmOpen(false);
     },
@@ -90,7 +93,7 @@ export default function payOutTransactions({
     { header: "Description", accessor: "description" },
     // { header: "Quantity", accessor: "quantity" },
     // { header: "Type", accessor: "type" },
-    // { header: "Category", accessor: "category" },
+    { header: "Category", accessor: "category" },
     { header: "Amount", accessor: "amount" },
     { header: "Payment Method", accessor: "payment_method" },
     { header: "Created By", accessor: "created_by_name" },

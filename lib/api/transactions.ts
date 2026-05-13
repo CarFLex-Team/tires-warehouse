@@ -66,7 +66,7 @@ export async function getTransactionsMonthlySummary(
 }
 //api local
 export async function createTransaction(data: {
-  category_id: number;
+  category: string;
   description: string;
   amount: number;
   type: CategoryType;
@@ -88,7 +88,7 @@ export async function createTransaction(data: {
 export async function editTransaction(
   id: string,
   data: {
-    category_id?: number;
+    category?: string;
     description: string;
     amount: number;
     type?: CategoryType;

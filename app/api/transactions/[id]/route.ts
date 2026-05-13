@@ -34,22 +34,27 @@ export async function PUT(
 ) {
   try {
     const { id } = await context.params;
-    const { amount, description, payment_method, created_at } =
+    const { amount, description, payment_method, created_at, category } =
       await req.json();
     await db.query(
       `
       UPDATE "Transaction"
       SET updated_at = NOW(),
           amount = $1,
-       
           description = $2,
           payment_method = $3,
-          
-        
-          created_at = $4
-      WHERE id = $5
+          created_at = $4,
+          category = $5
+      WHERE id = $6
       `,
-      [amount, description, payment_method, created_at || new Date(), id],
+      [
+        amount,
+        description,
+        payment_method,
+        created_at || new Date(),
+        category,
+        id,
+      ],
     );
 
     return NextResponse.json(

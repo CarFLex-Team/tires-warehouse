@@ -79,8 +79,8 @@ export async function POST(req: Request) {
     const userId = session.user.id;
     const { rows } = await db.query(
       `
-      INSERT INTO "Transaction" ( amount, type, description, payment_method, product_id, service_id,  created_by,created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7,$8)
+      INSERT INTO "Transaction" ( amount, type, description, payment_method, product_id, service_id,  created_by,created_at,category)
+      VALUES ($1, $2, $3, $4, $5, $6, $7,$8,$9)
       RETURNING *
       `,
       [
@@ -93,6 +93,7 @@ export async function POST(req: Request) {
         service_id,
         userId,
         created_at || new Date(),
+        category,
       ],
     );
 
