@@ -25,6 +25,10 @@ export interface TransactionSummary {
   cash_expenses_amount: number;
   debit_sales_count: number;
   debit_sales_amount: number;
+  tire_expenses_count: number;
+  tire_expenses_amount: number;
+  operational_expenses_count: number;
+  operational_expenses_amount: number;
 }
 
 export async function getTransactions({

@@ -16,9 +16,23 @@ export async function GET(req: Request) {
 
         COALESCE(SUM(t.amount) FILTER (
           WHERE t.type = 'Expense' AND t.deleted_at IS NULL
-        ), 0) AS total_expenses_amount
-
-       
+        ), 0) AS total_expenses_amount,
+ COUNT(*) FILTER (
+          WHERE  t.type = 'Expense' AND t.deleted_at IS NULL
+            AND t.category = 'Tire' 
+        ) AS tire_expenses_count,
+         COALESCE(SUM(t.amount) FILTER (
+          WHERE  t.type = 'Expense' AND t.deleted_at IS NULL
+            AND t.category = 'Tire' 
+        ), 0) AS tire_expenses_amount,
+ COUNT(*) FILTER (
+          WHERE  t.type = 'Expense' AND t.deleted_at IS NULL
+            AND t.category = 'Operational' 
+        ) AS operational_expenses_count,
+         COALESCE(SUM(t.amount) FILTER(
+          WHERE  t.type = 'Expense' AND t.deleted_at IS NULL
+            AND t.category = 'Operational' 
+        ), 0) AS operational_expenses_amount
     FROM "Transaction" t
     WHERE
       t.created_at >= date_trunc('month', $1::date)

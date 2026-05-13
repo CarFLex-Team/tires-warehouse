@@ -31,6 +31,18 @@ export default function payOuts() {
       subValue: `$${summaryData ? summaryData.total_expenses_amount : 0}`,
       color: "text-orange-400",
     },
+
+    {
+      label: "Tire Payouts",
+      value: summaryData ? summaryData.tire_expenses_count : 0,
+      subValue: `$${summaryData ? summaryData.tire_expenses_amount : 0}`,
+    },
+    {
+      label: "Operational Payouts",
+      value: summaryData ? summaryData.operational_expenses_count : 0,
+      subValue: `$${summaryData ? summaryData.operational_expenses_amount : 0}`,
+      color: "text-green-500",
+    },
   ];
   return (
     <>

@@ -35,6 +35,9 @@ export default function payOutTransactions({
   const [selectedPayout, setSelectedPayout] = useState<Transaction>(
     {} as Transaction,
   );
+  const [categoryFilter, setCategoryFilter] = useState<
+    "ALL" | "Tire" | "Operational"
+  >("ALL");
   const menuRef = useRef<HTMLDivElement | null>(null);
   const queryClient = useQueryClient();
   useEffect(() => {
@@ -132,16 +135,59 @@ export default function payOutTransactions({
       <DataTable
         title="Payouts"
         columns={transactionColumns}
-        data={isLoading ? [] : (transactions ?? [])}
+        data={
+          isLoading
+            ? []
+            : (transactions?.filter((t) => {
+                if (categoryFilter === "ALL") return true;
+                // if (invoice.payment_method === "Mix") return true;
+                return t.category === categoryFilter;
+              }) ?? [])
+        }
         isLoading={isLoading}
         action={
-          <CustomButton
-            onClick={() => {
-              setOpen(true);
-            }}
-          >
-            Add Payout
-          </CustomButton>
+          <div className="flex items-center gap-4">
+            <div className="flex">
+              <p className="p-2 text-sm">Category Filter:</p>
+              <button
+                className={`flex items-center gap-1.5 border-b border-gray-300 p-2  text-sm cursor-pointer  ${
+                  categoryFilter === "Tire"
+                    ? "bg-primary-600 text-white"
+                    : "bg-white text-primary-600 hover:bg-gray-100"
+                }`}
+                onClick={() =>
+                  categoryFilter === "Tire"
+                    ? setCategoryFilter("ALL")
+                    : setCategoryFilter("Tire")
+                }
+                type="button"
+              >
+                Tire Invoices
+              </button>
+              <button
+                className={`flex items-center gap-1.5  border-b border-gray-300 border-l-0 p-2  text-sm cursor-pointer  ${
+                  categoryFilter === "Operational"
+                    ? "bg-primary-600 text-white"
+                    : "bg-white text-primary-600 hover:bg-gray-100"
+                }`}
+                onClick={() =>
+                  categoryFilter === "Operational"
+                    ? setCategoryFilter("ALL")
+                    : setCategoryFilter("Operational")
+                }
+                type="button"
+              >
+                Operational Invoices
+              </button>
+            </div>
+            <CustomButton
+              onClick={() => {
+                setOpen(true);
+              }}
+            >
+              Add Payout
+            </CustomButton>
+          </div>
         }
         // renderActions={(row) => (
         //   <button
