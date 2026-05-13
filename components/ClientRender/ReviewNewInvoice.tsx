@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createInvoice } from "@/lib/api/invoices";
 import { useSession } from "next-auth/react";
 import { Transaction } from "@/lib/api/transactions";
+import { downloadPdf } from "@/lib/api/donwloadPdf";
 
 export default function ReviewNewInvoice({
   customer_Id,
@@ -39,6 +40,7 @@ export default function ReviewNewInvoice({
   const [cashAmount, setCashAmount] = useState<string>("");
   const [debitAmount, setDebitAmount] = useState<string>("");
   const [checkAmount, setCheckAmount] = useState<string>("");
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const clear = useInvoiceDraft((s) => s.clear);
   useEffect(() => {
     if (!items.length) {
@@ -161,7 +163,48 @@ export default function ReviewNewInvoice({
       created_at: new Date(cratedAt).toISOString(),
     });
   }
-
+  function printInvoice() {
+    if (!paymentMethod) {
+      setAlertMessage("Please select a payment method");
+      return;
+    }
+    if (
+      parseFloat(cashAmount || "0") +
+        parseFloat(debitAmount || "0") +
+        parseFloat(checkAmount || "0") !==
+      totalAmount
+    ) {
+      setAlertMessage("Amount added not equal the total amount");
+      return;
+    }
+    if (!customerId) {
+      return;
+    }
+    const data = {
+      id: "0",
+      invoice_no: 1,
+      created_at: new Date(cratedAt).toISOString(),
+      total_amount: totalAmount.toString(),
+      subtotal: subTotal.toString(),
+      cash_amount: parseFloat(cashAmount) || 0,
+      debit_amount: parseFloat(debitAmount) || 0,
+      tax: tax || "0",
+      check_amount: parseFloat(checkAmount) || 0,
+      customer_id: customerId,
+      payment_method: paymentMethod,
+      transactions: items.map((item) => ({
+        ...item,
+        amount: Number(item.amount),
+      })),
+      created_by: session?.user?.name || "",
+      created_by_name: session?.user?.name || "",
+      status: "pending" as "pending",
+      customer_name: "",
+      customer_phone: "",
+    };
+    console.log("Data to print:", data);
+    downloadPdf(data, setIsDownloading);
+  }
   return (
     <div className="flex flex-col sm:flex-row  ">
       <div className="flex-3">
@@ -351,6 +394,13 @@ export default function ReviewNewInvoice({
             isLoading={mutation.isPending}
           >
             Finish Invoice
+          </CustomButton>
+          <CustomButton
+            className="mt-4 w-full"
+            onClick={printInvoice}
+            isLoading={isDownloading}
+          >
+            Only Print Invoice
           </CustomButton>
         </div>
       </div>
