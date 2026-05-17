@@ -18,7 +18,7 @@ import { Invoice } from "./customers";
 //   total_amount: 799.98,
 // };
 export function downloadPdf(
-  invoice: Invoice,
+  invoice: { title: string } & Invoice,
   setIsDownloading: (downloading: boolean) => void,
 ) {
   setIsDownloading(true);

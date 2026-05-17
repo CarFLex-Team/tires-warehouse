@@ -89,7 +89,11 @@ export default function invoiceTransactions({
             </CustomButton>
             <CustomButton
               onClick={() => {
-                downloadPdf(data!, setIsDownloading);
+                if (!data) return;
+                downloadPdf(
+                  { ...(data as Invoice), title: "Invoice" },
+                  setIsDownloading,
+                );
               }}
               isLoading={isdownloading}
             >

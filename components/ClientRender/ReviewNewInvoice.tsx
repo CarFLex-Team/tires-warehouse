@@ -11,6 +11,7 @@ import { createInvoice } from "@/lib/api/invoices";
 import { useSession } from "next-auth/react";
 import { Transaction } from "@/lib/api/transactions";
 import { downloadPdf } from "@/lib/api/donwloadPdf";
+import { title } from "process";
 
 export default function ReviewNewInvoice({
   customer_Id,
@@ -181,6 +182,7 @@ export default function ReviewNewInvoice({
       return;
     }
     const data = {
+      title: "Quotation",
       id: "0",
       invoice_no: 1,
       created_at: new Date(cratedAt).toISOString(),
