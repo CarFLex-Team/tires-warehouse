@@ -22,6 +22,19 @@ export async function getInvoices(
   if (!res.ok) throw new Error("Failed to fetch invoices");
   return res.json();
 }
+export async function getInvoicesWithProducts(
+  status: "pending" | "finished",
+  month?: string,
+  date?: string,
+  search?: string,
+): Promise<Invoice[]> {
+  console.log(search);
+  const res = await fetch(
+    `/api/invoices/products?status=${status}${month ? `&month=${month}` : ""}${date ? `&date=${date}` : ""}${search ? `&search=${search}` : ""} `,
+  );
+  if (!res.ok) throw new Error("Failed to fetch invoices with products");
+  return res.json();
+}
 export async function getInvoiceSummary(
   month?: string,
   date?: string,

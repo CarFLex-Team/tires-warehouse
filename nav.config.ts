@@ -5,6 +5,7 @@ import {
   Hammer,
   Package,
   BanknoteArrowUp,
+  Banknote,
 } from "lucide-react";
 
 export type NavItem = {
@@ -24,10 +25,10 @@ export const navByRole: Record<Role, NavItem[]> = {
       icon: Home,
     },
     {
-      id: "ownerPayOuts",
-      label: "Pay Outs",
-      href: "/owner/payouts",
-      icon: BanknoteArrowUp,
+      id: "ownerTransactions",
+      label: "IN/OUT",
+      href: "/owner/in-out",
+      icon: Banknote,
     },
     {
       id: "ownerInventory",
@@ -65,10 +66,10 @@ export const navByRole: Record<Role, NavItem[]> = {
       icon: Users,
     },
     {
-      id: "teamPayOuts",
-      label: "PayOuts",
-      href: "/payouts",
-      icon: BanknoteArrowUp,
+      id: "teamTransactions",
+      label: "IN/OUT",
+      href: "/in-out",
+      icon: Banknote,
     },
     {
       id: "teamInventory",

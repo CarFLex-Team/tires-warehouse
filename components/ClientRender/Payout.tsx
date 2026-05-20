@@ -8,7 +8,11 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-export default function payOuts() {
+export default function payOuts({
+  setError,
+}: {
+  setError: (error: string | null) => void;
+}) {
   const currentMonth = new Date().toISOString().slice(0, 7);
   const [month, setMonth] = useState(currentMonth);
   const {
@@ -44,6 +48,12 @@ export default function payOuts() {
       color: "text-green-500",
     },
   ];
+  if (summaryError) {
+    setError(
+      summaryError.message ||
+        "An error occurred while fetching transaction summary",
+    );
+  }
   return (
     <>
       <OverviewStats
