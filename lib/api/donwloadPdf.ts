@@ -1,27 +1,14 @@
 import { Invoice } from "./customers";
 
-// const invoice = {
-//   id: "INV12345",
-//   created_at: "2026-02-01",
-//   transactions: [
-//     {
-//       category_name: "Software",
-//       description: "Software License",
-//       amount: 499.99,
-//     },
-//     {
-//       category_name: "Service",
-//       description: "Consulting",
-//       amount: 299.99,
-//     },
-//   ],
-//   total_amount: 799.98,
-// };
 export function downloadPdf(
   invoice: { title: string } & Invoice,
   setIsDownloading: (downloading: boolean) => void,
 ) {
   setIsDownloading(true);
+
+  const TIMEOUT = 5000; // 5 seconds timeout for opening new tab
+  let timeoutId: NodeJS.Timeout;
+
   fetch("https://pdf-service-production-92e8.up.railway.app/invoice", {
     method: "POST",
     headers: {
@@ -32,23 +19,41 @@ export function downloadPdf(
   })
     .then((response) => response.blob())
     .then((blob) => {
-      const link = document.createElement("a");
       const blobUrl = URL.createObjectURL(blob);
-      const newWindow = window.open(blobUrl); // Open PDF in a new tab
+      const newWindow = window.open(blobUrl); // Try to open PDF in a new tab
 
+      const fallbackDownload = () => {
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = `${invoice.title || "invoice"}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
+
+      // If the tab opened, try to print after loading
       if (newWindow) {
-        // Give it a short delay to load before printing
+        timeoutId = setTimeout(() => {
+          console.warn("PDF tab taking too long, fallback to download.");
+          newWindow.close();
+          fallbackDownload();
+        }, TIMEOUT);
+
         newWindow.onload = () => {
+          clearTimeout(timeoutId);
           newWindow.focus();
-          newWindow.print(); // Show print dialog immediately
+          newWindow.print();
         };
       } else {
-        alert("Please allow pop-ups to print the PDF.");
+        alert("Pop-ups are blocked. Downloading PDF instead.");
+        fallbackDownload();
       }
-      setIsDownloading(false);
     })
     .catch((error) => {
-      console.error("Error:", error);
+      console.error("Error generating PDF:", error);
+      alert("Failed to generate PDF. Please try again.");
+    })
+    .finally(() => {
       setIsDownloading(false);
     });
 }
