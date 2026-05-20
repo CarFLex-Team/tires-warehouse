@@ -91,7 +91,11 @@ export default function invoiceTransactions({
               onClick={() => {
                 if (!data) return;
                 downloadPdf(
-                  { ...(data as Invoice), title: "Invoice" },
+                  {
+                    ...(data as Invoice),
+                    title:
+                      data.payment_method === "Cash" ? "WorkSheet" : "Invoice",
+                  },
                   setIsDownloading,
                 );
               }}
