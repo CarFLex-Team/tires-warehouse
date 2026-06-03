@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import { Transaction } from "@/lib/api/transactions";
 import { downloadPdf } from "@/lib/api/donwloadPdf";
 import { title } from "process";
+import InvoiceCalcSections from "./InvoiceCalcSections";
 
 export default function ReviewNewInvoice({
   customer_Id,
@@ -82,39 +83,6 @@ export default function ReviewNewInvoice({
     (total, item) => total + Number(item.amount),
     0,
   );
-  useEffect(() => {
-    if (paymentMethod === "Debit") {
-      setTax((subTotal * 0.07).toFixed(2).toString());
-      setDebitAmount((subTotal + subTotal * 0.07).toFixed(2).toString());
-      setCashAmount("0");
-    } else if (paymentMethod === "Cash") {
-      setTax("0");
-      setCashAmount(subTotal.toString());
-      setDebitAmount("0");
-    } else if (paymentMethod === "Check") {
-      setTax("0");
-      setCheckAmount(subTotal.toString());
-      setCashAmount("0");
-      setDebitAmount("0");
-    } else if (paymentMethod === "Mix") {
-      const calculatedTax = (subTotal * 0.07).toFixed(2);
-      setTax(calculatedTax.toString());
-      setDebitAmount(((subTotal + parseFloat(calculatedTax)) / 2).toString());
-      setCashAmount(
-        (
-          subTotal +
-          parseFloat(calculatedTax) -
-          (subTotal + parseFloat(calculatedTax)) / 2
-        ).toString(),
-      );
-      setCheckAmount("0");
-    } else {
-      setTax("0");
-      setCashAmount("0");
-      setDebitAmount("0");
-      setCheckAmount("0");
-    }
-  }, [paymentMethod, subTotal]);
 
   const totalAmount = subTotal + parseFloat(tax || "0");
 
@@ -211,200 +179,29 @@ export default function ReviewNewInvoice({
       <div className="flex-3">
         <DataTable title="Review" columns={invoiceItemColumns} data={items} />
       </div>
-      <div className="relative rounded-xl bg-white p-5 m-4 shadow-sm min-h-full flex-1 ">
-        <div className="space-y-1">
-          <p className="font-semibold text-gray-800">Invoice Date</p>
-          <input
-            type="datetime-local"
-            value={cratedAt}
-            max={now}
-            onChange={(e) => setCreatedAt(e.target.value)}
-            className=" flex items-center gap-1.5 rounded border border-primary-600  px-2 py-1 text-sm  cursor-pointer m-1 "
-          />
-        </div>
-        <div className="space-y-1">
-          <p className="font-semibold text-gray-800">Payment Method</p>
-          <div className="flex gap-2">
-            <button
-              className={`flex items-center gap-1.5 rounded border border-primary-600  px-2 py-1 text-sm  cursor-pointer m-1  ${
-                paymentMethod === "Cash"
-                  ? "bg-primary-600 text-white"
-                  : "bg-white  text-primary-600 hover:bg-gray-100"
-              }`}
-              onClick={() => {
-                setAlertMessage("");
-                setPaymentMethod("Cash");
-              }}
-            >
-              <Banknote /> Cash
-            </button>
-            <button
-              className={`flex items-center gap-1.5 rounded border border-primary-600  px-2 py-1 text-sm cursor-pointer m-1  ${
-                paymentMethod === "Debit"
-                  ? "bg-primary-600 text-white"
-                  : "bg-white  text-primary-600 hover:bg-gray-100"
-              }`}
-              onClick={() => {
-                setAlertMessage("");
-                setPaymentMethod("Debit");
-              }}
-            >
-              <CreditCard /> Debit
-            </button>
-            <button
-              className={`flex items-center gap-1.5 rounded border border-primary-600  px-2 py-1 text-sm cursor-pointer m-1  ${
-                paymentMethod === "Check"
-                  ? "bg-primary-600 text-white"
-                  : "bg-white  text-primary-600 hover:bg-gray-100"
-              }`}
-              onClick={() => {
-                setAlertMessage("");
-                setPaymentMethod("Check");
-              }}
-            >
-              <Receipt /> Check
-            </button>
-            <button
-              className={`flex items-center gap-1.5 rounded border border-primary-600  px-2 py-1 text-sm cursor-pointer m-1  ${
-                paymentMethod === "Mix"
-                  ? "bg-primary-600 text-white"
-                  : "bg-white  text-primary-600 hover:bg-gray-100"
-              }`}
-              onClick={() => {
-                setAlertMessage("");
-                setPaymentMethod("Mix");
-              }}
-            >
-              <Merge /> Mix
-            </button>
-          </div>
-          <p className="text-red-500">{alertMessage}</p>
-        </div>
-        <div className="my-6 border-t" />
-        <div className="space-y-1">
-          <p className="font-semibold text-gray-800">Amount Breakdown</p>
-          {paymentMethod === "Debit" || paymentMethod === "Mix" ? (
-            <p className="text-sm text-gray-500">
-              SubTotal: ${subTotal.toFixed(2)}
-            </p>
-          ) : null}
-          {paymentMethod === "Debit" || paymentMethod === "Mix" ? (
-            <p className="text-sm text-gray-500">
-              Tax(7%): $
-              <input
-                type="text"
-                value={tax}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setTax(val);
-                  const numericVal = parseFloat(val) || 0;
-
-                  // Use toFixed(2) to round to 2 decimals
-                  const cash =
-                    paymentMethod === "Mix"
-                      ? Math.floor((subTotal + numericVal) / 2)
-                      : 0;
-                  const debit = (subTotal + numericVal - cash).toFixed(2);
-
-                  setCashAmount(cash.toString());
-                  setDebitAmount(debit);
-                }}
-                className=" w-9 rounded border border-gray-300 px-1 py-0.5  text-sm"
-              />
-            </p>
-          ) : null}
-          {paymentMethod === "Mix" && (
-            <>
-              <p className="text-sm text-gray-500">
-                Cash: $
-                <input
-                  type="text"
-                  value={cashAmount}
-                  onChange={(e) => {
-                    setCashAmount(e.target.value);
-                    // setDebitAmount(
-                    //   (
-                    //     totalAmount -
-                    //     parseFloat(cashAmount) -
-                    //     parseFloat(e.target.value || "0")
-                    //   )
-                    //     .toFixed(2)
-                    //     .toString(),
-                    // );
-                  }}
-                  className=" w-9 rounded border border-gray-300 px-1 py-0.5  text-sm"
-                />
-              </p>
-              <p className="text-sm text-gray-500">
-                Debit: $
-                <input
-                  type="text"
-                  value={debitAmount}
-                  max={totalAmount}
-                  min={0}
-                  onChange={(e) => {
-                    setDebitAmount(e.target.value);
-                    // setCashAmount(
-                    //   (
-                    //     totalAmount -
-                    //     parseFloat(cashAmount) -
-                    //     parseFloat(e.target.value || "0")
-                    //   )
-                    //     .toFixed(2)
-                    //     .toString(),
-                    // );
-                  }}
-                  className=" w-9 rounded border border-gray-300 px-1 py-0.5  text-sm"
-                />
-              </p>
-              <p className="text-sm text-gray-500">
-                Check: $
-                <input
-                  type="text"
-                  value={checkAmount}
-                  max={totalAmount}
-                  min={0}
-                  onChange={(e) => {
-                    setCheckAmount(e.target.value);
-                    // const remaining =
-                    //   totalAmount - parseFloat(e.target.value || "0");
-                    // const calculatedDebit = (remaining / 2).toFixed(2);
-                    // setDebitAmount(calculatedDebit.toString());
-                    // setCashAmount(
-                    //   (remaining - parseFloat(calculatedDebit)).toString(),
-                    // );
-                  }}
-                  className=" w-9 rounded border border-gray-300 px-1 py-0.5  text-sm"
-                />
-              </p>
-            </>
-          )}
-          <p className="text-sm text-gray-500">
-            Total: ${totalAmount.toFixed(2)}
-          </p>
-          <CustomButton
-            className="mt-4 w-full"
-            onClick={saveInvoiceAsPending}
-            isLoading={mutation.isPending}
-          >
-            Save Invoice as Pending
-          </CustomButton>
-          <CustomButton
-            className="mt-4 w-full"
-            onClick={saveInvoice}
-            isLoading={mutation.isPending}
-          >
-            Finish Invoice
-          </CustomButton>
-          <CustomButton
-            className="mt-4 w-full"
-            onClick={printInvoice}
-            isLoading={isDownloading}
-          >
-            Print Invoice without Saving
-          </CustomButton>
-        </div>
-      </div>
+      <InvoiceCalcSections
+        createdAt={cratedAt}
+        subTotal={subTotal}
+        totalAmount={totalAmount}
+        alertMessage={alertMessage}
+        setAlertMessage={setAlertMessage}
+        setCreatedAt={setCreatedAt}
+        tax={tax}
+        setTax={setTax}
+        cashAmount={cashAmount}
+        setCashAmount={setCashAmount}
+        debitAmount={debitAmount}
+        setDebitAmount={setDebitAmount}
+        checkAmount={checkAmount}
+        setCheckAmount={setCheckAmount}
+        paymentMethod={paymentMethod}
+        setPaymentMethod={setPaymentMethod}
+        saveInvoice={saveInvoice}
+        saveInvoiceAsPending={saveInvoiceAsPending}
+        printInvoice={printInvoice}
+        isDownloading={isDownloading}
+        mutation={mutation}
+      />
     </div>
   );
 }
