@@ -1,4 +1,13 @@
-import { Banknote, CreditCard, Merge, Receipt } from "lucide-react";
+import {
+  Banknote,
+  CalendarArrowDown,
+  CheckCheck,
+  Clock,
+  CreditCard,
+  Merge,
+  Printer,
+  Receipt,
+} from "lucide-react";
 import CustomButton from "../ui/CustomButton";
 import { useEffect } from "react";
 
@@ -21,6 +30,7 @@ export default function InvoiceCalcSections({
   setPaymentMethod,
   saveInvoice,
   saveInvoiceAsPending,
+  saveInvoiceinMonthly,
   printInvoice,
   isDownloading,
   mutation,
@@ -43,6 +53,7 @@ export default function InvoiceCalcSections({
   setPaymentMethod: (method: string) => void;
   saveInvoice: () => void;
   saveInvoiceAsPending?: () => void;
+  saveInvoiceinMonthly?: () => void;
   printInvoice?: () => void;
   isDownloading?: boolean;
   mutation: any;
@@ -255,31 +266,42 @@ export default function InvoiceCalcSections({
         <p className="text-sm text-gray-500">
           Total: ${totalAmount.toFixed(2)}
         </p>
-        {saveInvoiceAsPending && (
-          <CustomButton
-            className="mt-4 w-full"
-            onClick={saveInvoiceAsPending}
-            isLoading={mutation.isPending}
-          >
-            Save Invoice as Pending
-          </CustomButton>
-        )}
         <CustomButton
-          className="mt-4 w-full"
+          className=" bg-green-600! mt-4 w-full flex items-center justify-center gap-2  "
           onClick={saveInvoice}
           isLoading={mutation.isPending}
         >
-          Finish Invoice
+          <CheckCheck size={16} /> Finish Invoice
         </CustomButton>
-        {printInvoice && (
+        {saveInvoiceinMonthly && (
           <CustomButton
-            className="mt-4 w-full"
-            onClick={printInvoice}
-            isLoading={isDownloading}
+            className="mt-4 w-full flex items-center justify-center gap-2"
+            onClick={saveInvoiceinMonthly}
+            isLoading={mutation.isPending}
           >
-            Print Invoice without Saving
+            <CalendarArrowDown size={16} /> Add to Monthly Invoice
           </CustomButton>
         )}
+        <div className="flex gap-2">
+          {printInvoice && (
+            <CustomButton
+              className=" bg-blue-600! mt-4 w-full flex items-center justify-center gap-2  "
+              onClick={printInvoice}
+              isLoading={isDownloading}
+            >
+              <Printer size={16} /> Print without Saving
+            </CustomButton>
+          )}
+          {saveInvoiceAsPending && (
+            <CustomButton
+              className=" bg-white! border border-gray-400 text-gray-700! mt-4 w-full flex items-center justify-center gap-2"
+              onClick={saveInvoiceAsPending}
+              isLoading={mutation.isPending}
+            >
+              <Clock size={16} /> Save as Pending
+            </CustomButton>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -132,6 +132,21 @@ export default function ReviewNewInvoice({
       created_at: new Date(cratedAt).toISOString(),
     });
   }
+  function saveInvoiceinMonthly() {
+    if (!customerId) {
+      return;
+    }
+
+    mutation.mutate({
+      subtotal: subTotal,
+      customer_id: customerId,
+      status: "pending",
+      transactions: items,
+      created_by: session?.user?.id || 10,
+      created_at: new Date(cratedAt).toISOString(),
+      is_monthly_invoice: true,
+    });
+  }
   function printInvoice() {
     if (!paymentMethod) {
       setAlertMessage("Please select a payment method");
@@ -198,6 +213,7 @@ export default function ReviewNewInvoice({
         setPaymentMethod={setPaymentMethod}
         saveInvoice={saveInvoice}
         saveInvoiceAsPending={saveInvoiceAsPending}
+        saveInvoiceinMonthly={saveInvoiceinMonthly}
         printInvoice={printInvoice}
         isDownloading={isDownloading}
         mutation={mutation}

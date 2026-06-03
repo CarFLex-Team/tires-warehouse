@@ -68,6 +68,7 @@ export async function POST(req: Request) {
       debit_amount,
       check_amount,
       created_at,
+      is_monthly_invoice,
     } = await req.json();
     const session = await getServerSession(authOptions);
 
@@ -85,29 +86,59 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
     await client.query("BEGIN");
-
+    let invoiceRes = null;
+    if (is_monthly_invoice) {
+      invoiceRes = await client.query(
+        `
+        SELECT id ,total_amount,subtotal,tax FROM "Invoice"
+        WHERE customer_id = $1
+          AND is_monthly_invoice = true
+          AND date_trunc('month', created_at) = date_trunc('month', $2::date)
+      `,
+        [customer_id, created_at || new Date()],
+      );
+      if (invoiceRes.rows.length > 0) {
+        await client.query(
+          `
+          UPDATE "Invoice"
+          SET total_amount = $1, subtotal = $2, tax = $3
+          WHERE id = $4
+        `,
+          [
+            parseFloat(total || "0") +
+              parseFloat(invoiceRes.rows[0].total_amount) || null,
+            parseFloat(subtotal || "0") +
+              parseFloat(invoiceRes.rows[0].subtotal) || null,
+            parseFloat(tax || "0") + parseFloat(invoiceRes.rows[0].tax) || null,
+            invoiceRes.rows[0].id,
+          ],
+        );
+      }
+    }
     // 1️⃣ Create invoice
-    const invoiceRes = await client.query(
-      `
-      INSERT INTO "Invoice" (customer_id, created_by, total_amount, subtotal, tax, cash_amount, debit_amount, check_amount, created_at, payment_method,status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11)
+    if (!invoiceRes || invoiceRes.rows.length === 0) {
+      invoiceRes = await client.query(
+        `
+      INSERT INTO "Invoice" (customer_id, created_by, total_amount, subtotal, tax, cash_amount, debit_amount, check_amount, created_at, payment_method,status,is_monthly_invoice)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11,$12)
       RETURNING id
       `,
-      [
-        customer_id,
-        created_by,
-        total || null,
-        subtotal,
-        tax || null,
-        cash_amount || null,
-        debit_amount || null,
-        check_amount || null,
-        created_at || new Date(),
-        payment_method || null,
-        status,
-      ],
-    );
-
+        [
+          customer_id,
+          created_by,
+          total || null,
+          subtotal,
+          tax || null,
+          cash_amount || null,
+          debit_amount || null,
+          check_amount || null,
+          created_at || new Date(),
+          payment_method || null,
+          status,
+          is_monthly_invoice,
+        ],
+      );
+    }
     const invoiceId = invoiceRes.rows[0].id;
 
     // 2️⃣ Create transactions
