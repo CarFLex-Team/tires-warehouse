@@ -175,7 +175,7 @@ export async function POST(req: Request) {
           WHERE p.id = $2
             AND i.product_id = p.id
             AND p.deleted_at IS NULL
-            AND i.quantity >= $1
+            
             RETURNING p.id, quantity, price ,cost ,size
         
         `,

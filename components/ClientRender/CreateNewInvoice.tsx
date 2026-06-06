@@ -20,6 +20,7 @@ export default function CreateNewInvoice({
   const [rows, setRows] = useState<Transaction[]>([]);
   const [showAlert, setShowAlert] = useState<string>("");
   const [open, setOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
   const setItems = useInvoiceDraft((s) => s.setItems);
   const setCustomer = useInvoiceDraft((s) => s.setCustomer);
   const router = useRouter();
@@ -97,6 +98,7 @@ export default function CreateNewInvoice({
           setShowAlert(
             `Not enough inventory for ${product.name}. Available: ${product.quantity}`,
           );
+          setAlertOpen(true);
           return;
         }
       }
@@ -124,6 +126,35 @@ export default function CreateNewInvoice({
           width="max-w-[70vw]"
         >
           <CustomerPage isCreateInvoice={true} />
+        </Modal>
+      )}
+      {alertOpen && (
+        <Modal
+          title="Alert"
+          onClose={() => setAlertOpen(false)}
+          isOpen={alertOpen}
+        >
+          <p className="text-red-500">{showAlert}</p>
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              onClick={() => setAlertOpen(false)}
+              className="px-4 py-2 bg-white text-primary-600 border border-primary-600 rounded-lg disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                setShowAlert("");
+                setAlertOpen(false);
+                setCustomer(customer_Id);
+                setItems(rows);
+                router.push(`/customers/${customer_Id}/invoices/new/review`);
+              }}
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg disabled:opacity-50"
+            >
+              Continue Anyway
+            </button>
+          </div>
         </Modal>
       )}
       <div className=" relative space-y-4 bg-white p-5 m-4 rounded-xl shadow-sm">
@@ -156,7 +187,7 @@ export default function CreateNewInvoice({
           onRemove={removeRow}
           products={products}
         />
-        {showAlert && <div className="text-red-500 text-sm">{showAlert}</div>}
+        {/* {showAlert && <div className="text-red-500 text-sm">{showAlert}</div>} */}
         <div className="flex justify-end gap-3">
           <CustomButton onClick={submit}>Review & Submit</CustomButton>
         </div>
