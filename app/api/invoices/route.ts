@@ -67,6 +67,7 @@ export async function POST(req: Request) {
       cash_amount,
       debit_amount,
       check_amount,
+      down_payment,
       created_at,
       is_monthly_invoice,
     } = await req.json();
@@ -119,8 +120,8 @@ export async function POST(req: Request) {
     if (!invoiceRes || invoiceRes.rows.length === 0) {
       invoiceRes = await client.query(
         `
-      INSERT INTO "Invoice" (customer_id, created_by, total_amount, subtotal, tax, cash_amount, debit_amount, check_amount, created_at, payment_method,status,is_monthly_invoice)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11,$12)
+      INSERT INTO "Invoice" (customer_id, created_by, total_amount, subtotal, tax, cash_amount, debit_amount, check_amount,down_amount, created_at, payment_method,status,is_monthly_invoice)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11,$12,$13)
       RETURNING id
       `,
         [
@@ -132,6 +133,7 @@ export async function POST(req: Request) {
           cash_amount || null,
           debit_amount || null,
           check_amount || null,
+          down_payment || null,
           created_at || new Date(),
           payment_method || null,
           status,

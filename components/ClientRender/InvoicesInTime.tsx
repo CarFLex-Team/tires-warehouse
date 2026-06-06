@@ -1,6 +1,6 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import invoiceColumns from "../columns/InvoiceColumn";
+import { invoiceColumns } from "../columns/InvoiceColumn";
 import { DataTable } from "../Tables/DataTable";
 import { getInvoices } from "@/lib/api/invoices";
 import { Invoice } from "@/lib/api/customers";

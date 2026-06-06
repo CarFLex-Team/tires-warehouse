@@ -29,6 +29,7 @@ export interface Invoice {
   cash_amount?: number;
   debit_amount?: number;
   check_amount?: number;
+  down_amount?: number;
 }
 export interface CustomerMonthlySummary {
   customer: string;

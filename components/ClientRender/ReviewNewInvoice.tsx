@@ -42,6 +42,7 @@ export default function ReviewNewInvoice({
   const [cashAmount, setCashAmount] = useState<string>("");
   const [debitAmount, setDebitAmount] = useState<string>("");
   const [checkAmount, setCheckAmount] = useState<string>("");
+  const [downPayment, setDownPayment] = useState<string>("");
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const clear = useInvoiceDraft((s) => s.clear);
   useEffect(() => {
@@ -108,6 +109,7 @@ export default function ReviewNewInvoice({
       cash_amount: parseFloat(cashAmount) || 0,
       debit_amount: parseFloat(debitAmount) || 0,
       check_amount: parseFloat(checkAmount) || 0,
+      down_payment: parseFloat(downPayment) || 0,
       subtotal: subTotal,
       tax: parseFloat(tax || "0"),
       customer_id: customerId,
@@ -130,6 +132,7 @@ export default function ReviewNewInvoice({
       transactions: items,
       created_by: session?.user?.id || 10,
       created_at: new Date(cratedAt).toISOString(),
+      down_payment: parseFloat(downPayment) || 0,
     });
   }
   function saveInvoiceinMonthly() {
@@ -190,7 +193,7 @@ export default function ReviewNewInvoice({
     downloadPdf(data, setIsDownloading);
   }
   return (
-    <div className="flex flex-col md:flex-row  ">
+    <div className="flex flex-col lg:flex-row  ">
       <div className="flex-3">
         <DataTable title="Review" columns={invoiceItemColumns} data={items} />
       </div>
@@ -209,6 +212,8 @@ export default function ReviewNewInvoice({
         setDebitAmount={setDebitAmount}
         checkAmount={checkAmount}
         setCheckAmount={setCheckAmount}
+        downPayment={downPayment}
+        setDownPayment={setDownPayment}
         paymentMethod={paymentMethod}
         setPaymentMethod={setPaymentMethod}
         saveInvoice={saveInvoice}

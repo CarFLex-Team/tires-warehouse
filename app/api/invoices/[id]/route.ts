@@ -20,6 +20,8 @@ SELECT
   i.payment_method,
   i.cash_amount,
   i.debit_amount,
+  i.check_amount,
+  i.down_amount,
   COALESCE(
     json_agg(
       jsonb_build_object(

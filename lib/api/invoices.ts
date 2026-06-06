@@ -17,7 +17,7 @@ export async function getInvoices(
   date?: string,
 ): Promise<Invoice[]> {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices?status=${status}${month ? `&month=${month}` : ""}${date ? `&date=${date}` : ""}`,
+    `/api/invoices?status=${status}${month ? `&month=${month}` : ""}${date ? `&date=${date}` : ""}`,
   );
   if (!res.ok) throw new Error("Failed to fetch invoices");
   return res.json();
@@ -46,9 +46,7 @@ export async function getInvoiceSummary(
   return res.json();
 }
 export async function getInvoiceById(id: string): Promise<Invoice> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices/${id}`,
-  );
+  const res = await fetch(`/api/invoices/${id}`);
   if (!res.ok) throw new Error("Failed to fetch invoice");
   return res.json();
 }
@@ -57,6 +55,7 @@ export async function createInvoice(data: {
   cash_amount?: number;
   debit_amount?: number;
   check_amount?: number;
+  down_payment?: number;
   subtotal: number;
   tax?: number;
   customer_id: string;

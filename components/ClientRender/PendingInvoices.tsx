@@ -1,6 +1,6 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import invoiceColumns from "../columns/InvoiceColumn";
+import { pendingInvoiceColumns } from "../columns/InvoiceColumn";
 import { DataTable } from "../Tables/DataTable";
 import CustomButton from "../ui/CustomButton";
 import { Invoice } from "@/lib/api/customers";
@@ -34,7 +34,7 @@ export default function PendingInvoices({
     <>
       <DataTable
         title="Pending Invoices "
-        columns={invoiceColumns}
+        columns={pendingInvoiceColumns}
         data={invoiceLoading ? [] : invoiceData ? invoiceData : []}
         isLoading={invoiceLoading}
         action={

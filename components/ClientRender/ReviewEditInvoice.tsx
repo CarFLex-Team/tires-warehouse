@@ -28,12 +28,14 @@ export default function ReviewEditInvoice({
   const [cashAmount, setCashAmount] = useState<string>("");
   const [debitAmount, setDebitAmount] = useState<string>("");
   const [checkAmount, setCheckAmount] = useState<string>("");
+  const [downPayment, setDownPayment] = useState<string>("");
   const clear = useInvoiceDraft((s) => s.clear);
   const [items, setItems] = useState<Transaction[]>([]);
   const { data, isLoading, error } = useQuery<Invoice>({
     queryKey: ["invoices", invoice_Id],
     queryFn: () => getInvoiceById(invoice_Id),
   });
+
   useEffect(() => {
     if (!savedItems.length && data?.transactions) {
       setItems(data.transactions);
@@ -43,6 +45,9 @@ export default function ReviewEditInvoice({
     if (customerId && customerId !== customer_Id) {
       clear();
       router.replace("/customers");
+    }
+    if (data?.down_amount !== undefined) {
+      setDownPayment(String(data.down_amount));
     }
   }, [savedItems.length, customerId, router, customer_Id, data]);
   const mutation = useMutation({
@@ -156,6 +161,8 @@ export default function ReviewEditInvoice({
         paymentMethod={paymentMethod}
         setPaymentMethod={setPaymentMethod}
         saveInvoice={saveInvoice}
+        downPayment={downPayment}
+        setDownPayment={setDownPayment}
         mutation={mutation}
       />
     </div>
