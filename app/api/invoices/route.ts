@@ -93,7 +93,7 @@ export async function POST(req: Request) {
         `
         SELECT id ,total_amount,subtotal,tax FROM "Invoice"
         WHERE customer_id = $1
-          AND is_monthly_invoice = true
+          AND is_monthly_invoice = true AND deleted_at IS NULL
           AND date_trunc('month', created_at) = date_trunc('month', $2::date)
       `,
         [customer_id, created_at || new Date()],

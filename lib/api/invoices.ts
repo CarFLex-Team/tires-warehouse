@@ -91,14 +91,11 @@ export async function editInvoice(
     customer_id?: string;
   },
 ) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices/${id}`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    },
-  );
+  const res = await fetch(`/api/invoices/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 }
 export async function deleteInvoice(id: string, Transactions: Transaction[]) {
   const res = await fetch(
