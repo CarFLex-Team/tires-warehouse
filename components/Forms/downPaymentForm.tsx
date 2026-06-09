@@ -21,8 +21,7 @@ export function DownPaymentForm({
     <form className="mt-6 space-y-4">
       <div className="flex justify-between items-center gap-4">
         <label className="flex-2">
-          Doown Payment{" "}
-          <span className="text-sm text-gray-500">(optional)</span>
+          Down Payment <span className="text-sm text-gray-500">(optional)</span>
         </label>
         <input
           className="p-2 border border-gray-300 rounded-lg flex-5"
