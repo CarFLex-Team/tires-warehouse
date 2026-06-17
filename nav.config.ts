@@ -6,6 +6,7 @@ import {
   Package,
   BanknoteArrowUp,
   Banknote,
+  ChartColumnBig,
 } from "lucide-react";
 
 export type NavItem = {
@@ -82,6 +83,12 @@ export const navByRole: Record<Role, NavItem[]> = {
       label: "Services",
       href: "/services",
       icon: Hammer,
+    },
+    {
+      id: "teamReports",
+      label: "Reports",
+      href: "/reports",
+      icon: ChartColumnBig,
     },
   ],
 };
