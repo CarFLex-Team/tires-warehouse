@@ -9,8 +9,9 @@ import { useQuery } from "@tanstack/react-query";
 import Modal from "../ui/Modal";
 import CustomerPage from "./CustomerPage";
 import { getCustomerById } from "@/lib/api/customers";
-import LoadingSpinner from "../ui/LoadingSpinner";
+
 import { Transaction } from "@/lib/api/transactions";
+import LoadingSpinner from "../UI/LoadingSpinner";
 
 export default function CreateNewInvoice({
   customer_Id,
