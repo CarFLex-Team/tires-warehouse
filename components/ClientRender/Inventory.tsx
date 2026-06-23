@@ -18,6 +18,7 @@ import {
 import formatDate from "@/lib/formatDate";
 import { AddProductForm } from "@/components/Forms/addProductForm";
 import { EditProductForm } from "@/components/Forms/editProductForm";
+import { OverviewStats } from "../overview/Overview-stats";
 export default function Inventory({
   setError,
 }: {
@@ -193,6 +194,7 @@ export default function Inventory({
         ),
     },
   ];
+
   const value = search.toLowerCase();
   const widthValueNum = widthFilter ? Number(widthFilter) : null;
   const rimValueNum = rimFilter ? Number(rimFilter) : null;
@@ -237,7 +239,49 @@ export default function Inventory({
       if (ratioValueNum) return wA - wB;
       return 0;
     });
+  const monthlyTransactionStats = [
+    // {
+    //   label: "Total Transactions",
+    //   value: summaryData ? summaryData.total_expenses_count : 0,
+    //   color: "text-primary-500",
+    // },
+    {
+      label: `${condition ? condition : "All"} Tires Total Units`,
+      value: filteredInventory
+        ? filteredInventory.reduce(
+            (acc, product) => acc + Number(product.quantity),
+            0,
+          )
+        : 0,
+      color: "text-orange-400",
+    },
+    {
+      label: `${condition ? condition : "All"} Tires Total Price`,
+      value:
+        "$" +
+        (filteredInventory
+          ? filteredInventory.reduce(
+              (acc, product) => acc + Number(product.price),
+              0,
+            )
+          : 0),
 
+      color: "text-green-500",
+    },
+    {
+      label: `${condition ? condition : "All"} Tires Total Cost`,
+      value:
+        "$" +
+        (filteredInventory
+          ? filteredInventory.reduce(
+              (acc, product) => acc + Number(product.cost),
+              0,
+            )
+          : 0),
+
+      color: "text-red-500",
+    },
+  ];
   // Helper function to parse size
   function parseSize(size: string) {
     const [width, height, rim] = size.split("/").map(Number);
@@ -298,6 +342,13 @@ export default function Inventory({
           />
         </Modal>
       )}
+      <div>
+        <OverviewStats
+          title="Inventory Overview"
+          stats={monthlyTransactionStats}
+          // isLoading={summaryLoading}
+        />
+      </div>
       <DataTable
         columns={productColumns}
         data={isLoading ? [] : filteredInventory || []}
