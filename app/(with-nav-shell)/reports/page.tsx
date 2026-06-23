@@ -31,6 +31,7 @@ import {
   Cell,
 } from "recharts";
 import { useRef } from "react";
+import LoadingSpinner from "@/components/UI/LoadingSpinner";
 interface MonthData {
   month: string;
   totalTax: number;
@@ -224,7 +225,29 @@ export default function ReportsPage() {
   //       `Export triggered: /api/reports/export?${params.toString()}\n(Wire this to your real endpoint)`,
   //     );
   //   };
-
+  if (monthlySalesError || monthlySalesPerCategoryError || topTiresError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500">
+          Error loading data: Try refreshing the page.{" "}
+          {monthlySalesError?.message ||
+            monthlySalesPerCategoryError?.message ||
+            topTiresError?.message}
+        </p>
+      </div>
+    );
+  }
+  if (
+    isMonthlySalesLoading ||
+    isMonthlySalesPerCategoryLoading ||
+    isTopTiresLoading
+  ) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner width={8} height={8} />
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-slate-50 font-sans" ref={reportRef}>
       <div className="bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
@@ -305,7 +328,7 @@ export default function ReportsPage() {
             accentClass=""
           />
           <KpiCard
-            label="Total Expenses"
+            label="Total Payouts"
             value={fmt(totals.expenses)}
             delta={pctChange(
               comparisonTotals?.expenses?.current ?? 0,
@@ -349,11 +372,11 @@ export default function ReportsPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Sales vs Expenses */}
+          {/* Sales vs Payouts */}
           <div className="bg-white rounded-2xl border border-slate-100 p-5">
             <SectionHeader
-              title="Sales vs Expenses"
-              subtitle="Monthly sales and expense breakdown"
+              title="Sales vs Payouts"
+              subtitle="Monthly sales and payout breakdown"
             />
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={filteredData} barGap={4}>
@@ -390,7 +413,7 @@ export default function ReportsPage() {
                 />
                 <Bar
                   dataKey="expenses"
-                  name="Expenses"
+                  name="Payouts"
                   fill={COLORS.orange}
                   radius={[4, 4, 0, 0]}
                 />

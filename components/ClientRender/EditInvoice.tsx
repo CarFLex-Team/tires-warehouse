@@ -308,8 +308,9 @@ import LoadingSpinner from "../ui/LoadingSpinner";
 import { getInvoiceById } from "@/lib/api/invoices";
 import { Transaction } from "@/lib/api/transactions";
 import { useInvoiceDraft } from "@/stores/useInvoiceDraft";
+import Modal from "../ui/Modal";
 
-export default function CreateNewInvoice({
+export default function EditInvoice({
   customer_Id,
   invoice_Id,
 }: {
@@ -318,6 +319,7 @@ export default function CreateNewInvoice({
 }) {
   const [rows, setRows] = useState<Transaction[]>([]);
   const [showAlert, setShowAlert] = useState<string>("");
+  const [alertOpen, setAlertOpen] = useState(false);
   const setItems = useInvoiceDraft((s) => s.setItems);
   const setCustomer = useInvoiceDraft((s) => s.setCustomer);
   const router = useRouter();
@@ -335,6 +337,25 @@ export default function CreateNewInvoice({
     }
   }, [data]);
   // console.log(data);
+  function addRow() {
+    setRows((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        category: "",
+        product_name: "",
+        service_name: "",
+        description: "",
+        amount: 0,
+        cost: "0",
+        quantity: 1,
+        type: "Sales",
+        payment_method: "",
+        created_at: new Date().toISOString(),
+      },
+    ]);
+    setShowAlert("");
+  }
   function updateRow(
     id: string,
     field: keyof Transaction,
@@ -344,6 +365,9 @@ export default function CreateNewInvoice({
       prev.map((row) => (row.id === id ? { ...row, [field]: value } : row)),
     );
     setShowAlert("");
+  }
+  function removeRow(id: string) {
+    setRows((prev) => prev.filter((row) => row.id !== id));
   }
   function submit() {
     if (rows.length === 0) {
@@ -363,17 +387,24 @@ export default function CreateNewInvoice({
       setShowAlert("Please fill in all fields for each transaction.");
       return;
     }
+    // Check inventory for each row
     for (const row of rows) {
-      if (row.category === "Tire") {
-        const product = products?.find(
-          (prod: any) => prod.id === row.product_id,
+      if (row.category !== "Tire") continue;
+      const product = products?.find((prod: any) => prod.id === row.product_id);
+
+      if (!product) continue;
+
+      const original = data?.transactions?.find((t) => t.id === row.id);
+
+      const previousQty = original?.quantity ?? 0;
+      const diff = row.quantity - previousQty;
+
+      if (diff > 0 && diff > product.quantity) {
+        setShowAlert(
+          `Not enough inventory for ${product.name}. Available: ${product.quantity}, requested extra: ${diff}`,
         );
-        if (product && row.quantity > product.quantity) {
-          setShowAlert(
-            `Not enough inventory for ${product.name}. Available: ${product.quantity}`,
-          );
-          return;
-        }
+        setAlertOpen(true);
+        return;
       }
     }
     setShowAlert("");
@@ -390,11 +421,44 @@ export default function CreateNewInvoice({
   }
   return (
     <>
+      {alertOpen && (
+        <Modal
+          title="Alert"
+          onClose={() => setAlertOpen(false)}
+          isOpen={alertOpen}
+        >
+          <p className="text-red-500">{showAlert}</p>
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              onClick={() => setAlertOpen(false)}
+              className="px-4 py-2 bg-white text-primary-600 border border-primary-600 rounded-lg disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                setShowAlert("");
+                setAlertOpen(false);
+                setCustomer(customer_Id);
+                setItems(rows);
+                router.push(
+                  `/customers/${customer_Id}/invoices/${invoice_Id}/edit/review`,
+                );
+              }}
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg disabled:opacity-50"
+            >
+              Continue Anyway
+            </button>
+          </div>
+        </Modal>
+      )}
       <div className=" relative space-y-4 bg-white p-5 m-4 rounded-xl shadow-sm">
         <InvoiceTable
           rows={rows}
+          onAdd={addRow}
           onUpdate={updateRow}
           products={products}
+          onRemove={removeRow}
           title="Edit Invoice"
         />
         {showAlert && <div className="text-red-500 text-sm">{showAlert}</div>}
