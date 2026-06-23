@@ -11,7 +11,7 @@ import CustomerPage from "./CustomerPage";
 import { getCustomerById } from "@/lib/api/customers";
 
 import { Transaction } from "@/lib/api/transactions";
-import LoadingSpinner from "../UI/LoadingSpinner";
+import LoadingSpinner from "../ui/LoadingSpinner";
 
 export default function CreateNewInvoice({
   customer_Id,
