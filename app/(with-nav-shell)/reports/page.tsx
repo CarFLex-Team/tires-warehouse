@@ -31,7 +31,7 @@ import {
   Cell,
 } from "recharts";
 import { useRef } from "react";
-import LoadingSpinner from "@/components/UI/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 interface MonthData {
   month: string;
   totalTax: number;
