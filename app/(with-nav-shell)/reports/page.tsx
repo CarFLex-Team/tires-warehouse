@@ -1,5 +1,8 @@
 "use client";
 
+import SectionHeader from "@/components/ui/ChartsHeader";
+import CurrencyTooltip from "@/components/ui/CurrencyToolTip";
+import KpiCard from "@/components/ui/KpiCard";
 import {
   getMonthlySales,
   getMonthlySalesByCategory,
@@ -8,6 +11,8 @@ import {
   MonthlySales,
   TopTire,
 } from "@/lib/api/reports";
+import { fmt, fmtK, pctChange } from "@/lib/currenyFunctions";
+import { exportToExcel } from "@/lib/exportToExcel";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import {
@@ -24,11 +29,8 @@ import {
   PieChart,
   Pie,
   Cell,
-  TooltipProps,
 } from "recharts";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
+import { useRef } from "react";
 interface MonthData {
   month: string;
   totalTax: number;
@@ -43,8 +45,6 @@ interface MonthData {
   servicesAmount: number;
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const COLORS = {
   blue: "#3f5967",
   orange: "#ea580c",
@@ -53,7 +53,6 @@ const COLORS = {
 };
 
 const PIE_COLORS = [COLORS.blue, COLORS.slate, COLORS.green, COLORS.orange];
-
 const MONTHS = [
   "All",
   "Jan",
@@ -70,128 +69,8 @@ const MONTHS = [
   "Dec",
 ];
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
-function fmt(n: number): string {
-  return new Intl.NumberFormat("en-EG", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
-
-function fmtK(n: number): string {
-  return n >= 1000 ? `${(n / 1000).toFixed(0)}k` : String(n);
-}
-
-function pctChange(current: number, previous: number): string {
-  if (previous === 0) return "—";
-  const pct = ((current - previous) / previous) * 100;
-  return (pct >= 0 ? "↑ " : "↓ ") + Math.abs(pct).toFixed(1) + "%";
-}
-
-// ─── Custom Tooltip ───────────────────────────────────────────────────────────
-
-function CurrencyTooltip({
-  active,
-  payload,
-  label,
-}: TooltipProps<number, string> & {
-  payload?: any[];
-  label?: string | number;
-}) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="bg-white border border-slate-200 rounded-xl shadow-lg p-3 text-sm min-w-40">
-      <p className="font-medium text-slate-700 mb-2">{label}</p>
-      {payload.map((entry) => (
-        <div
-          key={entry.name}
-          className="flex items-center justify-between gap-4 py-0.5"
-        >
-          <span className="flex items-center gap-1.5 text-slate-500">
-            <span
-              className="inline-block w-2.5 h-2.5 rounded-sm"
-              style={{ background: entry.color }}
-            />
-            {entry.name}
-          </span>
-          <span className="font-medium text-slate-800">
-            {typeof entry.value === "number" && entry.value > 1000
-              ? fmt(entry.value)
-              : entry.value}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
-
-interface KpiCardProps {
-  label: string;
-  value: string;
-  delta?: string;
-  deltaPositive?: boolean;
-  icon: string;
-  accentClass: string;
-}
-
-function KpiCard({
-  label,
-  value,
-  delta,
-  deltaPositive,
-  icon,
-  accentClass,
-}: KpiCardProps) {
-  return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-5 flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-          {label}
-        </span>
-        <span
-          className={`w-8 h-8 rounded-lg flex items-center justify-center text-base ${accentClass}`}
-        >
-          {icon}
-        </span>
-      </div>
-      <p className="text-2xl font-semibold text-slate-900 leading-none">
-        {value}
-      </p>
-      {delta && (
-        <p
-          className={`text-xs font-medium ${deltaPositive ? "text-emerald-600" : "text-orange-500"}`}
-        >
-          {delta} vs prior period
-        </p>
-      )}
-    </div>
-  );
-}
-
-// ─── Section Header ───────────────────────────────────────────────────────────
-
-function SectionHeader({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) {
-  return (
-    <div className="mb-4">
-      <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
-      {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
-    </div>
-  );
-}
-
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
 export default function ReportsPage() {
+  const reportRef = useRef<HTMLDivElement>(null);
   const [selectedYear, setSelectedYear] = useState("2026");
   const [selectedMonth, setSelectedMonth] = useState("All");
   const {
@@ -199,7 +78,7 @@ export default function ReportsPage() {
     isLoading: isMonthlySalesLoading,
     error: monthlySalesError,
   } = useQuery<MonthlySales[]>({
-    queryKey: ["monthly-sales"],
+    queryKey: ["monthly-sales", selectedYear],
     queryFn: () => getMonthlySales(parseInt(selectedYear)),
   });
   const {
@@ -207,7 +86,7 @@ export default function ReportsPage() {
     isLoading: isMonthlySalesPerCategoryLoading,
     error: monthlySalesPerCategoryError,
   } = useQuery<MonthDataCategory[]>({
-    queryKey: ["monthly-sales-by-category"],
+    queryKey: ["monthly-sales-by-category", selectedYear],
     queryFn: () => getMonthlySalesByCategory(parseInt(selectedYear)),
   });
   const {
@@ -215,7 +94,7 @@ export default function ReportsPage() {
     isLoading: isTopTiresLoading,
     error: topTiresError,
   } = useQuery<TopTire[]>({
-    queryKey: ["top-tires"],
+    queryKey: ["top-tires", selectedYear],
     queryFn: () => getTopTires(parseInt(selectedYear)),
   });
 
@@ -226,9 +105,12 @@ export default function ReportsPage() {
         (c) => c.month === m.month,
       );
       return {
-        month: new Date(2026, m.month - 1).toLocaleString("en-US", {
-          month: "short",
-        }),
+        month: new Date(Number(selectedYear), m.month - 1).toLocaleString(
+          "en-US",
+          {
+            month: "short",
+          },
+        ),
         sales: Number(m.total_amount || 0),
         expenses: Number(categoryData?.expenses || 0),
         newTires: Number(categoryData?.newTiresQuantity || 0),
@@ -241,7 +123,7 @@ export default function ReportsPage() {
         totalTax: Number(m.total_tax || 0),
       };
     });
-  }, [monthlySales, monthlySalesPerCategory]);
+  }, [monthlySales, monthlySalesPerCategory, selectedYear]);
   const visibleData = useMemo(() => {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
@@ -265,7 +147,7 @@ export default function ReportsPage() {
   }, [selectedMonth, visibleData]);
   const filteredTopTires = useMemo(() => {
     if (selectedMonth === "All")
-      return topTires?.sort((a, b) => b.units - a.units).slice(0, 5);
+      return (topTires || []).sort((a, b) => b.units - a.units).slice(0, 5);
     const monthIndex = MONTHS.indexOf(selectedMonth);
     return (topTires || []).filter((t) => t.month === monthIndex);
   }, [selectedMonth, topTires]);
@@ -281,7 +163,6 @@ export default function ReportsPage() {
     return { sales, expenses, tires, services };
   }, [filteredData]);
 
-  // Month-over-month line data (always full year for context)
   const momData = visibleData.map((d, i) => {
     const prev = i === 0 ? null : visibleData[i - 1].sales;
     const pct = prev
@@ -290,7 +171,6 @@ export default function ReportsPage() {
     return { month: d.month, sales: d.sales, growth: pct };
   });
 
-  // Pie data
   const newRev = filteredData.reduce((s, d) => s + d.newTiresAmount, 0);
   const usedRev = filteredData.reduce((s, d) => s + d.usedTiresAmount, 0);
   const taxRev = filteredData.reduce((s, d) => s + d.totalTax, 0);
@@ -301,8 +181,34 @@ export default function ReportsPage() {
     { name: "Services", value: serviceRev },
     { name: "Tax", value: taxRev },
   ];
+  const comparisonTotals = useMemo(() => {
+    if (!MONTHLY_DATA.length) return null;
+    if (selectedMonth !== "All") {
+      const monthIndex = MONTHS.indexOf(selectedMonth) - 1;
 
-  // Top tires max for bar width
+      const current = MONTHLY_DATA[monthIndex];
+      const previous = monthIndex === 0 ? null : MONTHLY_DATA[monthIndex - 1];
+
+      return {
+        sales: {
+          current: current?.sales ?? 0,
+          previous: previous?.sales ?? 0,
+        },
+        expenses: {
+          current: current?.expenses ?? 0,
+          previous: previous?.expenses ?? 0,
+        },
+        tires: {
+          current: current?.newTires ?? 0,
+          previous: previous?.newTires ?? 0,
+        },
+        services: {
+          current: current?.services ?? 0,
+          previous: previous?.services ?? 0,
+        },
+      };
+    }
+  }, [selectedMonth, MONTHLY_DATA]);
   const maxUnits = useMemo(() => {
     if (!filteredTopTires) return 0;
     return Math.max(...filteredTopTires.map((t) => t.units));
@@ -320,19 +226,14 @@ export default function ReportsPage() {
   //   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      {/* ── Header ── */}
+    <div className="min-h-screen bg-slate-50 font-sans" ref={reportRef}>
       <div className="bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
         <div>
           <h1 className="text-xl font-semibold text-slate-900">
             Analytics & Reports
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Inventory & sales performance overview
-          </p>
         </div>
         <div className="flex items-center gap-2">
-          {/* Year filter */}
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
@@ -344,7 +245,6 @@ export default function ReportsPage() {
               </option>
             ))}
           </select>
-          {/* Month filter */}
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
@@ -357,8 +257,16 @@ export default function ReportsPage() {
             ))}
           </select>
           {/* Export */}
-          {/* <button
-            onClick={handleExport}
+          <button
+            onClick={() =>
+              exportToExcel(
+                filteredData,
+                filteredTopTires,
+                totals,
+                selectedYear,
+                selectedMonth,
+              )
+            }
             className="flex items-center gap-2 text-sm bg-primary-600 hover:bg-primary-700 active:scale-95 transition-all text-white px-4 py-1.5 rounded-lg font-medium"
           >
             <svg
@@ -375,7 +283,7 @@ export default function ReportsPage() {
               />
             </svg>
             Export
-          </button> */}
+          </button>
         </div>
       </div>
 
@@ -385,44 +293,67 @@ export default function ReportsPage() {
           <KpiCard
             label="Total Sales"
             value={fmt(totals.sales)}
-            delta=""
-            deltaPositive
+            delta={pctChange(
+              comparisonTotals?.sales?.current ?? 0,
+              comparisonTotals?.sales?.previous ?? 0,
+            )}
+            deltaPositive={
+              (comparisonTotals?.sales?.current ?? 0) >=
+              (comparisonTotals?.sales?.previous ?? 0)
+            }
             icon=""
             accentClass=""
           />
           <KpiCard
             label="Total Expenses"
             value={fmt(totals.expenses)}
-            delta=""
-            deltaPositive={false}
+            delta={pctChange(
+              comparisonTotals?.expenses?.current ?? 0,
+              comparisonTotals?.expenses?.previous ?? 0,
+            )}
+            deltaPositive={
+              (comparisonTotals?.expenses?.current ?? 0) >=
+              (comparisonTotals?.expenses?.previous ?? 0)
+            }
             icon=""
             accentClass=""
           />
           <KpiCard
             label="Tires Sold"
             value={`${totals.tires} units`}
-            delta=""
-            deltaPositive
+            delta={pctChange(
+              comparisonTotals?.tires?.current ?? 0,
+              comparisonTotals?.tires?.previous ?? 0,
+            )}
+            deltaPositive={
+              (comparisonTotals?.tires?.current ?? 0) >=
+              (comparisonTotals?.tires?.previous ?? 0)
+            }
             icon=""
             accentClass=""
           />
           <KpiCard
             label="Services Done"
             value={`${totals.services} services`}
-            delta={``}
-            deltaPositive
+            delta={pctChange(
+              comparisonTotals?.services?.current ?? 0,
+              comparisonTotals?.services?.previous ?? 0,
+            )}
+            deltaPositive={
+              (comparisonTotals?.services?.current ?? 0) >=
+              (comparisonTotals?.services?.previous ?? 0)
+            }
             icon=""
             accentClass=""
           />
         </div>
 
-        {/* ── Sales vs Expenses + Tires Sold ── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Sales vs Expenses */}
           <div className="bg-white rounded-2xl border border-slate-100 p-5">
             <SectionHeader
               title="Sales vs Expenses"
-              subtitle="Monthly sales and expense breakdown — USD"
+              subtitle="Monthly sales and expense breakdown"
             />
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={filteredData} barGap={4}>
@@ -518,13 +449,12 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        {/* ── Month-over-Month Line + Sales Split ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Month-over-Month Line Chart */}
           <div className="bg-white rounded-2xl border border-slate-100 p-5 lg:col-span-2">
             <SectionHeader
               title="Month-over-Month Sales"
-              subtitle="Full-year sales trend and growth % — USD"
+              subtitle="Full-year sales trend and growth %"
             />
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={momData}>
@@ -592,7 +522,7 @@ export default function ReportsPage() {
           <div className="bg-white rounded-2xl border border-slate-100 p-5">
             <SectionHeader
               title="Sales Split"
-              subtitle="New vs used tires, services, and tax — current period"
+              subtitle="New vs used tires, services, and tax"
             />
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -622,7 +552,8 @@ export default function ReportsPage() {
             {/* Custom legend */}
             <div className="mt-4 space-y-2">
               {pieData.map((d, i) => {
-                const pct = Math.round((d.value / (newRev + usedRev)) * 100);
+                const pct =
+                  Math.round((d.value / (newRev + usedRev)) * 100) || 0;
                 return (
                   <div
                     key={i}
@@ -647,7 +578,7 @@ export default function ReportsPage() {
         <div className="bg-white rounded-2xl border border-slate-100 p-5">
           <SectionHeader
             title="Top Sold Tires"
-            subtitle="Ranked by units sold — current period"
+            subtitle="Ranked by units sold"
           />
           <div className="space-y-3">
             {filteredTopTires?.map((tire, i) => {
