@@ -126,12 +126,12 @@ export default function dashboard() {
             />
           }
         />
-        <PayoutTransactions month={month} />
         <InvoicesInTime
           month={month}
           renderActions={actionColumn}
           setError={setError}
         />
+        <PayoutTransactions month={month} />
       </div>
       <ConfirmDialog
         isOpen={confirmOpen}
