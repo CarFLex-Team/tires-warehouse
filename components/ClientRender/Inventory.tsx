@@ -261,7 +261,8 @@ export default function Inventory({
         "$" +
         (filteredInventory
           ? filteredInventory.reduce(
-              (acc, product) => acc + Number(product.price),
+              (acc, product) =>
+                acc + Number(product.price) * Number(product.quantity),
               0,
             )
           : 0),
@@ -274,7 +275,8 @@ export default function Inventory({
         "$" +
         (filteredInventory
           ? filteredInventory.reduce(
-              (acc, product) => acc + Number(product.cost),
+              (acc, product) =>
+                acc + Number(product.cost) * Number(product.quantity),
               0,
             )
           : 0),
