@@ -50,12 +50,12 @@ export const navByRole: Record<Role, NavItem[]> = {
       icon: Hammer,
     },
 
-    // {
-    //   id: "ownerSettings",
-    //   label: "Settings",
-    //   href: "/owner/settings",
-    //   icon: Settings,
-    // },
+    {
+      id: "ownerReports",
+      label: "Reports",
+      href: "/owner/reports",
+      icon: ChartColumnBig,
+    },
   ],
 
   TEAM: [
