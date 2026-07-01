@@ -35,6 +35,11 @@ export async function getInvoicesWithProducts(
   if (!res.ok) throw new Error("Failed to fetch invoices with products");
   return res.json();
 }
+export async function getInvoiceSizes(id: string): Promise<string[]> {
+  const res = await fetch(`/api/invoices/${id}/sizes`);
+  if (!res.ok) throw new Error("Failed to fetch invoice sizes");
+  return res.json();
+}
 export async function getInvoiceSummary(
   month?: string,
   date?: string,

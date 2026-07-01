@@ -15,6 +15,7 @@ type DataTableProps<T> = {
   pagination?: Pagination;
   isLoading?: boolean;
   onRowClick?: (row: T) => void;
+  onRowHover?: (row: T) => void;
   renderActions?: (row: T) => React.ReactNode;
   hoverable?: boolean;
 };
@@ -27,6 +28,7 @@ export function DataTable<T>({
   pagination,
   isLoading = false,
   onRowClick,
+  onRowHover,
   renderActions,
   hoverable = false,
 }: DataTableProps<T>) {
@@ -76,6 +78,8 @@ export function DataTable<T>({
                 <tr
                   key={rowIndex}
                   onClick={() => onRowClick?.(row)}
+                  onMouseEnter={() => onRowHover?.(row)}
+                  onMouseLeave={() => onRowHover?.(null as any)}
                   className={`border-b last:border-0  ${
                     onRowClick ? "cursor-pointer" : ""
                   } ${hoverable ? "hover:bg-gray-100" : ""}`}
