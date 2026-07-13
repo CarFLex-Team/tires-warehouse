@@ -7,12 +7,7 @@ import CustomButton from "../ui/CustomButton";
 import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
 import ConfirmDialog from "../ui/ConfirmDialog";
-import {
-  Customer,
-  getCustomerById,
-  getCustomerInvoices,
-  Invoice,
-} from "@/lib/api/customers";
+import { Customer, getCustomerInvoices, Invoice } from "@/lib/api/customers";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import formatDate from "@/lib/formatDate";
 import { formatTime } from "@/lib/formatTime";
