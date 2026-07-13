@@ -87,7 +87,27 @@ export async function createTransaction(data: {
   if (!res.ok) throw new Error("Failed to add transaction");
   return res.json();
 }
-
+export async function createTirePurchase(data: {
+  product: {
+    size: string;
+    brand: string;
+    price: number;
+    cost: number;
+    quantity: number;
+    condition: "USED" | "NEW" | "SET";
+  };
+  payment_method: string;
+  created_by: number;
+  created_at: string;
+}) {
+  const res = await fetch(`/api/transactions/tire-purchase`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to add tire purchase transaction");
+  return res.json();
+}
 //api local
 export async function editTransaction(
   id: string,

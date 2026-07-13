@@ -114,23 +114,21 @@ export default function payOutTransactions({
   if (error) return <p>Error {error.message}</p>;
   return (
     <>
-      {open && (
-        <Modal title="Add Expense" onClose={() => setOpen(false)} isOpen={open}>
-          <AddTransactionForm onSuccess={() => setOpen(false)} />
-        </Modal>
-      )}
-      {editOpen && (
-        <Modal
-          isOpen={editOpen}
-          onClose={() => setEditOpen(false)}
-          title="Edit Payout"
-        >
-          <EditPayoutForm
-            payOutTransaction={selectedPayout}
-            onSuccess={() => setEditOpen(false)}
-          />
-        </Modal>
-      )}
+      <Modal title="Add Expense" onClose={() => setOpen(false)} isOpen={open}>
+        <AddTransactionForm onSuccess={() => setOpen(false)} />
+      </Modal>
+
+      <Modal
+        isOpen={editOpen}
+        onClose={() => setEditOpen(false)}
+        title="Edit Payout"
+      >
+        <EditPayoutForm
+          payOutTransaction={selectedPayout}
+          onSuccess={() => setEditOpen(false)}
+        />
+      </Modal>
+
       <DataTable
         title="Payouts"
         columns={transactionColumns}
