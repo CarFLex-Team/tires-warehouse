@@ -304,11 +304,11 @@ export async function PUT(
         );
       }
 
-      if (tx.category === "Tire") {
+      if (tx.category === "Tire" || tx.category === "Rim") {
         if (!tx.product_id) {
           await client.query("ROLLBACK");
           return NextResponse.json(
-            { error: "Product ID is required for tire transactions" },
+            { error: "Product ID is required for tire and rim transactions" },
             { status: 400 },
           );
         }
@@ -366,7 +366,7 @@ export async function PUT(
             tx.description || null,
             invoiceCreatedAt,
             tx.type,
-            tx.category,
+            "Tire",
 
             payment_method || null,
             tx.product_id,

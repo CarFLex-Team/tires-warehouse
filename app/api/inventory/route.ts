@@ -4,14 +4,36 @@ import { db } from "@/lib/db";
 export async function GET() {
   try {
     const { rows } = await db.query(`
-      SELECT i.id AS inventory_id, p.id AS id,name,size,brand,sku, price, cost,quantity,is_active,  p.created_at,  p.updated_at,condition
-      FROM "Inventory" as i , "Product" as p
-      WHERE i.product_id = p.id
-        AND p.deleted_at IS NULL
-      ORDER BY size ASC
+     SELECT
+      i.id AS inventory_id,
+      p.id AS id,
+      p.name,
+      p.size,
+      p.brand,
+      p.sku,
+      p.price,
+      p.cost,
+      i.quantity,
+      p.is_active,
+      p.created_at,
+      p.updated_at,
+      p.condition,
+      p.category,
+      pi.image_path
+    FROM "Inventory" AS i
+    INNER JOIN "Product" AS p
+      ON i.product_id = p.id
+    LEFT JOIN "ProductImage" AS pi
+      ON pi.product_id = p.id
+      WHERE p.deleted_at IS NULL
+    ORDER BY p.size ASC
     `);
-
-    return NextResponse.json(rows);
+    const baseUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/${process.env.SUPABASE_BUCKET}`;
+    const result = rows.map((row: any) => ({
+      ...row,
+      image_url: row.image_path ? `${baseUrl}/${row.image_path}` : null,
+    }));
+    return NextResponse.json(result);
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch inventory" },
@@ -22,7 +44,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { size, brand, price, cost, quantity, condition } = await req.json();
+    const { size, brand, price, cost, quantity, condition, category } =
+      await req.json();
     // console.log("Received data:", {
     //   size,
     //   brand,
@@ -38,12 +61,13 @@ export async function POST(req: Request) {
       !price ||
       !cost ||
       quantity === undefined ||
-      !condition
+      !condition ||
+      !category
     ) {
       return NextResponse.json(
         {
           error:
-            " size, brand, price, cost, quantity and condition are required",
+            " size, brand, price, cost, quantity, condition and category are required",
         },
         { status: 400 },
       );
@@ -52,10 +76,18 @@ export async function POST(req: Request) {
     // Insert into Product table and get the generated productId
     const productResult = await db.query(
       `
-      INSERT INTO "Product" (size, brand, price, cost, is_active, created_at, updated_at,name,condition)
-      VALUES ($1, $2, $3, $4, true, NOW(), NOW(),$5,$6)
+      INSERT INTO "Product" (size, brand, price, cost, is_active, created_at, updated_at,name,condition,category)
+      VALUES ($1, $2, $3, $4, true, NOW(), NOW(),$5,$6,$7)
       RETURNING id`,
-      [size, brand, price, cost, `${condition} ${brand} ${size}`, condition],
+      [
+        size,
+        brand,
+        price,
+        cost,
+        `${condition} ${category} ${brand} ${size}`,
+        condition,
+        category,
+      ],
     );
 
     const productId = productResult.rows[0].id; // Get the productId from the returned result

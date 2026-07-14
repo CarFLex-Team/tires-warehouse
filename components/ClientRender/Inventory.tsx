@@ -32,6 +32,7 @@ export default function Inventory({
   const [rimFilter, setRimFilter] = useState("");
   const [ratioFilter, setRatioFilter] = useState("");
   const [condition, setCondition] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("Tires");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmImageOpen, setConfirmImageOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -164,6 +165,7 @@ export default function Inventory({
         );
       },
     },
+    { header: "Category", accessor: "category" },
     { header: "Condition", accessor: "condition" },
     // { header: "Conditi", accessor: "id" },
     { header: "Brand", accessor: "brand" },
@@ -199,24 +201,28 @@ export default function Inventory({
   const widthValueNum = widthFilter ? Number(widthFilter) : null;
   const rimValueNum = rimFilter ? Number(rimFilter) : null;
   const ratioValueNum = ratioFilter ? Number(ratioFilter) : null;
+  const categorizedInventory = data?.filter((product) => {
+    if (categoryFilter === "Tires") {
+      return product.category === "Tires";
+    } else if (categoryFilter === "Rims") {
+      return product.category === "Rims";
+    }
 
-  const filteredInventory = data
+    return true;
+  });
+  const filteredInventory = categorizedInventory
     ?.filter((product) => {
-      // ---- Parse tire size ----
       const { width, height, rim } = parseSize(product.size);
 
-      // ---- General search ----
       const matchesSearch =
         product.name.toLowerCase().includes(value) ||
         product.brand.toLowerCase().includes(value) ||
         product.condition.toLowerCase().includes(value);
 
-      // ---- Specific size filters ----
       const matchesWidth = widthValueNum ? width === widthValueNum : true;
       const matchesRim = rimValueNum ? rim === rimValueNum : true;
       const matchesRatio = ratioValueNum ? height === ratioValueNum : true;
 
-      // ---- Condition filter ----
       const matchesCondition = condition
         ? product.condition === condition
         : true;
@@ -229,7 +235,7 @@ export default function Inventory({
         matchesCondition
       );
     })
-    // ---- Sort by your rules ----
+
     .sort((a, b) => {
       const { width: wA, rim: rA } = parseSize(a.size);
       const { width: wB, rim: rB } = parseSize(b.size);
@@ -246,7 +252,7 @@ export default function Inventory({
     //   color: "text-primary-500",
     // },
     {
-      label: `${condition ? condition : "All"} Tires Total Units`,
+      label: `${condition ? condition : "All"} ${categoryFilter || "Tires"} Total Units`,
       value: filteredInventory
         ? filteredInventory.reduce(
             (acc, product) => acc + Number(product.quantity),
@@ -256,7 +262,7 @@ export default function Inventory({
       color: "text-orange-400",
     },
     {
-      label: `${condition ? condition : "All"} Tires Total Price`,
+      label: `${condition ? condition : "All"} ${categoryFilter || "Tires"} Total Price`,
       value:
         "$" +
         (filteredInventory
@@ -270,7 +276,7 @@ export default function Inventory({
       color: "text-green-500",
     },
     {
-      label: `${condition ? condition : "All"} Tires Total Cost`,
+      label: `${condition ? condition : "All"} ${categoryFilter || "Tires"} Total Cost`,
       value:
         "$" +
         (filteredInventory
@@ -348,6 +354,32 @@ export default function Inventory({
         <OverviewStats
           title="Inventory Overview"
           stats={monthlyTransactionStats}
+          action={
+            <div className="flex items-center">
+              <CustomButton
+                onClick={() => setCategoryFilter("Tires")}
+                className={` border border-primary-600 ${
+                  categoryFilter === "Tires"
+                    ? "bg-primary-600 text-white "
+                    : "bg-gray-100 text-primary-600  "
+                }`}
+                isSelector={true}
+              >
+                Tires
+              </CustomButton>
+              <CustomButton
+                onClick={() => setCategoryFilter("Rims")}
+                className={` border border-primary-600 ${
+                  categoryFilter === "Rims"
+                    ? "bg-primary-600 text-white "
+                    : "bg-gray-100 text-primary-600  "
+                }`}
+                isSelector={true}
+              >
+                Rims
+              </CustomButton>
+            </div>
+          }
           // isLoading={summaryLoading}
         />
       </div>

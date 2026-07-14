@@ -95,6 +95,7 @@ export async function createTirePurchase(data: {
     cost: number;
     quantity: number;
     condition: "USED" | "NEW" | "SET";
+    category: string;
   };
   payment_method: string;
   created_by: number;

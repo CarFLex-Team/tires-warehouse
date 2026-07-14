@@ -47,7 +47,7 @@ export function InvoiceTable({
   ) => {
     let price = 0;
     let cost = 0;
-    if (category === "Tire") {
+    if (category === "Tire" || category === "Rim") {
       price =
         filteredProducts?.find((prod: any) => prod.id === product_id)?.price ||
         0;
@@ -89,7 +89,14 @@ export function InvoiceTable({
           <tbody>
             {rows.map((row) => {
               const filteredProducts = products?.filter(
-                (p) => !row.condition || p.condition === row.condition,
+                (p) =>
+                  (!row.condition || p.condition === row.condition) &&
+                  p.category ===
+                    (row.category === "Tire"
+                      ? "Tires"
+                      : row.category === "Rim"
+                        ? "Rims"
+                        : p.category),
               );
               return (
                 <tr key={row.id} className="border-b last:border-0">
@@ -130,10 +137,11 @@ export function InvoiceTable({
                       </option>
                       <option value="Service">Service</option>
                       <option value="Tire">Tire</option>
+                      <option value="Rim">Rim</option>
                     </select>
                   </td>
                   <td className="py-3 px-2 text-sm align-top ">
-                    {row.category === "Tire" ? (
+                    {row.category === "Tire" || row.category === "Rim" ? (
                       <div className="flex items-center gap-2">
                         <ComboBox
                           value={row.product_id}

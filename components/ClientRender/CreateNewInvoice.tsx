@@ -82,7 +82,8 @@ export default function CreateNewInvoice({
         (row) =>
           !row.category ||
           !row.type ||
-          (!row.product_name && row.category === "Tire") ||
+          (!row.product_name &&
+            (row.category === "Tire" || row.category === "Rim")) ||
           (!row.service_name && row.category === "Service") ||
           row.quantity <= 0,
       )
@@ -91,7 +92,7 @@ export default function CreateNewInvoice({
       return;
     }
     for (const row of rows) {
-      if (row.category === "Tire") {
+      if (row.category === "Tire" || row.category === "Rim") {
         const product = products?.find(
           (prod: any) => prod.id === row.product_id,
         );
