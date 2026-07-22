@@ -133,7 +133,6 @@ export default function ReportsPage() {
     return MONTHLY_DATA.filter((d, index) => {
       const monthNumber = index + 1;
 
-      // If viewing current year, hide future months
       if (Number(selectedYear) === currentYear && monthNumber > currentMonth) {
         return false;
       }
