@@ -45,6 +45,33 @@ export function ProductFormFields({ form }: { form: ProductForm }) {
           </button>
         </div>
       </div>
+      <div className="flex justify-between items-center gap-4">
+        <label className="flex-2">Category</label>
+        <div className="flex gap-2 flex-5">
+          <button
+            type="button"
+            className={`flex items-center gap-1.5 rounded border border-primary-600 p-2 text-sm cursor-pointer ${
+              values.category === "Tires"
+                ? "bg-primary-600 text-white"
+                : "bg-white text-primary-600 hover:bg-gray-100"
+            }`}
+            onClick={() => setters.setCategory("Tires")}
+          >
+            Tires
+          </button>
+          <button
+            type="button"
+            className={`flex items-center gap-1.5 rounded border border-primary-600 p-2 text-sm cursor-pointer ${
+              values.category === "Rims"
+                ? "bg-primary-600 text-white"
+                : "bg-white text-primary-600 hover:bg-gray-100"
+            }`}
+            onClick={() => setters.setCategory("Rims")}
+          >
+            Rims
+          </button>
+        </div>
+      </div>
 
       <div className="flex justify-between items-center gap-4">
         <label className="flex-2">Brand</label>

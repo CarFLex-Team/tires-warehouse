@@ -146,7 +146,7 @@ export async function POST(req: Request) {
     // 2️⃣ Create transactions
 
     for (const tx of transactions) {
-      if (tx.category === "Tire") {
+      if (tx.category === "Tire" || tx.category === "Rim") {
         await client.query(
           `
         INSERT INTO "Transaction" (invoice_id, amount, description, created_at,type,category,created_by,payment_method,product_id,quantity,status)
@@ -159,7 +159,7 @@ export async function POST(req: Request) {
             tx.description,
             tx.created_at || new Date(),
             tx.type,
-            tx.category,
+            "Tire",
             created_by,
             payment_method || null,
             tx.product_id,

@@ -11,6 +11,7 @@ export function useProductForm() {
   const [cost, setCost] = useState("");
   const [quantity, setQuantity] = useState("");
   const [condition, setCondition] = useState<Condition>("");
+  const [category, setCategory] = useState<"Tires" | "Rims" | "">("");
   const [isPercent, setIsPercent] = useState(false);
   const [markupPercent, setMarkupPercent] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +37,7 @@ export function useProductForm() {
     setCost("");
     setQuantity("");
     setCondition("");
+    setCategory("");
     setIsPercent(false);
     setMarkupPercent("");
     setError(null);
@@ -51,6 +53,7 @@ export function useProductForm() {
       !price ||
       !cost ||
       !quantity ||
+      !category ||
       isNaN(Number(price)) ||
       isNaN(Number(cost)) ||
       isNaN(Number(quantity))
@@ -70,6 +73,7 @@ export function useProductForm() {
       price: Number(price),
       cost: Number(cost),
       quantity: Number(quantity),
+      category: category as "Tires" | "Rims",
     };
   }
 
@@ -82,6 +86,7 @@ export function useProductForm() {
       price,
       cost,
       quantity,
+      category,
       condition,
       isPercent,
       markupPercent,
@@ -95,6 +100,7 @@ export function useProductForm() {
       setPrice,
       setCost,
       setQuantity,
+      setCategory,
       setCondition,
       setIsPercent,
       setMarkupPercent,

@@ -34,7 +34,6 @@ export default function SignInPage() {
       return;
     }
 
-    // success
     const sessionRes = await fetch("/api/auth/session");
     const session = await sessionRes.json();
 
@@ -86,7 +85,6 @@ export default function SignInPage() {
             Forget Password?
           </a>
 
-          {/* Auth error */}
           {authError && <p className="text-sm text-red-500">{authError}</p>}
           <AuthButton
             // type="submit"

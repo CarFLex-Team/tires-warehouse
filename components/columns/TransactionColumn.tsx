@@ -9,7 +9,9 @@ const transactionColumns: TableColumn<Transaction>[] = [
   {
     header: "Product/Service",
     accessor: (row) =>
-      row.category === "Tire" ? row.product_name : row.service_name,
+      row.category === "Tire" || row.category === "Rim"
+        ? row.product_name
+        : row.service_name,
   },
   // { header: "Description", accessor: "description" },
   { header: "Quantity", accessor: "quantity" },

@@ -379,7 +379,8 @@ export default function EditInvoice({
         (row) =>
           !row.category ||
           !row.type ||
-          (!row.product_name && row.category === "Tire") ||
+          (!row.product_name &&
+            (row.category === "Tire" || row.category === "Rim")) ||
           (!row.service_name && row.category === "Service") ||
           row.quantity <= 0,
       )
@@ -387,9 +388,9 @@ export default function EditInvoice({
       setShowAlert("Please fill in all fields for each transaction.");
       return;
     }
-    // Check inventory for each row
+
     for (const row of rows) {
-      if (row.category !== "Tire") continue;
+      if (row.category !== "Tire" && row.category !== "Rim") continue;
       const product = products?.find((prod: any) => prod.id === row.product_id);
 
       if (!product) continue;

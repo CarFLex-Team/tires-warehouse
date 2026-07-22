@@ -21,6 +21,7 @@ export function EditProductForm({
   const [price, setPrice] = useState("");
   const [oldCost, setOldCost] = useState("");
   const [cost, setCost] = useState("");
+  const [category, setCategory] = useState<"Tires" | "Rims" | "">("");
   const [quantity, setQuantity] = useState("");
   const [oldQuantity, setOldQuantity] = useState("");
   const [oldPrice, setOldPrice] = useState("");
@@ -35,6 +36,7 @@ export function EditProductForm({
       setQuantity(product.quantity.toString());
       setOldQuantity(product.quantity.toString());
       setOldPrice(product.price.toString());
+      setCategory(product.category);
     }
   }, []);
   useEffect(() => {
@@ -54,6 +56,7 @@ export function EditProductForm({
       setBrand("");
       setPrice("");
       setCost("");
+      setCategory("");
       setQuantity("");
       setOldCost("");
       setError(null);
@@ -69,6 +72,7 @@ export function EditProductForm({
       !price ||
       !cost ||
       !quantity ||
+      !category ||
       isNaN(Number(price)) ||
       isNaN(Number(cost)) ||
       isNaN(Number(quantity))
@@ -81,6 +85,7 @@ export function EditProductForm({
       price: Number(price),
       cost: Number(cost),
       is_active: product!.is_active,
+      category: category as "Tires" | "Rims",
       quantity: forAddNew
         ? Number(quantity) + Number(oldQuantity)
         : Number(quantity),
@@ -110,6 +115,35 @@ export function EditProductForm({
           required
         />
       </div>
+      {!forAddNew && (
+        <div className="flex justify-between items-center gap-4">
+          <label className="flex-2">Category</label>
+          <div className="flex gap-2 flex-5">
+            <button
+              type="button"
+              className={`flex items-center gap-1.5 rounded border border-primary-600 p-2 text-sm cursor-pointer ${
+                category === "Tires"
+                  ? "bg-primary-600 text-white"
+                  : "bg-white text-primary-600 hover:bg-gray-100"
+              }`}
+              onClick={() => setCategory("Tires")}
+            >
+              Tires
+            </button>
+            <button
+              type="button"
+              className={`flex items-center gap-1.5 rounded border border-primary-600 p-2 text-sm cursor-pointer ${
+                category === "Rims"
+                  ? "bg-primary-600 text-white"
+                  : "bg-white text-primary-600 hover:bg-gray-100"
+              }`}
+              onClick={() => setCategory("Rims")}
+            >
+              Rims
+            </button>
+          </div>
+        </div>
+      )}
       {forAddNew && (
         <>
           <div className="flex justify-between items-center gap-4">
