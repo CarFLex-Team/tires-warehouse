@@ -19,6 +19,7 @@ import formatDate from "@/lib/formatDate";
 import { AddProductForm } from "@/components/Forms/addProductForm";
 import { EditProductForm } from "@/components/Forms/editProductForm";
 import { OverviewStats } from "../overview/Overview-stats";
+import ActionDropdown from "../ui/ActionDropdown";
 export default function Inventory({
   setError,
 }: {
@@ -39,22 +40,6 @@ export default function Inventory({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] =
     useState<InventoryProduct | null>(null);
-  const [selectedMenuId, setSelectedMenuId] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setSelectedMenuId(null); // Close the menu if the click is outside
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside); // Add event listener
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside); // Cleanup event listener on component unmount
-    };
-  }, []);
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") setPreviewImage(null);
@@ -101,15 +86,6 @@ export default function Inventory({
       setConfirmImageOpen(false);
     },
   });
-  const handleMenuToggle = (id: string) => {
-    if (selectedMenuId === id) {
-      // If the same product's menu is clicked, toggle it off
-      setSelectedMenuId(null);
-    } else {
-      // Otherwise, open the menu for the clicked product
-      setSelectedMenuId(id);
-    }
-  };
   // console.log("Inventory data:", data?.[0]);
   const productColumns: TableColumn<InventoryProduct>[] = [
     {
@@ -481,65 +457,43 @@ export default function Inventory({
           </div>
         }
         renderActions={(row) => (
-          <div className="relative">
-            <button
-              onClick={() => handleMenuToggle(row.id)}
-              className=" rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
-            >
-              <EllipsisVertical size={16} />
-            </button>
-
-            {/* Dropdown menu */}
-            {selectedMenuId === row.id && (
-              <div
-                ref={menuRef}
-                className="absolute right-5 mt-2 w-25 rounded-md shadow-lg bg-white ring-1 ring-gray-400 ring-opacity-5 z-20"
+          <ActionDropdown
+            trigger={
+              <button
+                type="button"
+                aria-label={`Actions for ${row.name}`}
+                className="rounded border border-gray-400 bg-gray-100 p-1 text-gray-600 hover:bg-gray-200"
               >
-                <div
-                  className=""
-                  role="menu"
-                  aria-orientation="vertical"
-                  aria-labelledby="options-menu"
-                >
-                  {/* Edit Option */}
-                  <button
-                    onClick={() => {
-                      setSelectedMenuId(row.id);
-                      setSelectedId(row.id);
-                      setSelectedProduct(row);
-                      setAddOpen(true);
-                    }}
-                    className="block px-4 py-2 text-sm rounded-t-md text-gray-700 hover:bg-gray-100 w-full text-left"
-                  >
-                    Add New
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedMenuId(row.id);
-                      setSelectedId(row.id);
-                      setSelectedProduct(row);
-                      setEditOpen(true);
-                    }}
-                    className="block px-4 py-2 text-sm rounded-t-md text-gray-700 hover:bg-gray-100 w-full text-left"
-                  >
-                    Edit
-                  </button>
-
-                  {/* Trash Option */}
-                  <button
-                    onClick={() => {
-                      setSelectedMenuId(row.id);
-                      setSelectedId(row.id);
-                      setConfirmOpen(true);
-                    }}
-                    className=" block px-4 py-2 text-sm rounded-b-md text-gray-700 hover:bg-red-100 w-full text-left"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+                <EllipsisVertical size={16} />
+              </button>
+            }
+            items={[
+              {
+                label: "Add New",
+                onSelect: () => {
+                  setSelectedId(row.id);
+                  setSelectedProduct(row);
+                  setAddOpen(true);
+                },
+              },
+              {
+                label: "Edit",
+                onSelect: () => {
+                  setSelectedId(row.id);
+                  setSelectedProduct(row);
+                  setEditOpen(true);
+                },
+              },
+              {
+                label: "Delete",
+                destructive: true,
+                onSelect: () => {
+                  setSelectedId(row.id);
+                  setConfirmOpen(true);
+                },
+              },
+            ]}
+          />
         )}
       />
       <ConfirmDialog
