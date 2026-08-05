@@ -56,6 +56,39 @@ GROUP BY c.id;
     );
   }
 }
+export async function PATCH(
+  req: Request,
+  context: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await context.params;
+    const { name, phone, email } = await req.json();
+    console.log("PATCH request body:", { name, phone, email });
+    if (!name || !phone || !email) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
+    }
+
+    await db.query(
+      `
+      UPDATE "Customer"
+      SET name = $1, phone = $2, email = $3, updated_at = NOW()
+      WHERE id = $4
+      `,
+      [name, phone, email, id],
+    );
+
+    return NextResponse.json({ message: "Customer updated" }, { status: 200 });
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to update customer" },
+      { status: 500 },
+    );
+  }
+}
+
 export async function DELETE(
   _req: Request,
   context: { params: Promise<{ id: string }> },
