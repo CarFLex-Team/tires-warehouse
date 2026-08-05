@@ -18,7 +18,7 @@ import formatDate from "@/lib/formatDate";
 import { EllipsisVertical, Trash } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import EditPayoutForm from "../Forms/editPayoutForm";
-
+import ActionDropdown from "../ui/ActionDropdown";
 export default function payOutTransactions({
   date,
   month,
@@ -30,45 +30,13 @@ export default function payOutTransactions({
   const [editOpen, setEditOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [selectedMenuId, setSelectedMenuId] = useState<string | null>(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
   const [selectedPayout, setSelectedPayout] = useState<Transaction>(
     {} as Transaction,
   );
   const [categoryFilter, setCategoryFilter] = useState<
     "ALL" | "Tire" | "Operational"
   >("ALL");
-  const menuRef = useRef<HTMLDivElement | null>(null);
   const queryClient = useQueryClient();
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setSelectedMenuId(null); // Close the menu if the click is outside
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside); // Add event listener
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside); // Cleanup event listener on component unmount
-    };
-  }, []);
-
-  useEffect(() => {
-    if (menuRef.current) {
-      const rect = menuRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      setIsOverflowing(rect.bottom > viewportHeight); // true if it would overflow
-    }
-  }, [selectedMenuId]);
-  const handleMenuToggle = (id: string) => {
-    if (selectedMenuId === id) {
-      // If the same product's menu is clicked, toggle it off
-      setSelectedMenuId(null);
-    } else {
-      // Otherwise, open the menu for the clicked product
-      setSelectedMenuId(id);
-    }
-  };
   const {
     data: transactions,
     isLoading,
@@ -198,55 +166,35 @@ export default function payOutTransactions({
         //   </button>
         // )}
         renderActions={(row) => (
-          <div className="relative">
-            <button
-              onClick={() => handleMenuToggle(row.id)}
-              className=" rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
-            >
-              <EllipsisVertical size={16} />
-            </button>
-
-            {/* Dropdown menu */}
-            {selectedMenuId === row.id && (
-              <div
-                ref={menuRef}
-                className={`absolute right-5 z-20 w-25 rounded-md shadow-lg bg-white ring-1 ring-gray-400 ring-opacity-5 ${
-                  isOverflowing ? "bottom-full mb-2" : "mt-2 top-full"
-                }`}
+          <ActionDropdown
+            trigger={
+              <button
+                type="button"
+                aria-label={`Actions for ${row.description}`}
+                className="rounded border border-gray-400 bg-gray-100 p-1 text-gray-600 hover:bg-gray-200"
               >
-                <div
-                  className=""
-                  role="menu"
-                  aria-orientation="vertical"
-                  aria-labelledby="options-menu"
-                >
-                  <button
-                    onClick={() => {
-                      setSelectedMenuId(row.id);
-                      setSelectedId(row.id);
-                      setSelectedPayout(row);
-                      setEditOpen(true);
-                    }}
-                    className="block px-4 py-2 text-sm rounded-t-md text-gray-700 hover:bg-gray-100 w-full text-left"
-                  >
-                    Edit
-                  </button>
-
-                  {/* Trash Option */}
-                  <button
-                    onClick={() => {
-                      setSelectedMenuId(row.id);
-                      setSelectedId(row.id);
-                      setConfirmOpen(true);
-                    }}
-                    className=" block px-4 py-2 text-sm rounded-b-md text-gray-700 hover:bg-red-100 w-full text-left"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+                <EllipsisVertical size={16} />
+              </button>
+            }
+            items={[
+              {
+                label: "Edit",
+                onSelect: () => {
+                  setSelectedId(row.id);
+                  setSelectedPayout(row);
+                  setEditOpen(true);
+                },
+              },
+              {
+                label: "Delete",
+                destructive: true,
+                onSelect: () => {
+                  setSelectedId(row.id);
+                  setConfirmOpen(true);
+                },
+              },
+            ]}
+          />
         )}
       />
       <ConfirmDialog
