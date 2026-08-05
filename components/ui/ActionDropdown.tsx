@@ -32,6 +32,7 @@ export default function ActionDropdown({
           side={side}
           align={align}
           sideOffset={8}
+          onClick={(event) => event.stopPropagation()}
           collisionPadding={12}
           className="z-50 min-w-32 rounded-md bg-white py-1 shadow-lg ring-1 ring-gray-300/50"
         >

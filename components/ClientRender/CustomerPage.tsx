@@ -5,12 +5,14 @@ import { TableColumn } from "@/components/Tables/Type";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Modal from "@/components/ui/Modal";
-import { Trash } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Customer, deleteCustomer, getCustomers } from "@/lib/api/customers";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { AddCustomerForm } from "@/components/Forms/addCustomerForm";
 import formatDate from "@/lib/formatDate";
+import ActionDropdown from "../ui/ActionDropdown";
+import { EditCustomerForm } from "../Forms/editCustomerForm";
 export default function CustomerPage({
   isCreateInvoice = false,
 }: {
@@ -21,6 +23,10 @@ export default function CustomerPage({
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null,
+  );
   const router = useRouter();
 
   const pageSize = 10;
@@ -75,6 +81,18 @@ export default function CustomerPage({
           <AddCustomerForm onSuccess={() => setOpen(false)} />
         </Modal>
       )}
+      {editOpen && (
+        <Modal
+          isOpen={editOpen}
+          onClose={() => setEditOpen(false)}
+          title="Edit Customer"
+        >
+          <EditCustomerForm
+            customer={selectedCustomer}
+            onSuccess={() => setEditOpen(false)}
+          />
+        </Modal>
+      )}
       <div>
         <DataTable
           columns={customerColumns}
@@ -115,16 +133,35 @@ export default function CustomerPage({
           renderActions={(row) => {
             if (row.id === "88edfb3d-5402-4f8f-833f-0659d6dc60ff") return null;
             return (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedId(row.id);
-                  setConfirmOpen(true);
-                }}
-                className="rounded p-1 border border-gray-400 bg-gray-100 text-gray-600 hover:bg-gray-200"
-              >
-                <Trash size={16} />
-              </button>
+              <ActionDropdown
+                trigger={
+                  <button
+                    type="button"
+                    aria-label={`Actions for ${row.name}`}
+                    className="rounded border border-gray-400 bg-gray-100 p-1 text-gray-600 hover:bg-gray-200"
+                  >
+                    <EllipsisVertical size={16} />
+                  </button>
+                }
+                items={[
+                  {
+                    label: "Edit",
+                    onSelect: () => {
+                      setSelectedId(row.id);
+                      setSelectedCustomer(row);
+                      setEditOpen(true);
+                    },
+                  },
+                  {
+                    label: "Delete",
+                    destructive: true,
+                    onSelect: () => {
+                      setSelectedId(row.id);
+                      setConfirmOpen(true);
+                    },
+                  },
+                ]}
+              />
             );
           }}
         />

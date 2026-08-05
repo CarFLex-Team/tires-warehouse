@@ -58,6 +58,7 @@ export async function deleteProduct(id: string) {
 export async function editInventoryProduct(data: {
   id: string;
   size: string;
+  brand: string;
   price: number;
   cost: number;
   is_active: boolean;

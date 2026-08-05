@@ -85,14 +85,25 @@ export async function createCustomer(data: {
   if (!res.ok) throw new Error("Failed to add customer");
   return res.json();
 }
+export async function editCustomer(data: {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+}) {
+  const res = await fetch(`/api/customers/${data.id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 
+  if (!res.ok) throw new Error("Failed to edit customer");
+  return res.json();
+}
 export async function deleteCustomer(id: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers/${id}`,
-    {
-      method: "DELETE",
-    },
-  );
+  const res = await fetch(`/api/customers/${id}`, {
+    method: "DELETE",
+  });
 
   if (!res.ok) throw new Error("Failed to delete customer");
 }
