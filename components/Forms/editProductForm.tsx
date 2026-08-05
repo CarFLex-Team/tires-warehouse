@@ -70,6 +70,7 @@ export function EditProductForm({
       !size ||
       !brand ||
       !price ||
+      !brand ||
       !cost ||
       !quantity ||
       !category ||
@@ -82,6 +83,7 @@ export function EditProductForm({
     mutation.mutate({
       id: product!.id,
       size,
+      brand,
       price: Number(price),
       cost: Number(cost),
       is_active: product!.is_active,
@@ -102,7 +104,7 @@ export function EditProductForm({
           onChange={(e) => setBrand(e.target.value)}
           placeholder="Enter Product Brand"
           required
-          disabled
+          // disabled
         />
       </div>
       <div className="flex justify-between items-center gap-4">
