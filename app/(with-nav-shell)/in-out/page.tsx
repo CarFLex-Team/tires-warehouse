@@ -15,7 +15,11 @@ import { useState } from "react";
 
 export default function payOuts() {
   const [currentTab, setCurrentTab] = useState("payouts");
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentMonth = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+  }).format(new Date());
   const [month, setMonth] = useState(currentMonth);
   const [error, setError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);

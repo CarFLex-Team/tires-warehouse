@@ -5,7 +5,14 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const date = searchParams.get("date");
 
-  const targetDate = date ?? new Date().toISOString().slice(0, 10);
+  const targetDate =
+    date ??
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Chicago",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
   try {
     const { rows } = await db.query(
       `

@@ -38,43 +38,43 @@ export interface CustomerMonthlySummary {
 
 export async function getCustomers(): Promise<Customer[]> {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers`,
+    `/api/customers`,
   );
   if (!res.ok) throw new Error("Failed to fetch customers");
   return res.json();
 }
 export async function getCustomerById(id: string): Promise<Customer> {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers/${id}`,
+    `/api/customers/${id}`,
   );
   if (!res.ok) throw new Error("Failed to fetch customer");
   return res.json();
 }
 export async function getCustomerInvoices(id: string): Promise<Customer> {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers/${id}/invoices`,
+    `/api/customers/${id}/invoices`,
   );
   if (!res.ok) throw new Error("Failed to fetch customer invoices");
   return res.json();
 }
-export async function getCustomerMonthlySummary(
-  month?: string,
-): Promise<CustomerMonthlySummary[]> {
-  const url = month
-    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers/summary/monthly?month=${month}`
-    : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers/summary`;
+// export async function getCustomerMonthlySummary(
+//   month?: string,
+// ): Promise<CustomerMonthlySummary[]> {
+//   const url = month
+//     ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers/summary/monthly?month=${month}`
+//     : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers/summary`;
 
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to fetch customers monthly summary");
-  return res.json();
-}
+//   const res = await fetch(url);
+//   if (!res.ok) throw new Error("Failed to fetch customers monthly summary");
+//   return res.json();
+// }
 export async function createCustomer(data: {
   name: string;
   phone: string;
   email: string;
 }) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/customers`,
+    `/api/customers`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

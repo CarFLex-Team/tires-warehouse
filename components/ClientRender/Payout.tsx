@@ -13,7 +13,11 @@ export default function payOuts({
 }: {
   setError: (error: string | null) => void;
 }) {
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentMonth = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+  }).format(new Date());
   const [month, setMonth] = useState(currentMonth);
   const {
     data: summaryData,

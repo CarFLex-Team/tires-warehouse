@@ -335,13 +335,16 @@ export async function PUT(
           [tx.quantity, tx.product_id],
         );
 
-        if (inventoryRes.rowCount === 0) {
-          await client.query("ROLLBACK");
-          return NextResponse.json(
-            { error: "Insufficient inventory" },
-            { status: 400 },
-          );
-        }
+        // if (inventoryRes.rowCount === 0) {
+        //   await client.query("ROLLBACK");
+        //   console.error(
+        //     `Insufficient inventory for product_id ${tx.product_id}`,
+        //   );
+        //   return NextResponse.json(
+        //     { error: "Insufficient inventory" },
+        //     { status: 400 },
+        //   );
+        // }
 
         await client.query(
           `

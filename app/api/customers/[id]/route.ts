@@ -8,37 +8,10 @@ export async function GET(
     const { id } = await context.params;
     const { rows } = await db.query(
       `
-SELECT
-  c.*,
-  COALESCE(
-    json_agg(
-      jsonb_build_object(
-
-        'id', i.id, 
-        'invoice_no', i.invoice_no, 
-        'total_amount', i.total_amount,
-        'created_at', i.created_at,
-        'payment_method', i.payment_method,
-        'created_by', u.name,
-        'status', i.status,
-        'subtotal', i.subtotal
-      )
-      ORDER BY i.created_at DESC
-    )
-    FILTER (WHERE i.id IS NOT NULL),
-    '[]'
-  ) AS invoices
-FROM "Customer" c
-LEFT JOIN "Invoice" i
-  ON i.customer_id = c.id
-  AND i.deleted_at IS NULL
-LEFT JOIN "User" u
-  ON u.id = i.created_by
-WHERE c.id = $1
-  AND c.deleted_at IS NULL
-GROUP BY c.id;
-
-
+       SELECT *
+        FROM "Customer"
+        WHERE id = $1
+          AND deleted_at IS NULL
     `,
       [id],
     );

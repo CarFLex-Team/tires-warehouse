@@ -45,7 +45,7 @@ export async function getInvoiceSummary(
   date?: string,
 ): Promise<InvoiceSummary> {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices/summary${month ? `?month=${month}` : date ? `?date=${date}` : ""}`,
+    `/api/invoices/summary${month ? `?month=${month}` : date ? `?date=${date}` : ""}`,
   );
   if (!res.ok) throw new Error("Failed to fetch invoice summary");
   return res.json();
@@ -103,14 +103,11 @@ export async function editInvoice(
   });
 }
 export async function deleteInvoice(id: string, Transactions: Transaction[]) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/invoices/${id}`,
-    {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: Transactions }),
-    },
-  );
+  const res = await fetch(`/api/invoices/${id}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items: Transactions }),
+  });
 
   if (!res.ok) throw new Error("Failed to delete invoice");
 }

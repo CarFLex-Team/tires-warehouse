@@ -73,30 +73,24 @@ export async function editInventoryProduct(data: {
 
   if (!res.ok) throw new Error("Failed to edit product");
 }
-//not local
+
 export async function addProductImage(data: {
   id: string;
   image: File | null;
 }) {
   const formData = new FormData();
   formData.append("image", data.image!);
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inventory/${data.id}/image`,
-    {
-      method: "PUT",
-      body: formData,
-    },
-  );
+  const res = await fetch(`/api/inventory/${data.id}/image`, {
+    method: "PUT",
+    body: formData,
+  });
   if (!res.ok) throw new Error("Failed to add image to product");
 }
-//not local
+
 export async function deleteProductImage(id: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inventory/${id}/image`,
-    {
-      method: "DELETE",
-    },
-  );
+  const res = await fetch(`/api/inventory/${id}/image`, {
+    method: "DELETE",
+  });
   if (!res.ok) throw new Error("Failed to delete product image");
 }
 export async function getInventorySummary(): Promise<InventorySummary[]> {
