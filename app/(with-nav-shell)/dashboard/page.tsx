@@ -21,7 +21,12 @@ export default function dashboard() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [items, setItems] = useState<Transaction[]>([]);
   const [modalLoading, setModalLoading] = useState(false);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
   const [date, setDate] = useState(today);
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();

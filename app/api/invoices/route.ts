@@ -11,6 +11,7 @@ export async function GET(req: Request) {
   let whereClause = ``;
   const params: any[] = [];
   if (date) {
+    console.log("Filtering by date:", date);
     params.push(date);
     whereClause += `
       AND i.created_at >= $${params.length}::date
