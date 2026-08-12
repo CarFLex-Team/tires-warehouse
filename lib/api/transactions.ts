@@ -39,31 +39,31 @@ export async function getTransactions({
   month?: string;
 }): Promise<Transaction[]> {
   const url = date
-    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions?date=${date}`
+    ? `/api/transactions?date=${date}`
     : month
-      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions?month=${month}`
-      : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions`;
+      ? `/api/transactions?month=${month}`
+      : `/api/transactions`;
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch transactions");
   return res.json();
 }
-export async function getTransactionsDailySummary(
-  date?: string,
-): Promise<TransactionSummary> {
-  const url = date
-    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions/summary?date=${date}`
-    : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions/summary`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to fetch transactions daily summary");
-  return res.json();
-}
+// export async function getTransactionsDailySummary(
+//   date?: string,
+// ): Promise<TransactionSummary> {
+//   const url = date
+//     ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions/summary?date=${date}`
+//     : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions/summary`;
+//   const res = await fetch(url);
+//   if (!res.ok) throw new Error("Failed to fetch transactions daily summary");
+//   return res.json();
+// }
 // api local
 export async function getTransactionsMonthlySummary(
   month?: string,
 ): Promise<TransactionSummary> {
   const url = month
     ? `/api/transactions/summary/monthly?month=${month}`
-    : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions/summary`;
+    : `/api/transactions/summary`;
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch transactions monthly summary");
   return res.json();
@@ -132,12 +132,9 @@ export async function editTransaction(
 }
 
 export async function deleteTransaction(id: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions/${id}`,
-    {
-      method: "DELETE",
-    },
-  );
+  const res = await fetch(`/api/transactions/${id}`, {
+    method: "DELETE",
+  });
 
   if (!res.ok) throw new Error("Failed to delete transaction");
 }
