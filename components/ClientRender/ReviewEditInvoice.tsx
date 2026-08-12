@@ -22,6 +22,20 @@ export default function ReviewEditInvoice({
   const { data: session } = useSession();
   const router = useRouter();
   const { items: savedItems, customerId } = useInvoiceDraft();
+  const date = new Date();
+
+  const now = date
+    .toLocaleString("sv-SE", {
+      timeZone: "America/Chicago",
+      hour12: false,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+    .replace(" ", "T"); // "2026-05-13T02:31"
+  const [cratedAt, setCreatedAt] = useState<string>(now);
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [tax, setTax] = useState<string>("");
@@ -31,6 +45,7 @@ export default function ReviewEditInvoice({
   const [downPayment, setDownPayment] = useState<string>("");
   const clear = useInvoiceDraft((s) => s.clear);
   const [items, setItems] = useState<Transaction[]>([]);
+
   const { data, isLoading, error } = useQuery<Invoice>({
     queryKey: ["invoices", invoice_Id],
     queryFn: () => getInvoiceById(invoice_Id),
@@ -63,6 +78,7 @@ export default function ReviewEditInvoice({
       created_by: number;
       transactions: Transaction[];
       status: "pending" | "finished";
+      created_at?: string;
     }) => editInvoice(invoice_Id, data),
     onSuccess: () => {
       clear();
@@ -123,6 +139,7 @@ export default function ReviewEditInvoice({
       created_by: session?.user?.id || 10,
       transactions: items,
       status: "finished",
+      created_at: new Date(cratedAt).toISOString(),
     });
   }
 
@@ -148,10 +165,12 @@ export default function ReviewEditInvoice({
         />
       </div>
       <InvoiceCalcSections
+        createdAt={cratedAt}
         subTotal={subTotal}
         totalAmount={totalAmount}
         alertMessage={alertMessage}
         setAlertMessage={setAlertMessage}
+        setCreatedAt={setCreatedAt}
         tax={tax}
         setTax={setTax}
         cashAmount={cashAmount}
