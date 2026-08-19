@@ -86,11 +86,15 @@ export function DataTable<T>({
                 >
                   {columns.map((col, colIndex) => (
                     <td key={colIndex} className="py-3 px-2 text-sm">
-                      {typeof col.accessor === "function"
-                        ? col.accessor(row, rowIndex)
-                        : col.header === "Amount" || col.header === "Cost"
-                          ? "$" + (row[col.accessor] as React.ReactNode)
-                          : (row[col.accessor] as React.ReactNode)}
+                      {col.render
+                        ? col.render(row)
+                        : typeof col.accessor === "function"
+                          ? col.accessor(row, rowIndex)
+                          : col.header === "Amount" ||
+                              col.header === "Cost" ||
+                              col.header === "Price"
+                            ? "$" + (row[col.accessor] as React.ReactNode)
+                            : (row[col.accessor] as React.ReactNode)}
                     </td>
                   ))}
                   {renderActions && (

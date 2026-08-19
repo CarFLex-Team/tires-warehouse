@@ -20,6 +20,7 @@ import { AddProductForm } from "@/components/Forms/addProductForm";
 import { EditProductForm } from "@/components/Forms/editProductForm";
 import { OverviewStats } from "../overview/Overview-stats";
 import ActionDropdown from "../ui/ActionDropdown";
+import { EditableCell } from "../Tables/EditableCell";
 export default function Inventory({
   setError,
 }: {
@@ -149,7 +150,19 @@ export default function Inventory({
     // { header: "SKU", accessor: "sku" },
     { header: "Price", accessor: "price" },
     { header: "Cost", accessor: "cost" },
-    { header: "Quantity (Tire)", accessor: "quantity" },
+    {
+      header: "Quantity (Tire)",
+      accessor: "quantity",
+      render: (row) => (
+        <EditableCell
+          type="text"
+          className="w-10"
+          value={row.quantity.toString()}
+          rowId={row.id}
+          field="quantity"
+        />
+      ),
+    },
     // {
     //   header: "Status",
     //   accessor: (row) => (row.is_active ? "Active" : "Inactive"),

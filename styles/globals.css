@@ -1,6 +1,7 @@
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css";
+@source "../components/Tables/EditableCell.tsx";
 
 @theme {
   --color-primary-700: #344955;

@@ -35,7 +35,9 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 interface MonthData {
   month: string;
   totalTax: number;
-
+  cashAmount: number;
+  debitAmount: number;
+  checkAmount: number;
   sales: number;
   expenses: number;
   newTires: number;
@@ -120,7 +122,9 @@ export default function ReportsPage() {
         newTiresAmount: Number(categoryData?.newTiresAmount || 0),
         usedTiresAmount: Number(categoryData?.usedTiresAmount || 0),
         servicesAmount: Number(categoryData?.servicesAmount || 0),
-
+        cashAmount: Number(m.cash_amount || 0),
+        debitAmount: Number(m.debit_amount || 0),
+        checkAmount: Number(m.check_amount || 0),
         totalTax: Number(m.total_tax || 0),
       };
     });
@@ -176,11 +180,19 @@ export default function ReportsPage() {
   const usedRev = filteredData.reduce((s, d) => s + d.usedTiresAmount, 0);
   const taxRev = filteredData.reduce((s, d) => s + d.totalTax, 0);
   const serviceRev = filteredData.reduce((s, d) => s + d.servicesAmount, 0);
-  const pieData = [
+  const salesPieData = [
     { name: "New tires", value: newRev },
     { name: "Used tires", value: usedRev },
     { name: "Services", value: serviceRev },
     { name: "Tax", value: taxRev },
+  ];
+  const cashRev = filteredData.reduce((s, d) => s + d.cashAmount, 0);
+  const debitRev = filteredData.reduce((s, d) => s + d.debitAmount, 0);
+  const checkRev = filteredData.reduce((s, d) => s + d.checkAmount, 0);
+  const paymentMethodPieData = [
+    { name: "Cash", value: cashRev },
+    { name: "Debit", value: debitRev },
+    { name: "Check", value: checkRev },
   ];
   const comparisonTotals = useMemo(() => {
     if (!MONTHLY_DATA.length) return null;
@@ -371,7 +383,7 @@ export default function ReportsPage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Sales vs Payouts */}
           <div className="bg-white rounded-2xl border border-slate-100 p-5">
             <SectionHeader
@@ -470,6 +482,62 @@ export default function ReportsPage() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+          <div className="bg-white rounded-2xl border border-slate-100 p-5">
+            <SectionHeader
+              title="Payment Method Split"
+              subtitle="Cash, debit, and check payments"
+            />
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={paymentMethodPieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={85}
+                  paddingAngle={3}
+                  dataKey="value"
+                >
+                  {paymentMethodPieData.map((_, i) => (
+                    <Cell key={i} fill={PIE_COLORS[i]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(val: any, name: any) => [
+                    fmt(Number(val ?? 0)),
+                    name,
+                  ]}
+                  contentStyle={{
+                    borderRadius: 12,
+                    border: "1px solid #e2e8f0",
+                    fontSize: 12,
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            {/* Custom legend */}
+            <div className="mt-4 space-y-2">
+              {paymentMethodPieData.map((d, i) => {
+                const pct =
+                  Math.round((d.value / (newRev + usedRev)) * 100) || 0;
+                return (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className="flex items-center gap-2 text-slate-500">
+                      <span
+                        className="w-2.5 h-2.5 rounded-sm shrink-0"
+                        style={{ background: PIE_COLORS[i] }}
+                      />
+                      {d.name}
+                    </span>
+                    <span className="font-medium text-slate-700">{pct}%</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -550,7 +618,7 @@ export default function ReportsPage() {
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie
-                  data={pieData}
+                  data={salesPieData}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -558,12 +626,15 @@ export default function ReportsPage() {
                   paddingAngle={3}
                   dataKey="value"
                 >
-                  {pieData.map((_, i) => (
+                  {salesPieData.map((_, i) => (
                     <Cell key={i} fill={PIE_COLORS[i]} />
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(val: any) => [fmt(Number(val ?? 0)), ""]}
+                  formatter={(val: any, name: any) => [
+                    fmt(Number(val ?? 0)),
+                    name,
+                  ]}
                   contentStyle={{
                     borderRadius: 12,
                     border: "1px solid #e2e8f0",
@@ -574,7 +645,7 @@ export default function ReportsPage() {
             </ResponsiveContainer>
             {/* Custom legend */}
             <div className="mt-4 space-y-2">
-              {pieData.map((d, i) => {
+              {salesPieData.map((d, i) => {
                 const pct =
                   Math.round((d.value / (newRev + usedRev)) * 100) || 0;
                 return (
