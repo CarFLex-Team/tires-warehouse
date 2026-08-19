@@ -12,7 +12,10 @@ export async function GET(req: NextRequest) {
       SELECT
         m.month,
         COALESCE(SUM(i.total_amount), 0) AS total_amount,
-        COALESCE(SUM(i.tax), 0) AS total_tax
+        COALESCE(SUM(i.tax), 0) AS total_tax,
+        COALESCE(SUM(i.cash_amount), 0) AS cash_amount,
+        COALESCE(SUM(i.debit_amount), 0) AS debit_amount,
+        COALESCE(SUM(i.check_amount), 0) AS check_amount
       FROM months m
       LEFT JOIN "Invoice" i ON EXTRACT(MONTH FROM i.created_at)::int = m.month
         AND EXTRACT(YEAR FROM i.created_at) = ${year}

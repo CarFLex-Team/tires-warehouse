@@ -2,6 +2,9 @@ export interface MonthlySales {
   month: number;
   total_amount: number;
   total_tax: number;
+  cash_amount: number;
+  debit_amount: number;
+  check_amount: number;
 }
 export interface MonthDataCategory {
   month: number;
