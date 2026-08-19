@@ -66,8 +66,11 @@ export async function PUT(
     return NextResponse.json({ success: true });
   } catch (err) {
     await client.query("ROLLBACK");
-    console.error("Edit Take Status error:", err);
-    return NextResponse.json({ error: "Failed to Take car" }, { status: 500 });
+    console.error("Edit inventory error:", err);
+    return NextResponse.json(
+      { error: "Failed to edit inventory" },
+      { status: 500 },
+    );
   } finally {
     client.release();
   }

@@ -73,6 +73,24 @@ export async function editInventoryProduct(data: {
 
   if (!res.ok) throw new Error("Failed to edit product");
 }
+export async function editInventoryCell(data: {
+  id: string;
+  // size: string;
+  // brand: string;
+  // price: number;
+  // cost: number;
+  // is_active: boolean;
+  quantity: number;
+  // category: "Tires" | "Rims" | "";
+}) {
+  const res = await fetch(`/api/inventory/${data.id}/editCell`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) throw new Error("Failed to edit inventory cell");
+}
 
 export async function addProductImage(data: {
   id: string;

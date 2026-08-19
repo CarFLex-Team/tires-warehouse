@@ -16,7 +16,7 @@ export async function GET() {
       i.quantity,
       p.is_active,
       p.created_at,
-      p.updated_at,
+      i.updated_at,
       p.condition,
       p.category,
       pi.image_path
