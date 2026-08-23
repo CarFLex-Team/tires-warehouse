@@ -32,6 +32,10 @@ import {
 } from "recharts";
 import { useRef } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { ReportsOverviewStats } from "@/components/overview/ReportsOverviewStats";
+import { getInventory, InventoryProduct } from "@/lib/api/inventory";
+import formatDate from "@/lib/formatDate";
+import CustomButton from "@/components/ui/CustomButton";
 interface MonthData {
   month: string;
   totalTax: number;
@@ -76,6 +80,8 @@ export default function ReportsPage() {
   const reportRef = useRef<HTMLDivElement>(null);
   const [selectedYear, setSelectedYear] = useState("2026");
   const [selectedMonth, setSelectedMonth] = useState("All");
+  const [condition, setCondition] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("Tires");
   const {
     data: monthlySales,
     isLoading: isMonthlySalesLoading,
@@ -92,6 +98,16 @@ export default function ReportsPage() {
     queryKey: ["monthly-sales-by-category", selectedYear],
     queryFn: () => getMonthlySalesByCategory(parseInt(selectedYear)),
   });
+  const { data, isLoading, error } = useQuery<InventoryProduct[]>({
+    queryKey: ["inventory"],
+    queryFn: getInventory,
+    select: (inventoryProducts) =>
+      inventoryProducts.map((product) => ({
+        ...product,
+        created_at: formatDate(product.created_at),
+        updated_at: formatDate(product.updated_at),
+      })),
+  });
   const {
     data: topTires,
     isLoading: isTopTiresLoading,
@@ -100,7 +116,58 @@ export default function ReportsPage() {
     queryKey: ["top-tires", selectedYear],
     queryFn: () => getTopTires(parseInt(selectedYear)),
   });
+  const categorizedInventory = data?.filter((product) => {
+    if (categoryFilter === "Tires") {
+      return product.category === "Tires";
+    } else if (categoryFilter === "Rims") {
+      return product.category === "Rims";
+    }
 
+    return true;
+  });
+  const filteredInventory = categorizedInventory?.filter((product) => {
+    return condition ? product.condition === condition : true;
+  });
+  const monthlyTransactionStats = [
+    {
+      label: `${condition ? condition : "All"} ${categoryFilter || "Tires"} Total Units`,
+      value: filteredInventory
+        ? filteredInventory.reduce(
+            (acc, product) => acc + Number(product.quantity),
+            0,
+          )
+        : 0,
+      color: "text-orange-400",
+    },
+    {
+      label: `${condition ? condition : "All"} ${categoryFilter || "Tires"} Total Price`,
+      value:
+        "$" +
+        (filteredInventory
+          ? filteredInventory.reduce(
+              (acc, product) =>
+                acc + Number(product.price) * Number(product.quantity),
+              0,
+            )
+          : 0),
+
+      color: "text-green-500",
+    },
+    {
+      label: `${condition ? condition : "All"} ${categoryFilter || "Tires"} Total Cost`,
+      value:
+        "$" +
+        (filteredInventory
+          ? filteredInventory.reduce(
+              (acc, product) =>
+                acc + Number(product.cost) * Number(product.quantity),
+              0,
+            )
+          : 0),
+
+      color: "text-red-500",
+    },
+  ];
   const MONTHLY_DATA: MonthData[] = useMemo(() => {
     if (!monthlySales || !monthlySalesPerCategory) return [];
     return monthlySales.map((m) => {
@@ -252,7 +319,8 @@ export default function ReportsPage() {
   if (
     isMonthlySalesLoading ||
     isMonthlySalesPerCategoryLoading ||
-    isTopTiresLoading
+    isTopTiresLoading ||
+    isLoading
   ) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -322,7 +390,83 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+      <div className=" mx-auto px-6 py-6 space-y-6">
+        <ReportsOverviewStats
+          title="Current Inventory Overview"
+          stats={monthlyTransactionStats}
+          action={
+            <div className="flex justify-between gap-2">
+              <div className="flex">
+                <button
+                  className={`flex items-center gap-1.5 border-b border-slate-100 p-2  text-sm cursor-pointer  ${
+                    condition === "NEW"
+                      ? "bg-primary-600 text-white"
+                      : "bg-white text-primary-600 hover:bg-slate-100"
+                  }`}
+                  onClick={() =>
+                    condition === "NEW" ? setCondition("") : setCondition("NEW")
+                  }
+                  type="button"
+                >
+                  New
+                </button>
+                <button
+                  className={`flex items-center gap-1.5  border-b border-slate-100 border-l-0 p-2  text-sm cursor-pointer  ${
+                    condition === "USED"
+                      ? "bg-primary-600 text-white"
+                      : "bg-white text-primary-600 hover:bg-slate-100"
+                  }`}
+                  onClick={() =>
+                    condition === "USED"
+                      ? setCondition("")
+                      : setCondition("USED")
+                  }
+                  type="button"
+                >
+                  Used
+                </button>
+                <button
+                  className={`flex items-center gap-1.5  border-b border-slate-100 border-l-0 p-2  text-sm cursor-pointer  ${
+                    condition === "SET"
+                      ? "bg-primary-600 text-white"
+                      : "bg-white text-primary-600 hover:bg-slate-100"
+                  }`}
+                  onClick={() =>
+                    condition === "SET" ? setCondition("") : setCondition("SET")
+                  }
+                  type="button"
+                >
+                  Used Set
+                </button>
+              </div>
+              <div className="flex items-center ">
+                <CustomButton
+                  onClick={() => setCategoryFilter("Tires")}
+                  className={` border border-primary-600 ${
+                    categoryFilter === "Tires"
+                      ? "bg-primary-600 text-white "
+                      : "bg-gray-100 text-primary-600  "
+                  }`}
+                  isSelector={true}
+                >
+                  Tires
+                </CustomButton>
+                <CustomButton
+                  onClick={() => setCategoryFilter("Rims")}
+                  className={` border border-primary-600 ${
+                    categoryFilter === "Rims"
+                      ? "bg-primary-600 text-white "
+                      : "bg-gray-100 text-primary-600  "
+                  }`}
+                  isSelector={true}
+                >
+                  Rims
+                </CustomButton>
+              </div>
+            </div>
+          }
+          // isLoading={summaryLoading}
+        />
         {/* ── KPI Strip ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard

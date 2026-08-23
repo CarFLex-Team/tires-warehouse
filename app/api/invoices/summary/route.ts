@@ -4,15 +4,15 @@ import { db } from "@/lib/db";
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const date = searchParams.get("date");
-
-  const targetDate =
-    date ??
-    new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Chicago",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(new Date());
+  const month = searchParams.get("month");
+  const currentDate = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  const targetDate = date ?? (month ? `${month}-01` : currentDate);
+  const interval = month && !date ? "1 month" : "1 day";
   try {
     const { rows } = await db.query(
       `
@@ -65,9 +65,9 @@ export async function GET(req: Request) {
       FROM "Invoice" i
     WHERE
       i.created_at >= $1::date
-      AND i.created_at < $1::date + INTERVAL '1 day' AND i.status = 'finished'
+      AND i.created_at < $1::date + $2::interval AND i.status = 'finished'
     `,
-      [targetDate],
+      [targetDate, interval],
     );
 
     return NextResponse.json(rows[0]);

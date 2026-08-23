@@ -32,10 +32,16 @@ import {
 } from "recharts";
 import { useRef } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { ReportsOverviewStats } from "@/components/overview/ReportsOverviewStats";
+import { getInventory, InventoryProduct } from "@/lib/api/inventory";
+import formatDate from "@/lib/formatDate";
+import CustomButton from "@/components/ui/CustomButton";
 interface MonthData {
   month: string;
   totalTax: number;
-
+  cashAmount: number;
+  debitAmount: number;
+  checkAmount: number;
   sales: number;
   expenses: number;
   newTires: number;
@@ -74,6 +80,8 @@ export default function ReportsPage() {
   const reportRef = useRef<HTMLDivElement>(null);
   const [selectedYear, setSelectedYear] = useState("2026");
   const [selectedMonth, setSelectedMonth] = useState("All");
+  const [condition, setCondition] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("Tires");
   const {
     data: monthlySales,
     isLoading: isMonthlySalesLoading,
@@ -90,6 +98,16 @@ export default function ReportsPage() {
     queryKey: ["monthly-sales-by-category", selectedYear],
     queryFn: () => getMonthlySalesByCategory(parseInt(selectedYear)),
   });
+  const { data, isLoading, error } = useQuery<InventoryProduct[]>({
+    queryKey: ["inventory"],
+    queryFn: getInventory,
+    select: (inventoryProducts) =>
+      inventoryProducts.map((product) => ({
+        ...product,
+        created_at: formatDate(product.created_at),
+        updated_at: formatDate(product.updated_at),
+      })),
+  });
   const {
     data: topTires,
     isLoading: isTopTiresLoading,
@@ -98,7 +116,58 @@ export default function ReportsPage() {
     queryKey: ["top-tires", selectedYear],
     queryFn: () => getTopTires(parseInt(selectedYear)),
   });
+  const categorizedInventory = data?.filter((product) => {
+    if (categoryFilter === "Tires") {
+      return product.category === "Tires";
+    } else if (categoryFilter === "Rims") {
+      return product.category === "Rims";
+    }
 
+    return true;
+  });
+  const filteredInventory = categorizedInventory?.filter((product) => {
+    return condition ? product.condition === condition : true;
+  });
+  const monthlyTransactionStats = [
+    {
+      label: `${condition ? condition : "All"} ${categoryFilter || "Tires"} Total Units`,
+      value: filteredInventory
+        ? filteredInventory.reduce(
+            (acc, product) => acc + Number(product.quantity),
+            0,
+          )
+        : 0,
+      color: "text-orange-400",
+    },
+    {
+      label: `${condition ? condition : "All"} ${categoryFilter || "Tires"} Total Price`,
+      value:
+        "$" +
+        (filteredInventory
+          ? filteredInventory.reduce(
+              (acc, product) =>
+                acc + Number(product.price) * Number(product.quantity),
+              0,
+            )
+          : 0),
+
+      color: "text-green-500",
+    },
+    {
+      label: `${condition ? condition : "All"} ${categoryFilter || "Tires"} Total Cost`,
+      value:
+        "$" +
+        (filteredInventory
+          ? filteredInventory.reduce(
+              (acc, product) =>
+                acc + Number(product.cost) * Number(product.quantity),
+              0,
+            )
+          : 0),
+
+      color: "text-red-500",
+    },
+  ];
   const MONTHLY_DATA: MonthData[] = useMemo(() => {
     if (!monthlySales || !monthlySalesPerCategory) return [];
     return monthlySales.map((m) => {
@@ -120,7 +189,9 @@ export default function ReportsPage() {
         newTiresAmount: Number(categoryData?.newTiresAmount || 0),
         usedTiresAmount: Number(categoryData?.usedTiresAmount || 0),
         servicesAmount: Number(categoryData?.servicesAmount || 0),
-
+        cashAmount: Number(m.cash_amount || 0),
+        debitAmount: Number(m.debit_amount || 0),
+        checkAmount: Number(m.check_amount || 0),
         totalTax: Number(m.total_tax || 0),
       };
     });
@@ -133,6 +204,7 @@ export default function ReportsPage() {
     return MONTHLY_DATA.filter((d, index) => {
       const monthNumber = index + 1;
 
+      // If viewing current year, hide future months
       if (Number(selectedYear) === currentYear && monthNumber > currentMonth) {
         return false;
       }
@@ -175,11 +247,19 @@ export default function ReportsPage() {
   const usedRev = filteredData.reduce((s, d) => s + d.usedTiresAmount, 0);
   const taxRev = filteredData.reduce((s, d) => s + d.totalTax, 0);
   const serviceRev = filteredData.reduce((s, d) => s + d.servicesAmount, 0);
-  const pieData = [
+  const salesPieData = [
     { name: "New tires", value: newRev },
     { name: "Used tires", value: usedRev },
     { name: "Services", value: serviceRev },
     { name: "Tax", value: taxRev },
+  ];
+  const cashRev = filteredData.reduce((s, d) => s + d.cashAmount, 0);
+  const debitRev = filteredData.reduce((s, d) => s + d.debitAmount, 0);
+  const checkRev = filteredData.reduce((s, d) => s + d.checkAmount, 0);
+  const paymentMethodPieData = [
+    { name: "Cash", value: cashRev },
+    { name: "Debit", value: debitRev },
+    { name: "Check", value: checkRev },
   ];
   const comparisonTotals = useMemo(() => {
     if (!MONTHLY_DATA.length) return null;
@@ -239,7 +319,8 @@ export default function ReportsPage() {
   if (
     isMonthlySalesLoading ||
     isMonthlySalesPerCategoryLoading ||
-    isTopTiresLoading
+    isTopTiresLoading ||
+    isLoading
   ) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -309,7 +390,83 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+      <div className=" mx-auto px-6 py-6 space-y-6">
+        <ReportsOverviewStats
+          title="Current Inventory Overview"
+          stats={monthlyTransactionStats}
+          action={
+            <div className="flex justify-between gap-2">
+              <div className="flex">
+                <button
+                  className={`flex items-center gap-1.5 border-b border-slate-100 p-2  text-sm cursor-pointer  ${
+                    condition === "NEW"
+                      ? "bg-primary-600 text-white"
+                      : "bg-white text-primary-600 hover:bg-slate-100"
+                  }`}
+                  onClick={() =>
+                    condition === "NEW" ? setCondition("") : setCondition("NEW")
+                  }
+                  type="button"
+                >
+                  New
+                </button>
+                <button
+                  className={`flex items-center gap-1.5  border-b border-slate-100 border-l-0 p-2  text-sm cursor-pointer  ${
+                    condition === "USED"
+                      ? "bg-primary-600 text-white"
+                      : "bg-white text-primary-600 hover:bg-slate-100"
+                  }`}
+                  onClick={() =>
+                    condition === "USED"
+                      ? setCondition("")
+                      : setCondition("USED")
+                  }
+                  type="button"
+                >
+                  Used
+                </button>
+                <button
+                  className={`flex items-center gap-1.5  border-b border-slate-100 border-l-0 p-2  text-sm cursor-pointer  ${
+                    condition === "SET"
+                      ? "bg-primary-600 text-white"
+                      : "bg-white text-primary-600 hover:bg-slate-100"
+                  }`}
+                  onClick={() =>
+                    condition === "SET" ? setCondition("") : setCondition("SET")
+                  }
+                  type="button"
+                >
+                  Used Set
+                </button>
+              </div>
+              <div className="flex items-center ">
+                <CustomButton
+                  onClick={() => setCategoryFilter("Tires")}
+                  className={` border border-primary-600 ${
+                    categoryFilter === "Tires"
+                      ? "bg-primary-600 text-white "
+                      : "bg-gray-100 text-primary-600  "
+                  }`}
+                  isSelector={true}
+                >
+                  Tires
+                </CustomButton>
+                <CustomButton
+                  onClick={() => setCategoryFilter("Rims")}
+                  className={` border border-primary-600 ${
+                    categoryFilter === "Rims"
+                      ? "bg-primary-600 text-white "
+                      : "bg-gray-100 text-primary-600  "
+                  }`}
+                  isSelector={true}
+                >
+                  Rims
+                </CustomButton>
+              </div>
+            </div>
+          }
+          // isLoading={summaryLoading}
+        />
         {/* ── KPI Strip ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard
@@ -370,7 +527,7 @@ export default function ReportsPage() {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Sales vs Payouts */}
           <div className="bg-white rounded-2xl border border-slate-100 p-5">
             <SectionHeader
@@ -469,6 +626,62 @@ export default function ReportsPage() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+          <div className="bg-white rounded-2xl border border-slate-100 p-5">
+            <SectionHeader
+              title="Payment Method Split"
+              subtitle="Cash, debit, and check payments"
+            />
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={paymentMethodPieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={85}
+                  paddingAngle={3}
+                  dataKey="value"
+                >
+                  {paymentMethodPieData.map((_, i) => (
+                    <Cell key={i} fill={PIE_COLORS[i]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(val: any, name: any) => [
+                    fmt(Number(val ?? 0)),
+                    name,
+                  ]}
+                  contentStyle={{
+                    borderRadius: 12,
+                    border: "1px solid #e2e8f0",
+                    fontSize: 12,
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            {/* Custom legend */}
+            <div className="mt-4 space-y-2">
+              {paymentMethodPieData.map((d, i) => {
+                const pct =
+                  Math.round((d.value / (newRev + usedRev)) * 100) || 0;
+                return (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className="flex items-center gap-2 text-slate-500">
+                      <span
+                        className="w-2.5 h-2.5 rounded-sm shrink-0"
+                        style={{ background: PIE_COLORS[i] }}
+                      />
+                      {d.name}
+                    </span>
+                    <span className="font-medium text-slate-700">{pct}%</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -549,7 +762,7 @@ export default function ReportsPage() {
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie
-                  data={pieData}
+                  data={salesPieData}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -557,12 +770,15 @@ export default function ReportsPage() {
                   paddingAngle={3}
                   dataKey="value"
                 >
-                  {pieData.map((_, i) => (
+                  {salesPieData.map((_, i) => (
                     <Cell key={i} fill={PIE_COLORS[i]} />
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(val: any) => [fmt(Number(val ?? 0)), ""]}
+                  formatter={(val: any, name: any) => [
+                    fmt(Number(val ?? 0)),
+                    name,
+                  ]}
                   contentStyle={{
                     borderRadius: 12,
                     border: "1px solid #e2e8f0",
@@ -573,7 +789,7 @@ export default function ReportsPage() {
             </ResponsiveContainer>
             {/* Custom legend */}
             <div className="mt-4 space-y-2">
-              {pieData.map((d, i) => {
+              {salesPieData.map((d, i) => {
                 const pct =
                   Math.round((d.value / (newRev + usedRev)) * 100) || 0;
                 return (
