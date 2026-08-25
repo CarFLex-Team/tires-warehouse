@@ -32,12 +32,14 @@ export function EditableCell({
   const [newValue, setNewValue] = useState(value);
   useEffect(() => {
     setNewValue(value);
+    setDraft(value);
   }, [value]);
   const mutation = useMutation({
     mutationFn: editInventoryCell,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
       setNewValue(draft);
+      setDraft("");
       setEditing(false);
     },
   });
