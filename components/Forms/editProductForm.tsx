@@ -91,6 +91,7 @@ export function EditProductForm({
       quantity: forAddNew
         ? Number(quantity) + Number(oldQuantity)
         : Number(quantity),
+      condition: product!.condition as "USED" | "NEW" | "SET",
     });
   }
 

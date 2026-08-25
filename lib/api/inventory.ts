@@ -64,6 +64,7 @@ export async function editInventoryProduct(data: {
   is_active: boolean;
   quantity: number;
   category: "Tires" | "Rims" | "";
+  condition: "USED" | "NEW" | "SET" | "";
 }) {
   const res = await fetch(`/api/inventory/${data.id}`, {
     method: "PUT",
