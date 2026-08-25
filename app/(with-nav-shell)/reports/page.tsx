@@ -48,6 +48,8 @@ interface MonthData {
   newTiresAmount: number;
   usedTires: number;
   usedTiresAmount: number;
+  setTires: number;
+  setTiresAmount: number;
   services: number;
   servicesAmount: number;
 }
@@ -57,9 +59,16 @@ const COLORS = {
   orange: "#ea580c",
   green: "#16a34a",
   slate: "#6e97af",
+  purple: "#8b5cf6",
 };
 
-const PIE_COLORS = [COLORS.blue, COLORS.slate, COLORS.green, COLORS.orange];
+const PIE_COLORS = [
+  COLORS.blue,
+  COLORS.slate,
+  COLORS.green,
+  COLORS.orange,
+  COLORS.purple,
+];
 const MONTHS = [
   "All",
   "Jan",
@@ -116,6 +125,7 @@ export default function ReportsPage() {
     queryKey: ["top-tires", selectedYear],
     queryFn: () => getTopTires(parseInt(selectedYear)),
   });
+
   const categorizedInventory = data?.filter((product) => {
     if (categoryFilter === "Tires") {
       return product.category === "Tires";
@@ -185,9 +195,11 @@ export default function ReportsPage() {
         expenses: Number(categoryData?.expenses || 0),
         newTires: Number(categoryData?.newTiresQuantity || 0),
         usedTires: Number(categoryData?.usedTiresQuantity || 0),
+        setTires: Number(categoryData?.setTiresQuantity || 0),
         services: Number(categoryData?.servicesQuantity || 0),
         newTiresAmount: Number(categoryData?.newTiresAmount || 0),
         usedTiresAmount: Number(categoryData?.usedTiresAmount || 0),
+        setTiresAmount: Number(categoryData?.setTiresAmount || 0),
         servicesAmount: Number(categoryData?.servicesAmount || 0),
         cashAmount: Number(m.cash_amount || 0),
         debitAmount: Number(m.debit_amount || 0),
@@ -217,11 +229,53 @@ export default function ReportsPage() {
     if (selectedMonth === "All") return visibleData;
     return visibleData.filter((d) => d.month === selectedMonth);
   }, [selectedMonth, visibleData]);
+  const CONDITIONS = ["NEW", "USED", "SET"] as const;
+
   const filteredTopTires = useMemo(() => {
-    if (selectedMonth === "All")
-      return (topTires || []).sort((a, b) => b.units - a.units).slice(0, 5);
+    const data = topTires || [];
+
+    if (selectedMonth === "All") {
+      const aggregated = new Map<
+        string,
+        { name: string; condition: string; units: number }
+      >();
+
+      for (const row of data) {
+        const key = `${row.condition}::${row.name}`;
+        const existing = aggregated.get(key);
+        if (existing) {
+          existing.units = Number(existing.units) + Number(row.units);
+        } else {
+          aggregated.set(key, {
+            name: row.name,
+            condition: row.condition,
+            units: Number(row.units),
+          });
+        }
+      }
+
+      const grouped: Record<string, typeof data> = {};
+      for (const condition of CONDITIONS) {
+        grouped[condition] = Array.from(aggregated.values())
+          .filter((t) => t.condition === condition)
+          .sort((a, b) => Number(b.units) - Number(a.units))
+          .slice(0, 5) as typeof data;
+      }
+      return grouped;
+    }
+
+    // Specific month selected
     const monthIndex = MONTHS.indexOf(selectedMonth);
-    return (topTires || []).filter((t) => t.month === monthIndex);
+    const monthData = data.filter((t) => t.month === monthIndex);
+
+    const grouped: Record<string, typeof data> = {};
+    for (const condition of CONDITIONS) {
+      grouped[condition] = monthData
+        .filter((t) => t.condition === condition)
+        .sort((a, b) => Number(b.units) - Number(a.units))
+        .slice(0, 5);
+    }
+    return grouped;
   }, [selectedMonth, topTires]);
 
   const totals = useMemo(() => {
@@ -230,7 +284,8 @@ export default function ReportsPage() {
 
     const tires =
       filteredData.reduce((s, d) => s + d.newTires, 0) +
-      filteredData.reduce((s, d) => s + d.usedTires, 0);
+      filteredData.reduce((s, d) => s + d.usedTires, 0) +
+      filteredData.reduce((s, d) => s + d.setTires, 0);
     const services = filteredData.reduce((s, d) => s + d.services, 0);
     return { sales, expenses, tires, services };
   }, [filteredData]);
@@ -245,11 +300,13 @@ export default function ReportsPage() {
 
   const newRev = filteredData.reduce((s, d) => s + d.newTiresAmount, 0);
   const usedRev = filteredData.reduce((s, d) => s + d.usedTiresAmount, 0);
+  const setRev = filteredData.reduce((s, d) => s + d.setTiresAmount, 0);
   const taxRev = filteredData.reduce((s, d) => s + d.totalTax, 0);
   const serviceRev = filteredData.reduce((s, d) => s + d.servicesAmount, 0);
   const salesPieData = [
     { name: "New tires", value: newRev },
     { name: "Used tires", value: usedRev },
+    { name: "Set tires", value: setRev },
     { name: "Services", value: serviceRev },
     { name: "Tax", value: taxRev },
   ];
@@ -289,10 +346,20 @@ export default function ReportsPage() {
       };
     }
   }, [selectedMonth, MONTHLY_DATA]);
-  const maxUnits = useMemo(() => {
-    if (!filteredTopTires) return 0;
-    return Math.max(...filteredTopTires.map((t) => t.units));
+  const maxUnitsByCondition = useMemo(() => {
+    if (!filteredTopTires) return {};
+    const result: Record<string, number> = {};
+    for (const condition of Object.keys(filteredTopTires)) {
+      const units = filteredTopTires[condition].map((t) => Number(t.units));
+      result[condition] = units.length ? Math.max(...units) : 0;
+    }
+    return result;
   }, [filteredTopTires]);
+
+  const topTiresForExport = useMemo(
+    () => Object.values(filteredTopTires).flat(),
+    [filteredTopTires],
+  );
 
   //   // Export handler — wire to your real API
   //   const handleExport = () => {
@@ -364,7 +431,7 @@ export default function ReportsPage() {
             onClick={() =>
               exportToExcel(
                 filteredData,
-                filteredTopTires,
+                topTiresForExport,
                 totals,
                 selectedYear,
                 selectedMonth,
@@ -621,6 +688,20 @@ export default function ReportsPage() {
                   name="Used"
                   stackId="tires"
                   fill={COLORS.slate}
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="setTires"
+                  name="Set"
+                  stackId="tires"
+                  fill={COLORS.green}
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="services"
+                  name="Services"
+                  stackId="tires"
+                  fill={COLORS.orange}
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
@@ -818,54 +899,63 @@ export default function ReportsPage() {
             title="Top Sold Tires"
             subtitle="Ranked by units sold"
           />
-          <div className="space-y-3">
-            {filteredTopTires?.map((tire, i) => {
-              const barW = Math.round((tire.units / maxUnits) * 100);
-              return (
-                <div key={i} className="flex items-center gap-4">
-                  <span className="text-xs text-slate-300 w-4 shrink-0 font-medium">
-                    {i + 1}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm text-slate-700 truncate pr-4">
-                        {tire.name}
-                      </p>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                            tire.condition === "NEW"
-                              ? "bg-blue-50 text-blue-600"
-                              : tire.condition === "USED"
-                                ? "bg-slate-100 text-slate-500"
-                                : "bg-orange-100 text-orange-600"
-                          }`}
-                        >
-                          {tire.condition}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 ">
+            {CONDITIONS.map((condition) => (
+              <div key={condition} className="flex flex-col gap-2">
+                <h3 className="font-semibold text-slate-700">{condition}</h3>
+                <div className="space-y-2">
+                  {filteredTopTires?.[condition]?.map((tire, i) => {
+                    const barW = Math.round(
+                      (tire.units / maxUnitsByCondition[condition]) * 100,
+                    );
+                    return (
+                      <div key={i} className="flex items-center gap-4">
+                        <span className="text-xs text-slate-300 w-4 shrink-0 font-medium">
+                          {i + 1}
                         </span>
-                        <span className="text-sm font-semibold text-slate-800 w-10 text-right">
-                          {tire.units}
-                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-sm text-slate-700 truncate pr-4">
+                              {tire.name}
+                            </p>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span
+                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                  tire.condition === "NEW"
+                                    ? "bg-blue-50 text-blue-600"
+                                    : tire.condition === "USED"
+                                      ? "bg-slate-100 text-slate-500"
+                                      : "bg-orange-100 text-orange-600"
+                                }`}
+                              >
+                                {tire.condition}
+                              </span>
+                              <span className="text-sm font-semibold text-slate-800 w-10 text-right">
+                                {tire.units}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{
+                                width: `${barW}%`,
+                                background:
+                                  tire.condition === "NEW"
+                                    ? COLORS.blue
+                                    : tire.condition === "USED"
+                                      ? COLORS.slate
+                                      : COLORS.orange,
+                              }}
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{
-                          width: `${barW}%`,
-                          background:
-                            tire.condition === "NEW"
-                              ? COLORS.blue
-                              : tire.condition === "USED"
-                                ? COLORS.slate
-                                : COLORS.orange,
-                        }}
-                      />
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </div>
