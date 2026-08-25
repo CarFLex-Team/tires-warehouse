@@ -62,13 +62,35 @@ SELECT
   COALESCE(
     SUM(
       CASE
-        WHEN p.condition = 'USED' OR p.condition='SET'
+        WHEN p.condition = 'USED'
         THEN t.amount
         ELSE 0
       END
     ),
     0
   ) AS "usedTiresAmount",
+ -- Set Tires
+  COALESCE(
+    SUM(
+      CASE
+        WHEN p.condition = 'SET'
+        THEN t.quantity
+        ELSE 0
+      END
+    ),
+    0
+  ) AS "setTiresQuantity",
+
+  COALESCE(
+    SUM(
+      CASE
+        WHEN p.condition = 'SET'
+        THEN t.amount
+        ELSE 0
+      END
+    ),
+    0
+  ) AS "setTiresAmount",
 
   -- Services
   COALESCE(

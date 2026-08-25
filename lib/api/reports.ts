@@ -15,7 +15,8 @@ export interface MonthDataCategory {
 
   usedTiresQuantity: number;
   usedTiresAmount: number;
-
+  setTiresQuantity: number;
+  setTiresAmount: number;
   servicesQuantity: number;
   servicesAmount: number;
 }
